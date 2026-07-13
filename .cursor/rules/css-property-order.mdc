@@ -1,0 +1,34 @@
+---
+description: Order CSS properties consistently in stylesheets and style blocks
+globs: "**/*.{css,svelte}"
+alwaysApply: false
+---
+
+# CSS Property Order
+
+When writing or editing CSS (`.css` files or `<style>` blocks), order properties in each rule as follows when applicable:
+
+1. **Position** — `position`, `z-index`, `display`, `flex`/`grid` shorthand and related layout props as needed for positioning context
+2. **Offsets** — `top`, `right`, `bottom`, `left`, `inset`
+3. **Width** — `width`, `min-width`, `max-width`
+4. **Height** — `height`, `min-height`, `max-height`
+5. **Padding** — `padding`, and longhands
+6. **Margin** — `margin`, and longhands
+7. **Misc** — border, background, typography, color, opacity, transform, transition, etc.
+
+```css
+.card {
+	position: relative;
+	top: 0;
+	width: 100%;
+	max-width: 40rem;
+	height: auto;
+	padding: 1rem;
+	margin: 0 auto;
+	border: 1px solid var(--border);
+	background: var(--card);
+	color: var(--foreground);
+}
+```
+
+Skip groups that do not apply. Prefer this order for new or touched declarations; do not mass-reorder untouched rules unless asked.

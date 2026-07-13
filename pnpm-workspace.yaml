@@ -1,0 +1,4 @@
+saveExact: true
+allowBuilds:
+  '@tailwindcss/oxide': true
+  esbuild: true

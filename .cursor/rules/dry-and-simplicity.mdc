@@ -1,0 +1,12 @@
+---
+description: Prefer DRY and the simplest solution that works
+alwaysApply: true
+---
+
+# DRY and Simplicity
+
+- Prefer the simplest solution that meets the requirement. Avoid premature abstraction.
+- Do not duplicate logic, markup patterns, or data lookups that already exist in the project. Reuse shared helpers, components, and data modules.
+- Extract a shared helper or component only when the same logic appears (or will clearly appear) in more than one place.
+- Prefer extending existing patterns over introducing parallel approaches.
+- Keep changes focused: no drive-by refactors unrelated to the task.

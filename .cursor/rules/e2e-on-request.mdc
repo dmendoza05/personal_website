@@ -1,0 +1,12 @@
+---
+description: Only run e2e tests when the user explicitly asks
+alwaysApply: true
+---
+
+# End-to-End Tests
+
+Do not run end-to-end tests (`pnpm test:e2e`, `playwright test`, or `pnpm test` which includes e2e) unless the user explicitly asks for them in the prompt.
+
+- Pre-commit and routine verification use unit tests only (`pnpm test:unit -- --run`).
+- Prefer `pnpm test:unit` / Vitest for local checks after changes.
+- Run Playwright / e2e only on an explicit user request (e.g. "run e2e", "run playwright", "run end-to-end tests").
