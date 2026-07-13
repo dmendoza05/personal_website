@@ -1,0 +1,48 @@
+---
+description: Order code inside Svelte script tags
+globs: "**/*.svelte"
+alwaysApply: false
+---
+
+# Svelte `<script>` Order
+
+When writing or editing code inside `<script>` (or `<script lang="ts">`), keep declarations in this order, separated by blank lines between groups when helpful:
+
+1. **Imports**
+2. **Component / class declarations** (e.g. typed interfaces used only here, if any)
+3. **Parameters / arguments** (`$props()`, exported props)
+4. **Constants**
+5. **Local variables / state** (`let`, `$state`)
+6. **Lifecycles** (`onMount`, `onDestroy`, `beforeUpdate`, `afterUpdate`, etc.)
+7. **Svelte derived / reactive** (`$derived`, `$effect`, reactive statements)
+8. **Custom methods** (functions / event handlers)
+9. **Misc** (anything that does not fit above)
+
+```svelte
+<script lang="ts">
+	import { onMount } from 'svelte';
+	import Card from '$lib/components/Card.svelte';
+
+	interface Item {
+		id: string;
+	}
+
+	let { items = [] }: { items: Item[] } = $props();
+
+	const MAX = 10;
+
+	let count = $state(0);
+
+	onMount(() => {
+		/* ... */
+	});
+
+	const visible = $derived(items.slice(0, MAX));
+
+	function increment() {
+		count += 1;
+	}
+</script>
+```
+
+Do not reorder unrelated code in a file unless you are already editing that `<script>` block for the task.
