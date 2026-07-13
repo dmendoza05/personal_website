@@ -24,5 +24,12 @@
 	"blog_title": "Blog",
 	"blog_description": "Reflexiones sobre desarrollo, herramientas y aprendizaje.",
 	"blog_read_more": "Leer más",
-	"blog_back": "Volver al blog"
+	"blog_back": "Volver al blog",
+	"blog_views": "{count} visitas",
+	"blog_comments_title": "Comentarios",
+	"blog_comments_empty": "Aún no hay comentarios. Sé el primero en compartir tu opinión.",
+	"blog_comment_name": "Nombre",
+	"blog_comment_body": "Comentario",
+	"blog_comment_submit": "Publicar comentario",
+	"blog_comment_success": "Gracias — tu comentario se ha publicado."
 }

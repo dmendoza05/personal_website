@@ -24,5 +24,12 @@
 	"blog_title": "Blog",
 	"blog_description": "Thoughts on development, tools, and learning.",
 	"blog_read_more": "Read more",
-	"blog_back": "Back to blog"
+	"blog_back": "Back to blog",
+	"blog_views": "{count} views",
+	"blog_comments_title": "Comments",
+	"blog_comments_empty": "No comments yet. Be the first to share your thoughts.",
+	"blog_comment_name": "Name",
+	"blog_comment_body": "Comment",
+	"blog_comment_submit": "Post comment",
+	"blog_comment_success": "Thanks — your comment was posted."
 }

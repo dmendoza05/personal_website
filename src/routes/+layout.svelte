@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Pathname } from '$app/types';
+	import { afterNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
@@ -9,6 +10,18 @@
 	import Footer from '$lib/components/Footer.svelte';
 
 	let { children } = $props();
+
+	afterNavigate(({ to }) => {
+		const path = to?.url.pathname;
+		if (!path) return;
+
+		void fetch('/api/pageview', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ path }),
+			keepalive: true
+		}).catch(() => {});
+	});
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>

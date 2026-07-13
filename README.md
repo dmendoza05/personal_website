@@ -1,42 +1,46 @@
-# sv
+# Personal website
 
-Everything you need to build a Svelte project, powered by [`sv`](https://github.com/sveltejs/cli).
-
-## Creating a project
-
-If you're seeing this, you've probably already done this step. Congrats!
-
-```sh
-# create a new project
-npx sv create my-app
-```
-
-To recreate this project with the same configuration:
-
-```sh
-# recreate this project
-pnpm dlx sv@0.16.2 create --template minimal --types ts --add prettier eslint vitest="usages:unit,component" playwright tailwindcss="plugins:typography,forms" sveltekit-adapter="adapter:auto" paraglide="languageTags:en, es+demo:yes" --install pnpm .
-```
+SvelteKit portfolio with a markdown blog, Neon Postgres (comments + page views), and Vercel-ready deploy.
 
 ## Developing
 
-Once you've created a project and installed dependencies with `npm install` (or `pnpm install` or `yarn`), start a development server:
-
 ```sh
-npm run dev
-
-# or start the server and open the app in a new browser tab
-npm run dev -- --open
+pnpm install
+cp .env.example .env
+# Set DATABASE_URL to your Neon pooled connection string
+pnpm db:migrate
+pnpm dev
 ```
+
+## Database
+
+Uses [Drizzle](https://orm.drizzle.team) + [Neon](https://neon.tech) Postgres.
+
+| Script | Purpose |
+|--------|---------|
+| `pnpm db:generate` | Generate SQL migrations from the schema |
+| `pnpm db:migrate` | Apply migrations to the database in `DATABASE_URL` |
+| `pnpm db:studio` | Open Drizzle Studio |
+
+Schema lives in `src/lib/server/db/schema.ts` (`comments`, `page_views`).
 
 ## Building
 
-To create a production version of your app:
-
 ```sh
-npm run build
+pnpm build
+pnpm preview
 ```
 
-You can preview the production build with `npm run preview`.
+## Deploy to Vercel
 
-> To deploy your app, you may need to install an [adapter](https://svelte.dev/docs/kit/adapters) for your target environment.
+1. Push this repo to GitHub.
+2. In [Vercel](https://vercel.com), import the project (SvelteKit preset). Build command: `pnpm build`.
+3. Add env var `DATABASE_URL` (Neon pooled connection string) for Production and Preview.
+4. Apply migrations once against that database:
+   ```sh
+   DATABASE_URL='your-neon-url' pnpm db:migrate
+   ```
+   Or paste the SQL from `drizzle/*.sql` into the Neon SQL editor.
+5. Optionally attach the custom domain `danielmendoza.dev` in Vercel and point DNS.
+
+`@sveltejs/adapter-auto` detects Vercel; no adapter change required.
