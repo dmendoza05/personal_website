@@ -4,8 +4,10 @@
 	let { project }: { project: Project } = $props();
 </script>
 
-<article class="flex flex-col rounded-lg border border-border bg-card p-6 transition-shadow hover:shadow-md">
-	<h3 class="text-lg font-semibold text-foreground">{project.title}</h3>
+<article
+	class="flex flex-col rounded-lg border border-border bg-card p-4 transition-shadow hover:shadow-md sm:p-6"
+>
+	<h3 class="text-base font-semibold text-foreground sm:text-lg">{project.title}</h3>
 	<p class="mt-2 flex-1 text-sm leading-relaxed text-muted">{project.description}</p>
 
 	<div class="mt-4 flex flex-wrap gap-2">
@@ -16,7 +18,7 @@
 		{/each}
 	</div>
 
-	<div class="mt-4 flex gap-4">
+	<div class="mt-4 flex flex-wrap gap-x-4 gap-y-2">
 		{#if project.href}
 			<a
 				href={project.href}

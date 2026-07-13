@@ -31,25 +31,27 @@
 <article>
 	<a href={resolve('/blog')} class="text-sm text-accent hover:underline">← {m.blog_back()}</a>
 
-	<header class="mt-4 mb-8">
+	<header class="mt-4 mb-6 sm:mb-8">
 		<div class="flex flex-wrap items-baseline gap-x-3 gap-y-1">
 			<time class="text-sm text-muted" datetime={data.post.date}>
 				{formatDate(data.post.date)}
 			</time>
 			<span class="text-sm text-muted">{m.blog_views({ count: data.viewCount })}</span>
 		</div>
-		<h1 class="mt-1 text-3xl font-bold tracking-tight text-foreground">{data.post.title}</h1>
-		<p class="mt-2 text-muted">{data.post.description}</p>
+		<h1 class="mt-1 text-2xl font-bold tracking-tight text-foreground sm:text-3xl lg:text-4xl">
+			{data.post.title}
+		</h1>
+		<p class="mt-2 text-sm text-muted sm:text-base">{data.post.description}</p>
 	</header>
 
-	<div class="prose prose-neutral dark:prose-invert max-w-none">
+	<div class="prose prose-neutral dark:prose-invert prose-sm sm:prose-base max-w-none">
 		<!-- eslint-disable-next-line svelte/no-at-html-tags -->
 		{@html data.post.html}
 	</div>
 </article>
 
-<section class="mt-16 border-t border-border pt-10" aria-labelledby="comments-heading">
-	<h2 id="comments-heading" class="text-xl font-semibold text-foreground">
+<section class="mt-12 border-t border-border pt-8 sm:mt-16 sm:pt-10" aria-labelledby="comments-heading">
+	<h2 id="comments-heading" class="text-lg font-semibold text-foreground sm:text-xl">
 		{m.blog_comments_title()}
 	</h2>
 
@@ -93,7 +95,7 @@
 				required
 				maxlength="80"
 				value={form?.values?.authorName ?? ''}
-				class="mt-1 block w-full max-w-md rounded-md border border-border bg-background px-3 py-2 text-foreground"
+				class="mt-1 block w-full max-w-md rounded-md border border-border bg-background px-3 py-2.5 text-base text-foreground sm:py-2 sm:text-sm"
 			/>
 			{#if form?.fieldErrors?.authorName}
 				<p class="mt-1 text-sm text-red-600 dark:text-red-400">{form.fieldErrors.authorName}</p>
@@ -110,7 +112,7 @@
 				required
 				maxlength="2000"
 				rows="4"
-				class="mt-1 block w-full max-w-xl rounded-md border border-border bg-background px-3 py-2 text-foreground"
+				class="mt-1 block w-full max-w-xl rounded-md border border-border bg-background px-3 py-2.5 text-base text-foreground sm:py-2 sm:text-sm"
 			>{form?.values?.body ?? ''}</textarea>
 			{#if form?.fieldErrors?.body}
 				<p class="mt-1 text-sm text-red-600 dark:text-red-400">{form.fieldErrors.body}</p>
@@ -119,7 +121,7 @@
 
 		<button
 			type="submit"
-			class="inline-flex items-center rounded-md bg-accent px-4 py-2 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90"
+			class="inline-flex w-full items-center justify-center rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 sm:w-auto sm:py-2"
 		>
 			{m.blog_comment_submit()}
 		</button>

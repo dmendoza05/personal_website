@@ -6,10 +6,12 @@
 </script>
 
 <footer class="border-t border-border">
-	<div class="mx-auto flex max-w-4xl flex-col items-center gap-4 px-6 py-8 sm:flex-row sm:justify-between">
+	<div
+		class="mx-auto flex md:max-w-4xl max-w-full lg:max-w-7xl flex-col items-center gap-4 px-4 py-8 text-center sm:flex-row sm:justify-between sm:px-6 sm:text-left"
+	>
 		<p class="text-sm text-muted">{m.footer_copyright({ year })}</p>
 
-		<div class="flex items-center gap-4">
+		<div class="flex flex-wrap items-center justify-center gap-x-5 gap-y-2">
 			<a
 				href={site.links.github}
 				target="_blank"

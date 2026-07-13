@@ -16,9 +16,9 @@
 <SectionHeading title={m.blog_title()} description={m.blog_description()} />
 
 {#if posts.length === 0}
-	<p class="text-muted">No posts yet. Check back soon!</p>
+	<p class="text-sm text-muted sm:text-base">No posts yet. Check back soon!</p>
 {:else}
-	<div class="space-y-6">
+	<div class="space-y-4 sm:space-y-6">
 		{#each posts as post (post.slug)}
 			<BlogPostCard {post} />
 		{/each}

@@ -13,7 +13,7 @@
 
 <SectionHeading title={m.projects_title()} description={m.projects_description()} />
 
-<div class="grid gap-6 sm:grid-cols-2">
+<div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
 	{#each projects as project (project.slug)}
 		<ProjectCard {project} />
 	{/each}
