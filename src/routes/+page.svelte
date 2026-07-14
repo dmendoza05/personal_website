@@ -17,32 +17,6 @@
 </svelte:head>
 
 <section class="mb-12 sm:mb-16">
-	<h1 class="text-3xl font-bold tracking-tight text-foreground sm:text-4xl lg:text-5xl">
-		{m.home_hero_title()}
-	</h1>
-	<p class="mt-3 text-lg text-muted sm:text-xl">{m.home_hero_tagline()}</p>
-	<p class="mt-4 max-w-2xl text-sm leading-relaxed text-muted sm:mt-6 sm:text-base">
-		{m.home_bio()}
-	</p>
-	<div class="mt-6 flex flex-col gap-3 sm:flex-row sm:flex-wrap sm:gap-4">
-		<a
-			href={resolve('/resume')}
-			class="inline-flex items-center justify-center rounded-md bg-accent px-4 py-2.5 text-sm font-medium text-accent-foreground transition-opacity hover:opacity-90 sm:py-2"
-		>
-			{m.home_view_resume()}
-		</a>
-		<a
-			href={site.links.github}
-			target="_blank"
-			rel="noopener noreferrer"
-			class="inline-flex items-center justify-center rounded-md border border-border px-4 py-2.5 text-sm font-medium text-foreground transition-colors hover:bg-card sm:py-2"
-		>
-			GitHub
-		</a>
-	</div>
-</section>
-
-<section class="mb-12 sm:mb-16">
 	<div class="mb-5 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
 		<h2 class="text-xl font-semibold text-foreground sm:text-2xl">{m.home_featured_projects()}</h2>
 		<a href={resolve('/projects')} class="text-sm font-medium text-accent hover:underline">
