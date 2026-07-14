@@ -29,7 +29,7 @@
 <div class="flex min-h-screen flex-col">
 	<Header />
 
-	<main class="mx-auto w-full md:max-w-4xl max-w-full lg:max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-16">
+	<main class="mx-auto w-full md:max-w-4xl max-w-full lg:max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-16 min-h-dvh">
 		{@render children()}
 	</main>
 
