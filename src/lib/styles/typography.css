@@ -3,3 +3,7 @@
 @theme {
 	--font-display: 'BBH Bartle', ui-sans-serif, system-ui, sans-serif;
 }
+
+@utility varela {
+	font-family: 'Varela', ui-sans-serif, system-ui, sans-serif;
+}   

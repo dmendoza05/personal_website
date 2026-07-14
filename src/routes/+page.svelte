@@ -16,7 +16,7 @@
 	<meta name="description" content={site.description} />
 </svelte:head>
 
-<section class="mb-12 sm:mb-16">
+<section class="mb-12 sm:mb-16 varela">
 	<div class="mb-5 flex flex-col gap-2 sm:mb-6 sm:flex-row sm:items-baseline sm:justify-between sm:gap-4">
 		<h2 class="text-xl font-semibold text-foreground sm:text-2xl">{m.home_featured_projects()}</h2>
 		<a href={resolve('/projects')} class="text-sm font-medium text-accent hover:underline">
