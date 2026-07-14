@@ -7,3 +7,7 @@
 @utility varela {
 	font-family: 'Varela', ui-sans-serif, system-ui, sans-serif;
 }   
+
+@utility bartle {
+	font-family: 'BBH Bartle', ui-sans-serif, system-ui, sans-serif;
+}
