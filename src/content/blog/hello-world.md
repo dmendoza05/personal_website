@@ -16,7 +16,7 @@ Writing helps me solidify what I learn. I plan to share:
 
 ## What's next?
 
-Stay tuned for more posts. In the meantime, check out my [projects](/projects) or [resume](/resume).
+Stay tuned for more posts. In the meantime, check out my [projects](/projects) or [about me](/about).
 
 ```typescript
 const greeting = 'Hello, world!';

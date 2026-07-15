@@ -15,9 +15,9 @@ export const projects: Project[] = [
 		slug: 'personal-website',
 		title: 'Personal Website',
 		description:
-			'A SvelteKit portfolio site with projects, resume, and a markdown-powered blog. Built with Tailwind CSS and i18n support.',
+			'A SvelteKit portfolio site with projects, an about page, and a markdown-powered blog. Built with Tailwind CSS and i18n support.',
 		tags: ['sveltekit', 'typescript', 'tailwindcss'],
-		repo: 'https://github.com/danielmendoza/personal-website',
+		repo: 'https://github.com/dmendoza05/personal-website',
 		featured: true
 	}
 ];

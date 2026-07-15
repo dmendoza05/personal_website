@@ -28,12 +28,6 @@
 			>
 				LinkedIn
 			</a>
-			<a
-				href={site.links.email}
-				class="text-sm text-muted transition-colors hover:text-foreground"
-			>
-				Email
-			</a>
 		</div>
 	</div>
 </footer>

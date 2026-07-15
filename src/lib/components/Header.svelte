@@ -8,7 +8,7 @@
 
 	const navItems: { href: Pathname; label: () => string }[] = [
 		{ href: '/projects', label: () => m.nav_projects() },
-		{ href: '/resume', label: () => m.nav_resume() },
+		{ href: '/about', label: () => m.nav_about() },
 		{ href: '/blog', label: () => m.nav_blog() }
 	];
 

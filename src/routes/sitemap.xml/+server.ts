@@ -1,7 +1,7 @@
 import { site } from '$lib/data/site';
 import { getPostSlugs } from '$lib/blog/posts';
 
-const staticRoutes = ['', '/projects', '/resume', '/blog'];
+const staticRoutes = ['', '/projects', '/about', '/blog'];
 const blogSlugs = getPostSlugs();
 
 export function GET() {
