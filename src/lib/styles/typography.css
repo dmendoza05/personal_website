@@ -1,0 +1,13 @@
+@import url('https://fonts.googleapis.com/css2?family=BBH+Bartle&family=Varela&display=swap');
+
+@theme {
+	--font-display: 'BBH Bartle', ui-sans-serif, system-ui, sans-serif;
+}
+
+@utility varela {
+	font-family: 'Varela', ui-sans-serif, system-ui, sans-serif;
+}   
+
+@utility bartle {
+	font-family: 'BBH Bartle', ui-sans-serif, system-ui, sans-serif;
+}

@@ -1,8 +1,10 @@
+import type { SkillId } from './skills';
+
 export type Project = {
 	slug: string;
 	title: string;
 	description: string;
-	tags: string[];
+	tags: SkillId[];
 	href?: string;
 	repo?: string;
 	featured?: boolean;
@@ -14,7 +16,7 @@ export const projects: Project[] = [
 		title: 'Personal Website',
 		description:
 			'A SvelteKit portfolio site with projects, resume, and a markdown-powered blog. Built with Tailwind CSS and i18n support.',
-		tags: ['SvelteKit', 'TypeScript', 'Tailwind CSS'],
+		tags: ['sveltekit', 'typescript', 'tailwindcss'],
 		repo: 'https://github.com/danielmendoza/personal-website',
 		featured: true
 	}

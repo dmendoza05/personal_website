@@ -1,9 +1,17 @@
+/* 
+	Keep typography.css for the font family on top to avoid this error::after
+	```
+		[vite:css][postcss] @import must precede all other statements (besides @charset or empty @layer)
+	```
+ */
+@import '../lib/styles/typography.css';
 @import 'tailwindcss';
+
 @plugin '@tailwindcss/forms';
 @plugin '@tailwindcss/typography';
 
 @theme {
-	--font-sans: 'Inter', ui-sans-serif, system-ui, sans-serif;
+	--font-sans: 'Varela', ui-sans-serif, system-ui, sans-serif;
 	--color-background: var(--bg);
 	--color-foreground: var(--fg);
 	--color-muted: var(--muted);

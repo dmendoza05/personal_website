@@ -1,3 +1,4 @@
+import { env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
 import { recordPageView } from '$lib/server/db/pageviews';
 import type { RequestHandler } from './$types';
@@ -24,6 +25,10 @@ export const POST: RequestHandler = async ({ request }) => {
 
 	if (!path || path.length > 512 || !PATH_PATTERN.test(path)) {
 		return json({ ok: false }, { status: 400 });
+	}
+
+	if (!env.DATABASE_URL) {
+		return json({ ok: true });
 	}
 
 	try {
