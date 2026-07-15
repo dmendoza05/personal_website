@@ -1,3 +1,5 @@
+import type { SkillId } from './skills';
+
 export type Experience = {
 	company: string;
 	role: string;
@@ -17,7 +19,7 @@ export type Resume = {
 	summary: string;
 	experience: Experience[];
 	education: Education[];
-	skills: string[];
+	skills: SkillId[];
 };
 
 export const resume: Resume = {
@@ -64,16 +66,16 @@ export const resume: Resume = {
 		}
 	],
 	skills: [
-		'TypeScript',
-		'JavaScript',
-		'SvelteKit',
-		'React',
-		'Node.js',
-		'PostgreSQL',
-		'Docker',
-		'Git',
-		'CI/CD',
-		'REST APIs',
-		'Testing'
+		'typescript',
+		'javascript',
+		'sveltekit',
+		'react',
+		'nodejs',
+		'postgresql',
+		'docker',
+		'git',
+		'ci-cd',
+		'rest-apis',
+		'testing'
 	]
 };

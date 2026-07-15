@@ -1,5 +1,7 @@
 <script lang="ts">
 	import type { Project } from '$lib/data/projects';
+	import { getSkill } from '$lib/data/skills';
+	import SkillLogo from '$lib/components/SkillLogo.svelte';
 
 	let { project }: { project: Project } = $props();
 </script>
@@ -12,8 +14,11 @@
 
 	<div class="mt-4 flex flex-wrap gap-2">
 		{#each project.tags as tag (tag)}
-			<span class="rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-medium text-accent">
-				{tag}
+			<span
+				class="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-medium text-accent"
+			>
+				<SkillLogo id={tag} class="size-3 shrink-0 text-accent" />
+				{getSkill(tag).label}
 			</span>
 		{/each}
 	</div>

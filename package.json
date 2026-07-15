@@ -16,12 +16,17 @@
 		"test:e2e": "playwright install && playwright test",
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
-		"db:studio": "drizzle-kit studio"
+		"db:studio": "drizzle-kit studio",
+		"skills:logos": "node scripts/generate-skill-logos.mjs"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "21.2.1",
 		"@commitlint/config-conventional": "21.2.0",
 		"@eslint/js": "^10.0.1",
+		"@iconify-json/devicon": "1.2.62",
+		"@iconify-json/logos": "1.2.11",
+		"@iconify-json/simple-icons": "1.2.90",
+		"@iconify/utils": "3.1.4",
 		"@inlang/paraglide-js": "^2.18.2",
 		"@playwright/test": "^1.60.0",
 		"@sveltejs/adapter-auto": "^7.0.1",
