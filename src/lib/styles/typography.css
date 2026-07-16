@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=BBH+Bartle&family=Varela&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=BBH+Bartle&family=Orbitron:wght@400..900&family=Rajdhani:wght@300;400;500;600;700&family=Varela&display=swap');
 
 @theme {
 	--font-display: 'BBH Bartle', ui-sans-serif, system-ui, sans-serif;
@@ -6,8 +6,16 @@
 
 @utility varela {
 	font-family: 'Varela', ui-sans-serif, system-ui, sans-serif;
-}   
+}
 
 @utility bartle {
 	font-family: 'BBH Bartle', ui-sans-serif, system-ui, sans-serif;
+}
+
+@utility orbitron {
+	font-family: 'Orbitron', ui-sans-serif, system-ui, sans-serif;
+}
+
+@utility rajdhani {
+	font-family: 'Rajdhani', ui-sans-serif, system-ui, sans-serif;
 }
