@@ -31,7 +31,7 @@
 	}
 </script>
 
-<header id="header" class="sticky top-0 z-50 w-dvw border-b border-border bg-background/80 backdrop-blur-sm">
+<header id="header" class="sticky top-0 z-50 w-dvw border-b border-border backdrop-blur-sm">
 	<div
 		class="relative flex w-dvw flex-col items-center justify-center px-4 transition-[height] duration-500 ease-in-out motion-reduce:transition-none sm:px-6"
 		style="height: {isHome

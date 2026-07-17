@@ -27,11 +27,11 @@
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
-<DotsBackground />
-<div class="relative z-10 flex min-h-screen flex-col">
+<div class="relative z-10 flex w-dvw h-dvh flex-col overflow-hidden">
+	<DotsBackground />
 	<Header />
 
-	<main class="mx-auto w-full md:max-w-4xl max-w-full lg:max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-16 min-h-dvh">
+	<main class="mx-auto w-full md:max-w-4xl max-w-full lg:max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-16 min-h-dvh overflow-scroll">
 		{@render children()}
 	</main>
 
