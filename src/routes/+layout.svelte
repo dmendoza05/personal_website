@@ -8,6 +8,7 @@
 	import favicon from '$lib/assets/favicon.svg';
 	import Header from '$lib/components/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import DotsBackground from '$lib/components/DotsBackground.svelte';
 
 	let { children } = $props();
 
@@ -26,7 +27,8 @@
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
-<div class="flex min-h-screen flex-col">
+<DotsBackground />
+<div class="relative z-10 flex min-h-screen flex-col">
 	<Header />
 
 	<main class="mx-auto w-full md:max-w-4xl max-w-full lg:max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-16 min-h-dvh">
