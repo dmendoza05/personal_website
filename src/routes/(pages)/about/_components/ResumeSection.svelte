@@ -1,8 +1,6 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages.js';
 	import { resume } from '$lib/data/resume';
-	import { getSkill } from '$lib/data/skills';
-	import SkillLogo from '$lib/components/SkillLogo.svelte';
 </script>
 
 <section class="space-y-8 sm:space-y-10">
@@ -57,20 +55,6 @@
 					<h4 class="font-semibold text-foreground">{edu.degree}</h4>
 					<p class="text-sm text-muted">{edu.school} · {edu.period}</p>
 				</div>
-			{/each}
-		</div>
-	</div>
-
-	<div>
-		<h3 class="mb-4 text-lg font-semibold text-foreground">{m.resume_skills()}</h3>
-		<div class="flex flex-wrap gap-2">
-			{#each resume.skills as skillId (skillId)}
-				<span
-					class="inline-flex items-center gap-1.5 rounded-full border border-border px-3 py-1 text-sm text-foreground"
-				>
-					<SkillLogo id={skillId} class="size-3.5 shrink-0 text-foreground" />
-					{getSkill(skillId).label}
-				</span>
 			{/each}
 		</div>
 	</div>

@@ -3,7 +3,7 @@
 	import { site } from '$lib/data/site';
 	import { getPosts } from '$lib/blog/posts';
 	import SectionHeading from '$lib/components/SectionHeading.svelte';
-	import BlogPostCard from '$lib/components/BlogPostCard.svelte';
+	import BlogPostCard from './_components/BlogPostCard.svelte';
 
 	const posts = getPosts();
 </script>

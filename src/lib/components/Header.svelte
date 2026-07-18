@@ -20,6 +20,7 @@
 	});
 
 	const isHome = $derived(page.url.pathname === '/');
+	const headerHeight = $derived(isHome ? '100dvh' : `${COLLAPSED_HEIGHT}px`);
 
 	function isActive(href: Pathname) {
 		if (href === '/') return page.url.pathname === '/';
@@ -31,12 +32,10 @@
 	}
 </script>
 
-<header id="header" class="sticky top-0 z-50 w-dvw border-b border-border backdrop-blur-sm">
+<header id="header" class="fixed top-0 z-50 w-dvw border-b border-border backdrop-blur-xs">
 	<div
 		class="relative flex w-dvw flex-col items-center justify-center px-4 transition-[height] duration-500 ease-in-out motion-reduce:transition-none sm:px-6"
-		style="height: {isHome
-			? '100dvh'
-			: `${COLLAPSED_HEIGHT}px`}; padding-top: 2rem; padding-bottom: 2rem; gap: 1.5rem;"
+		style="height: {headerHeight}; padding-top: 2rem; padding-bottom: 2rem; gap: 1.5rem;"
 	>
 		<a href={resolve('/')} aria-label="Home" class="inline-block">
 			<svg
@@ -111,3 +110,9 @@
 		</nav>
 	</div>
 </header>
+
+<div
+	class="shrink-0 transition-[height] duration-500 ease-in-out motion-reduce:transition-none"
+	style="height: {headerHeight}"
+	aria-hidden="true"
+></div>
