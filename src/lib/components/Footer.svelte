@@ -5,7 +5,7 @@
 	const year = new Date().getFullYear();
 </script>
 
-<footer class="border-t border-border">
+<footer class="border-t border-border bg-background/80 backdrop-blur-sm">
 	<div
 		class="mx-auto flex md:max-w-4xl max-w-full lg:max-w-7xl flex-col items-center gap-4 px-4 py-8 text-center sm:flex-row sm:justify-between sm:px-6 sm:text-left"
 	>
@@ -27,12 +27,6 @@
 				class="text-sm text-muted transition-colors hover:text-foreground"
 			>
 				LinkedIn
-			</a>
-			<a
-				href={site.links.email}
-				class="text-sm text-muted transition-colors hover:text-foreground"
-			>
-				Email
 			</a>
 		</div>
 	</div>
