@@ -3,14 +3,19 @@
 	import { afterNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
-	import Header from '$lib/components/Header.svelte';
+	import Header from '$lib/components/header/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import DotsBackground from '$lib/components/DotsBackground.svelte';
+	import { headerOffsetForPath } from '$lib/components/header/header-height';
+	import { SM_VIEWPORT_QUERY } from '$lib/components/header/header-state';
 
 	let { children } = $props();
+
+	let isSmViewport = $state(false);
 
 	afterNavigate(({ to }) => {
 		const path = to?.url.pathname;
@@ -23,6 +28,23 @@
 			keepalive: true
 		}).catch(() => {});
 	});
+
+	onMount(() => {
+		const mediaQuery = window.matchMedia(SM_VIEWPORT_QUERY);
+		isSmViewport = mediaQuery.matches;
+
+		function onViewportChange() {
+			isSmViewport = mediaQuery.matches;
+		}
+
+		mediaQuery.addEventListener('change', onViewportChange);
+
+		return () => {
+			mediaQuery.removeEventListener('change', onViewportChange);
+		};
+	});
+
+	const headerOffset = $derived(headerOffsetForPath(page.url.pathname, isSmViewport));
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
@@ -31,7 +53,10 @@
 	<DotsBackground />
 	<Header />
 
-	<main class="mx-auto w-full md:max-w-4xl max-w-full lg:max-w-7xl flex-1 px-4 py-8 sm:px-6 sm:py-12 lg:py-16 min-h-dvh overflow-scroll">
+	<main
+		class="mx-auto w-full md:max-w-4xl max-w-full lg:max-w-7xl flex-1 px-4 pb-8 sm:px-6 sm:pb-12 lg:pb-16 min-h-dvh overflow-scroll"
+		style:padding-top={headerOffset}
+	>
 		{@render children()}
 	</main>
 

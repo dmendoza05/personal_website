@@ -6,6 +6,14 @@
 	import { onMount } from 'svelte';
 	import { animate, stagger } from 'animejs';
 	import Logo from '$lib/components/Logo.svelte';
+	import HeaderShape from './HeaderShape.svelte';
+	import { headerOffsetForState } from './header-height';
+	import {
+		HEADER_HEIGHT,
+		HEADER_LOGO_HEIGHT,
+		resolveHeaderState,
+		SM_VIEWPORT_QUERY
+	} from './header-state';
 	import { m } from '$lib/paraglide/messages.js';
 
 	const navItems: { href: Pathname; label: () => string }[] = [
@@ -14,22 +22,56 @@
 		{ href: '/blog', label: () => m.nav_blog() }
 	];
 
-	const COLLAPSED_HEIGHT = 150;
-
 	let menuOpen = $state(false);
+	let shapeRevealed = $state(false);
+	let isSmViewport = $state(false);
+	let logoReady = $state(false);
 	let logo: Logo;
-	let navList: HTMLUListElement;
+	let navList: HTMLUListElement | undefined = $state();
+	let headerContent: HTMLDivElement | undefined = $state();
 
 	afterNavigate(() => {
 		menuOpen = false;
 	});
 
 	onMount(() => {
-		logo.toFullname();
+		const mediaQuery = window.matchMedia(SM_VIEWPORT_QUERY);
+		isSmViewport = mediaQuery.matches;
+		logoReady = true;
+
+		function onViewportChange() {
+			isSmViewport = mediaQuery.matches;
+		}
+
+		mediaQuery.addEventListener('change', onViewportChange);
+
+		return () => {
+			mediaQuery.removeEventListener('change', onViewportChange);
+		};
 	});
 
-	const isHome = $derived(page.url.pathname === '/');
-	const headerHeight = $derived(isHome ? '100dvh' : `${COLLAPSED_HEIGHT}px`);
+	const headerState = $derived(resolveHeaderState(page.url.pathname, isSmViewport));
+	const logoHeight = $derived(HEADER_LOGO_HEIGHT[headerState]);
+	const headerOffset = $derived(headerOffsetForState(headerState));
+	const headerSizeStyle = $derived(
+		headerState === 'expanded'
+			? `min-height: ${HEADER_HEIGHT.expanded.min}; max-height: ${HEADER_HEIGHT.expanded.max};`
+			: `height: ${headerOffset};`
+	);
+
+	$effect(() => {
+		if (!logoReady) return;
+
+		if (headerState === 'compact') {
+			const wasAlreadyInitials = logo.getState() === 'initials-default';
+			logo.toInitials();
+			// Already initials: no animation runs, so reveal the header UI now.
+			if (wasAlreadyInitials) onLogoComplete();
+			return;
+		}
+
+		logo.toFullname();
+	});
 
 	function isActive(href: Pathname) {
 		if (href === '/') return page.url.pathname === '/';
@@ -41,8 +83,11 @@
 	}
 
 	function onLogoComplete() {
-		const items = navList.querySelectorAll<HTMLElement>(':scope > li');
-		if (!items.length) return;
+		if (shapeRevealed) return;
+		shapeRevealed = true;
+
+		const items = navList?.querySelectorAll<HTMLElement>(':scope > li');
+		if (!items?.length) return;
 
 		if (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
 			items.forEach((item) => {
@@ -62,16 +107,22 @@
 	}
 </script>
 
-<header id="header" class="fixed top-0 z-50 w-dvw border-b border-border backdrop-blur-xs">
+<HeaderShape revealed={shapeRevealed} content={headerContent} nav={navList}>
 	<div
-		class="relative flex w-dvw flex-col items-center justify-center px-4 transition-[height] duration-500 ease-in-out motion-reduce:transition-none sm:px-6"
-		style="height: {headerHeight}; padding-top: 2rem; padding-bottom: 2rem; gap: 1.5rem;"
+		bind:this={headerContent}
+		class="relative mx-auto flex w-full max-w-full flex-col items-center justify-center px-4 transition-[height,min-height,max-height] duration-500 ease-in-out motion-reduce:transition-none sm:px-6 md:max-w-4xl lg:max-w-7xl"
+		style="{headerSizeStyle} padding-top: 1rem; padding-bottom: 1rem; gap: 1.5rem;"
 	>
-		<a href={resolve('/')} aria-label="Home" class="inline-block">
+		<a
+			href={resolve('/')}
+			aria-label="Home"
+			class="inline-block transition-[height] duration-500 ease-in-out motion-reduce:transition-none"
+			style:height="{logoHeight}px"
+		>
 			<Logo
 				bind:this={logo}
 				initial="initials"
-				class="h-[42px] w-auto text-white"
+				class="h-full w-auto text-white"
 				oncomplete={onLogoComplete}
 			/>
 		</a>
@@ -131,10 +182,4 @@
 			</ul>
 		</nav>
 	</div>
-</header>
-
-<div
-	class="shrink-0 transition-[height] duration-500 ease-in-out motion-reduce:transition-none"
-	style="height: {headerHeight}"
-	aria-hidden="true"
-></div>
+</HeaderShape>
