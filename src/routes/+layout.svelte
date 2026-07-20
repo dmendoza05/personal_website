@@ -11,7 +11,7 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import DotsBackground from '$lib/components/DotsBackground.svelte';
 	import { headerOffsetForPath } from '$lib/components/header/header-height';
-	import { SM_VIEWPORT_QUERY } from '$lib/components/header/header-state';
+	import { HEADER_TRANSITION_MS, SM_VIEWPORT_QUERY } from '$lib/components/header/header-state';
 
 	let { children } = $props();
 
@@ -56,6 +56,7 @@
 	<main
 		class="mx-auto w-full md:max-w-4xl max-w-full lg:max-w-7xl flex-1 px-4 pb-8 sm:px-6 sm:pb-12 lg:pb-16 min-h-dvh overflow-scroll"
 		style:padding-top={headerOffset}
+		style:transition="padding-top {HEADER_TRANSITION_MS}ms ease-in-out"
 	>
 		{@render children()}
 	</main>

@@ -1,17 +1,20 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { HEADER_TRANSITION_MS } from './header-state';
 
 	const NOTCH_INSET_RATIO = 0.2;
 
 	let {
 		revealed = false,
 		content,
-		nav,
+		height,
+		transitionMs = HEADER_TRANSITION_MS,
 		children
 	}: {
 		revealed?: boolean;
 		content: HTMLElement | undefined;
-		nav: HTMLElement | undefined;
+		height: string;
+		transitionMs?: number;
 		children: Snippet;
 	} = $props();
 
@@ -26,8 +29,10 @@
 	$effect(() => {
 		const shape = shapeEl;
 		const contentEl = content;
-		const navEl = nav;
-		if (!shape || !contentEl || !navEl) return;
+		if (!shape || !contentEl) return;
+
+		// Re-run when the target header height changes.
+		void height;
 
 		let animationFrame = 0;
 
@@ -39,7 +44,6 @@
 		const observer = new ResizeObserver(scheduleShapeUpdate);
 		observer.observe(shape);
 		observer.observe(contentEl);
-		observer.observe(navEl);
 		scheduleShapeUpdate();
 
 		return () => {
@@ -49,21 +53,17 @@
 	});
 
 	function updateHeaderShape() {
-		if (!content || !nav) return;
+		if (!content) return;
 
 		const shapeRect = shapeEl.getBoundingClientRect();
 		const contentRect = content.getBoundingClientRect();
-		const navRect = nav.getBoundingClientRect();
-		if (!shapeRect.width || !shapeRect.height || !contentRect.width) return;
+		const navNotchBottomYPx = Number.parseFloat(height);
+		if (!shapeRect.width || !contentRect.width || !navNotchBottomYPx) return;
 
 		const contentLeft = contentRect.left - shapeRect.left;
 		const navNotchLeftPx = contentLeft + contentRect.width * NOTCH_INSET_RATIO;
 		const navNotchRightPx = contentLeft + contentRect.width * (1 - NOTCH_INSET_RATIO);
-		const navBarMiddleYPx = shapeRect.height / 2;
-		const navNotchBottomYPx =
-			navRect.height > 0
-				? Math.min(shapeRect.height, navRect.bottom - shapeRect.top)
-				: shapeRect.height;
+		const navBarMiddleYPx = navNotchBottomYPx / 2;
 		const diagonalRun = Math.max(0, navNotchBottomYPx - navBarMiddleYPx);
 
 		navNotchLeft = `${navNotchLeftPx}px`;
@@ -71,7 +71,7 @@
 		navDiagonalLeft = `${Math.max(0, navNotchLeftPx - diagonalRun)}px`;
 		navDiagonalRight = `${Math.min(shapeRect.width, navNotchRightPx + diagonalRun)}px`;
 		navBarMiddleY = `${navBarMiddleYPx}px`;
-		navNotchBottomY = `${navNotchBottomYPx}px`;
+		navNotchBottomY = height;
 	}
 </script>
 
@@ -80,6 +80,7 @@
 		bind:this={shapeEl}
 		class:header-shape-custom={revealed}
 		class="header-shape w-dvw bg-background/60 backdrop-blur-xs"
+		style:--header-transition-ms="{transitionMs}ms"
 		style:--nav-notch-left={navNotchLeft}
 		style:--nav-notch-right={navNotchRight}
 		style:--nav-diagonal-left={navDiagonalLeft}
@@ -99,7 +100,7 @@
 
 	.header-shape {
 		clip-path: polygon(0 0, 100% 0, 100% 100%, 100% 100%, 100% 100%, 0 100%, 0 100%, 0 100%);
-		transition: clip-path 500ms ease-in-out;
+		transition: clip-path var(--header-transition-ms, 500ms) ease-in-out;
 	}
 
 	.header-shape-custom {

@@ -9,8 +9,8 @@
 	import HeaderShape from './HeaderShape.svelte';
 	import { headerOffsetForState } from './header-height';
 	import {
-		HEADER_HEIGHT,
 		HEADER_LOGO_HEIGHT,
+		HEADER_TRANSITION_MS,
 		resolveHeaderState,
 		SM_VIEWPORT_QUERY
 	} from './header-state';
@@ -53,11 +53,8 @@
 	const headerState = $derived(resolveHeaderState(page.url.pathname, isSmViewport));
 	const logoHeight = $derived(HEADER_LOGO_HEIGHT[headerState]);
 	const headerOffset = $derived(headerOffsetForState(headerState));
-	const headerSizeStyle = $derived(
-		headerState === 'expanded'
-			? `min-height: ${HEADER_HEIGHT.expanded.min}; max-height: ${HEADER_HEIGHT.expanded.max};`
-			: `height: ${headerOffset};`
-	);
+	const shapeCustom = $derived(shapeRevealed && headerState !== 'expanded');
+	const headerTransition = $derived(`height ${HEADER_TRANSITION_MS}ms ease-in-out`);
 
 	$effect(() => {
 		if (!logoReady) return;
@@ -101,23 +98,33 @@
 			opacity: [0, 1],
 			translateY: [-12, 0],
 			delay: stagger(80),
-			duration: 500,
+			duration: HEADER_TRANSITION_MS,
 			ease: 'outCubic'
 		});
 	}
 </script>
 
-<HeaderShape revealed={shapeRevealed} content={headerContent} nav={navList}>
+<HeaderShape
+	revealed={shapeCustom}
+	content={headerContent}
+	height={headerOffset}
+	transitionMs={HEADER_TRANSITION_MS}
+>
 	<div
 		bind:this={headerContent}
-		class="relative mx-auto flex w-full max-w-full flex-col items-center justify-center px-4 transition-[height,min-height,max-height] duration-500 ease-in-out motion-reduce:transition-none sm:px-6 md:max-w-4xl lg:max-w-7xl"
-		style="{headerSizeStyle} padding-top: 1rem; padding-bottom: 1rem; gap: 1.5rem;"
+		class="relative mx-auto flex w-full max-w-full flex-col items-center justify-center px-4 sm:px-6 md:max-w-4xl lg:max-w-7xl"
+		style:height={headerOffset}
+		style:padding-top="1rem"
+		style:padding-bottom="1rem"
+		style:gap="1.5rem"
+		style:transition={headerTransition}
 	>
 		<a
 			href={resolve('/')}
 			aria-label="Home"
-			class="inline-block transition-[height] duration-500 ease-in-out motion-reduce:transition-none"
+			class="inline-block"
 			style:height="{logoHeight}px"
+			style:transition="height {HEADER_TRANSITION_MS}ms ease-in-out"
 		>
 			<Logo
 				bind:this={logo}
