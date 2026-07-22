@@ -8,8 +8,11 @@
 	import Logo from '$lib/components/Logo.svelte';
 	import HeaderShape from './HeaderShape.svelte';
 	import { headerOffsetForState } from './header-height';
+	import { getExpandedHeaderHeight } from './header-expanded-height.svelte';
 	import {
+		HEADER_EXPANDED_MARGIN_PX,
 		HEADER_LOGO_HEIGHT,
+		HEADER_TRANSITION,
 		HEADER_TRANSITION_MS,
 		resolveHeaderState,
 		SM_VIEWPORT_QUERY
@@ -52,9 +55,13 @@
 
 	const headerState = $derived(resolveHeaderState(page.url.pathname, isSmViewport));
 	const logoHeight = $derived(HEADER_LOGO_HEIGHT[headerState]);
-	const headerOffset = $derived(headerOffsetForState(headerState));
+	const headerOffset = $derived(
+		headerOffsetForState(headerState, getExpandedHeaderHeight())
+	);
 	const shapeCustom = $derived(shapeRevealed && headerState !== 'expanded');
-	const headerTransition = $derived(`height ${HEADER_TRANSITION_MS}ms ease-in-out`);
+	const contentPadding = $derived(
+		headerState === 'expanded' ? `${HEADER_EXPANDED_MARGIN_PX}px` : '1rem 0'
+	);
 
 	$effect(() => {
 		if (!logoReady) return;
@@ -114,21 +121,21 @@
 		bind:this={headerContent}
 		class="relative mx-auto flex w-full max-w-full flex-col items-center justify-center px-4 sm:px-6 md:max-w-4xl lg:max-w-7xl"
 		style:height={headerOffset}
-		style:padding-top="1rem"
-		style:padding-bottom="1rem"
+		style:padding={contentPadding}
 		style:gap="1.5rem"
-		style:transition={headerTransition}
+		style:transition="{HEADER_TRANSITION}, padding {HEADER_TRANSITION_MS}ms"
 	>
 		<a
 			href={resolve('/')}
 			aria-label="Home"
 			class="inline-block"
 			style:height="{logoHeight}px"
-			style:transition="height {HEADER_TRANSITION_MS}ms ease-in-out"
+			style:transition={HEADER_TRANSITION}
 		>
 			<Logo
 				bind:this={logo}
 				initial="initials"
+				duration={HEADER_TRANSITION_MS}
 				class="h-full w-auto text-white"
 				oncomplete={onLogoComplete}
 			/>
@@ -136,7 +143,13 @@
 
 		<button
 			type="button"
-			class="absolute top-3 right-4 inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground transition-colors hover:bg-card sm:right-6 md:hidden"
+			class="absolute inline-flex h-10 w-10 items-center justify-center rounded-md text-foreground transition-colors hover:bg-card md:hidden"
+			style:top={headerState === 'expanded'
+				? `${HEADER_EXPANDED_MARGIN_PX + 8}px`
+				: '0.75rem'}
+			style:right={headerState === 'expanded'
+				? `${HEADER_EXPANDED_MARGIN_PX + 8}px`
+				: '1rem'}
 			aria-expanded={menuOpen}
 			aria-controls="site-nav"
 			onclick={toggleMenu}

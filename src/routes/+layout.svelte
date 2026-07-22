@@ -11,7 +11,12 @@
 	import Footer from '$lib/components/Footer.svelte';
 	import DotsBackground from '$lib/components/DotsBackground.svelte';
 	import { headerOffsetForPath } from '$lib/components/header/header-height';
-	import { HEADER_TRANSITION_MS, SM_VIEWPORT_QUERY } from '$lib/components/header/header-state';
+	import { getExpandedHeaderHeight, initExpandedHeaderHeight } from '$lib/components/header/header-expanded-height.svelte';
+	import {
+		HEADER_TRANSITION_EASE,
+		HEADER_TRANSITION_MS,
+		SM_VIEWPORT_QUERY
+	} from '$lib/components/header/header-state';
 
 	let { children } = $props();
 
@@ -30,21 +35,25 @@
 	});
 
 	onMount(() => {
-		const mediaQuery = window.matchMedia(SM_VIEWPORT_QUERY);
-		isSmViewport = mediaQuery.matches;
+		const smQuery = window.matchMedia(SM_VIEWPORT_QUERY);
+		isSmViewport = smQuery.matches;
+		const stopExpandedHeight = initExpandedHeaderHeight();
 
-		function onViewportChange() {
-			isSmViewport = mediaQuery.matches;
+		function onSmViewportChange() {
+			isSmViewport = smQuery.matches;
 		}
 
-		mediaQuery.addEventListener('change', onViewportChange);
+		smQuery.addEventListener('change', onSmViewportChange);
 
 		return () => {
-			mediaQuery.removeEventListener('change', onViewportChange);
+			smQuery.removeEventListener('change', onSmViewportChange);
+			stopExpandedHeight();
 		};
 	});
 
-	const headerOffset = $derived(headerOffsetForPath(page.url.pathname, isSmViewport));
+	const headerOffset = $derived(
+		headerOffsetForPath(page.url.pathname, isSmViewport, getExpandedHeaderHeight())
+	);
 </script>
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
@@ -56,7 +65,7 @@
 	<main
 		class="mx-auto min-h-dvh w-full max-w-full flex-1 overflow-scroll px-4 pb-8 sm:px-6 sm:pb-12 md:max-w-4xl lg:max-w-7xl lg:pb-16"
 		style:padding-top={headerOffset}
-		style:transition="padding-top {HEADER_TRANSITION_MS}ms ease-in-out"
+		style:transition="padding-top {HEADER_TRANSITION_MS}ms {HEADER_TRANSITION_EASE}"
 	>
 		{@render children()}
 	</main>

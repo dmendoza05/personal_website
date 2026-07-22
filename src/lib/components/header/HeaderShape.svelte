@@ -1,32 +1,37 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { HEADER_TRANSITION_MS } from './header-state';
+	import {
+		HEADER_EXPANDED_CORNER_NOTCH_PX,
+		HEADER_EXPANDED_MARGIN_PX,
+		HEADER_TRANSITION_EASE,
+		HEADER_TRANSITION_MS
+	} from './header-state';
 
-	const NOTCH_INSET_RATIO = 0.2;
+	const NAV_NOTCH_INSET_RATIO = 0.2;
+	const FALLBACK_CLIP = 'polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px)';
 
 	let {
 		revealed = false,
 		content,
 		height,
 		transitionMs = HEADER_TRANSITION_MS,
+		transitionEase = HEADER_TRANSITION_EASE,
 		children
 	}: {
 		revealed?: boolean;
 		content: HTMLElement | undefined;
 		height: string;
 		transitionMs?: number;
+		transitionEase?: string;
 		children: Snippet;
 	} = $props();
 
 	let shapeEl: HTMLDivElement;
-	let navNotchLeft = $state('20%');
-	let navNotchRight = $state('80%');
-	let navDiagonalLeft = $state('20%');
-	let navDiagonalRight = $state('80%');
-	let navBarMiddleY = $state('50%');
-	let navNotchBottomY = $state('100%');
-	let borderPathFlat = $state("path('M0 0H1V1H0Z')");
-	let borderPathNotched = $state("path('M0 0H1V1H0Z')");
+	// Default = expanded (inset + 4 corner notches). Custom = nav bottom tab.
+	let clipPathExpanded = $state(FALLBACK_CLIP);
+	let clipPathNav = $state(FALLBACK_CLIP);
+	let borderPathExpanded = $state("path('M0 0H1V1H0Z')");
+	let borderPathNav = $state("path('M0 0H1V1H0Z')");
 	let svgViewBox = $state('0 0 1 1');
 
 	$effect(() => {
@@ -60,30 +65,41 @@
 
 		const shapeRect = shapeEl.getBoundingClientRect();
 		const contentRect = content.getBoundingClientRect();
-		const navNotchBottomYPx = Number.parseFloat(height);
+		const parsedHeight = height.endsWith('px') ? Number.parseFloat(height) : Number.NaN;
+		const navNotchBottomYPx = Number.isFinite(parsedHeight) ? parsedHeight : contentRect.height;
 		if (!shapeRect.width || !contentRect.width || !navNotchBottomYPx) return;
 
 		const w = shapeRect.width;
 		const h = shapeRect.height;
+
+		// Expanded: inset from viewport + chamfered corners (8 points).
+		const margin = HEADER_EXPANDED_MARGIN_PX;
+		const left = margin;
+		const right = w - margin;
+		const top = margin;
+		const bottom = h - margin;
+		const notch = Math.min(
+			HEADER_EXPANDED_CORNER_NOTCH_PX,
+			Math.max(0, (right - left) / 4),
+			Math.max(0, (bottom - top) / 4)
+		);
+
+		clipPathExpanded = `polygon(${left + notch}px ${top}px, ${right - notch}px ${top}px, ${right}px ${top + notch}px, ${right}px ${bottom - notch}px, ${right - notch}px ${bottom}px, ${left + notch}px ${bottom}px, ${left}px ${bottom - notch}px, ${left}px ${top + notch}px)`;
+		borderPathExpanded = `path('M${left + notch} ${top}L${right - notch} ${top}L${right} ${top + notch}L${right} ${bottom - notch}L${right - notch} ${bottom}L${left + notch} ${bottom}L${left} ${bottom - notch}L${left} ${top + notch}Z')`;
+
+		// Nav: full-bleed bar with center bottom tab (same 8-point order for morph).
 		const contentLeft = contentRect.left - shapeRect.left;
-		const navNotchLeftPx = contentLeft + contentRect.width * NOTCH_INSET_RATIO;
-		const navNotchRightPx = contentLeft + contentRect.width * (1 - NOTCH_INSET_RATIO);
+		const navNotchLeftPx = contentLeft + contentRect.width * NAV_NOTCH_INSET_RATIO;
+		const navNotchRightPx = contentLeft + contentRect.width * (1 - NAV_NOTCH_INSET_RATIO);
 		const navBarMiddleYPx = navNotchBottomYPx / 2;
 		const diagonalRun = Math.max(0, navNotchBottomYPx - navBarMiddleYPx);
 		const navDiagonalLeftPx = Math.max(0, navNotchLeftPx - diagonalRun);
 		const navDiagonalRightPx = Math.min(w, navNotchRightPx + diagonalRun);
 
-		navNotchLeft = `${navNotchLeftPx}px`;
-		navNotchRight = `${navNotchRightPx}px`;
-		navDiagonalLeft = `${navDiagonalLeftPx}px`;
-		navDiagonalRight = `${navDiagonalRightPx}px`;
-		navBarMiddleY = `${navBarMiddleYPx}px`;
-		navNotchBottomY = height;
+		clipPathNav = `polygon(0 0, ${w}px 0, ${w}px ${navBarMiddleYPx}px, ${navDiagonalRightPx}px ${navBarMiddleYPx}px, ${navNotchRightPx}px ${navNotchBottomYPx}px, ${navNotchLeftPx}px ${navNotchBottomYPx}px, ${navDiagonalLeftPx}px ${navBarMiddleYPx}px, 0 ${navBarMiddleYPx}px)`;
+		borderPathNav = `path('M0 0L${w} 0L${w} ${navBarMiddleYPx}L${navDiagonalRightPx} ${navBarMiddleYPx}L${navNotchRightPx} ${navNotchBottomYPx}L${navNotchLeftPx} ${navNotchBottomYPx}L${navDiagonalLeftPx} ${navBarMiddleYPx}L0 ${navBarMiddleYPx}Z')`;
 
 		svgViewBox = `0 0 ${w} ${h}`;
-		// Same point count/order as clip-path so CSS can interpolate `d` with the reveal.
-		borderPathFlat = `path('M0 0L${w} 0L${w} ${h}L${w} ${h}L${w} ${h}L0 ${h}L0 ${h}L0 ${h}Z')`;
-		borderPathNotched = `path('M0 0L${w} 0L${w} ${navBarMiddleYPx}L${navDiagonalRightPx} ${navBarMiddleYPx}L${navNotchRightPx} ${navNotchBottomYPx}L${navNotchLeftPx} ${navNotchBottomYPx}L${navDiagonalLeftPx} ${navBarMiddleYPx}L0 ${navBarMiddleYPx}Z')`;
 	}
 </script>
 
@@ -97,28 +113,26 @@
 			aria-hidden="true"
 		>
 			<path
-				class:header-border-custom={revealed}
+				class:header-border-nav={revealed}
 				class="header-border"
 				fill="none"
 				stroke="var(--border)"
 				stroke-width="1"
 				vector-effect="non-scaling-stroke"
 				style:--header-transition-ms="{transitionMs}ms"
-				style:--header-border-flat={borderPathFlat}
-				style:--header-border-notched={borderPathNotched}
+				style:--header-transition-ease={transitionEase}
+				style:--header-border-expanded={borderPathExpanded}
+				style:--header-border-nav={borderPathNav}
 			/>
 		</svg>
 		<div
 			bind:this={shapeEl}
-			class:header-shape-custom={revealed}
+			class:header-shape-nav={revealed}
 			class="header-shape w-dvw bg-glass"
 			style:--header-transition-ms="{transitionMs}ms"
-			style:--nav-notch-left={navNotchLeft}
-			style:--nav-notch-right={navNotchRight}
-			style:--nav-diagonal-left={navDiagonalLeft}
-			style:--nav-diagonal-right={navDiagonalRight}
-			style:--nav-bar-middle-y={navBarMiddleY}
-			style:--nav-notch-bottom-y={navNotchBottomY}
+			style:--header-transition-ease={transitionEase}
+			style:--header-clip-expanded={clipPathExpanded}
+			style:--header-clip-nav={clipPathNav}
 		>
 			{@render children()}
 		</div>
@@ -127,30 +141,22 @@
 
 <style>
 	.header-border {
-		d: var(--header-border-flat);
-		transition: d var(--header-transition-ms, 500ms) ease-in-out;
+		d: var(--header-border-expanded);
+		transition: d var(--header-transition-ms, 500ms) var(--header-transition-ease, ease-in-out);
 	}
 
-	.header-border-custom {
-		d: var(--header-border-notched);
+	.header-border-nav {
+		d: var(--header-border-nav);
 	}
 
 	.header-shape {
-		clip-path: polygon(0 0, 100% 0, 100% 100%, 100% 100%, 100% 100%, 0 100%, 0 100%, 0 100%);
-		transition: clip-path var(--header-transition-ms, 500ms) ease-in-out;
+		clip-path: var(--header-clip-expanded);
+		transition: clip-path var(--header-transition-ms, 500ms)
+			var(--header-transition-ease, ease-in-out);
 	}
 
-	.header-shape-custom {
-		clip-path: polygon(
-			0 0,
-			100% 0,
-			100% var(--nav-bar-middle-y),
-			var(--nav-diagonal-right) var(--nav-bar-middle-y),
-			var(--nav-notch-right) var(--nav-notch-bottom-y),
-			var(--nav-notch-left) var(--nav-notch-bottom-y),
-			var(--nav-diagonal-left) var(--nav-bar-middle-y),
-			0 var(--nav-bar-middle-y)
-		);
+	.header-shape-nav {
+		clip-path: var(--header-clip-nav);
 	}
 
 	@media (prefers-reduced-motion: reduce) {
