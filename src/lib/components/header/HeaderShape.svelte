@@ -25,6 +25,9 @@
 	let navDiagonalRight = $state('80%');
 	let navBarMiddleY = $state('50%');
 	let navNotchBottomY = $state('100%');
+	let borderPathFlat = $state("path('M0 0H1V1H0Z')");
+	let borderPathNotched = $state("path('M0 0H1V1H0Z')");
+	let svgViewBox = $state('0 0 1 1');
 
 	$effect(() => {
 		const shape = shapeEl;
@@ -60,42 +63,76 @@
 		const navNotchBottomYPx = Number.parseFloat(height);
 		if (!shapeRect.width || !contentRect.width || !navNotchBottomYPx) return;
 
+		const w = shapeRect.width;
+		const h = shapeRect.height;
 		const contentLeft = contentRect.left - shapeRect.left;
 		const navNotchLeftPx = contentLeft + contentRect.width * NOTCH_INSET_RATIO;
 		const navNotchRightPx = contentLeft + contentRect.width * (1 - NOTCH_INSET_RATIO);
 		const navBarMiddleYPx = navNotchBottomYPx / 2;
 		const diagonalRun = Math.max(0, navNotchBottomYPx - navBarMiddleYPx);
+		const navDiagonalLeftPx = Math.max(0, navNotchLeftPx - diagonalRun);
+		const navDiagonalRightPx = Math.min(w, navNotchRightPx + diagonalRun);
 
 		navNotchLeft = `${navNotchLeftPx}px`;
 		navNotchRight = `${navNotchRightPx}px`;
-		navDiagonalLeft = `${Math.max(0, navNotchLeftPx - diagonalRun)}px`;
-		navDiagonalRight = `${Math.min(shapeRect.width, navNotchRightPx + diagonalRun)}px`;
+		navDiagonalLeft = `${navDiagonalLeftPx}px`;
+		navDiagonalRight = `${navDiagonalRightPx}px`;
 		navBarMiddleY = `${navBarMiddleYPx}px`;
 		navNotchBottomY = height;
+
+		svgViewBox = `0 0 ${w} ${h}`;
+		// Same point count/order as clip-path so CSS can interpolate `d` with the reveal.
+		borderPathFlat = `path('M0 0L${w} 0L${w} ${h}L${w} ${h}L${w} ${h}L0 ${h}L0 ${h}L0 ${h}Z')`;
+		borderPathNotched = `path('M0 0L${w} 0L${w} ${navBarMiddleYPx}L${navDiagonalRightPx} ${navBarMiddleYPx}L${navNotchRightPx} ${navNotchBottomYPx}L${navNotchLeftPx} ${navNotchBottomYPx}L${navDiagonalLeftPx} ${navBarMiddleYPx}L0 ${navBarMiddleYPx}Z')`;
 	}
 </script>
 
-<header id="header" class="header-outline fixed top-0 z-50 w-dvw">
-	<div
-		bind:this={shapeEl}
-		class:header-shape-custom={revealed}
-		class="header-shape w-dvw bg-background/60 backdrop-blur-xs"
-		style:--header-transition-ms="{transitionMs}ms"
-		style:--nav-notch-left={navNotchLeft}
-		style:--nav-notch-right={navNotchRight}
-		style:--nav-diagonal-left={navDiagonalLeft}
-		style:--nav-diagonal-right={navDiagonalRight}
-		style:--nav-bar-middle-y={navBarMiddleY}
-		style:--nav-notch-bottom-y={navNotchBottomY}
-	>
-		{@render children()}
+<header id="header" class="fixed top-0 z-50 w-dvw">
+	<div class="relative w-dvw">
+		<!-- Stroke sits outside clip-path so it isn't cropped; sibling so filter isn't needed. -->
+		<svg
+			class="pointer-events-none absolute inset-0 z-10 h-full w-full overflow-visible"
+			viewBox={svgViewBox}
+			preserveAspectRatio="none"
+			aria-hidden="true"
+		>
+			<path
+				class:header-border-custom={revealed}
+				class="header-border"
+				fill="none"
+				stroke="var(--border)"
+				stroke-width="1"
+				vector-effect="non-scaling-stroke"
+				style:--header-transition-ms="{transitionMs}ms"
+				style:--header-border-flat={borderPathFlat}
+				style:--header-border-notched={borderPathNotched}
+			/>
+		</svg>
+		<div
+			bind:this={shapeEl}
+			class:header-shape-custom={revealed}
+			class="header-shape w-dvw bg-glass"
+			style:--header-transition-ms="{transitionMs}ms"
+			style:--nav-notch-left={navNotchLeft}
+			style:--nav-notch-right={navNotchRight}
+			style:--nav-diagonal-left={navDiagonalLeft}
+			style:--nav-diagonal-right={navDiagonalRight}
+			style:--nav-bar-middle-y={navBarMiddleY}
+			style:--nav-notch-bottom-y={navNotchBottomY}
+		>
+			{@render children()}
+		</div>
 	</div>
 </header>
 
 <style>
-	/* Border can't follow a clip-path, so trace the shaped edge with a drop-shadow instead. */
-	.header-outline {
-		filter: drop-shadow(0 1px 0 var(--border));
+	.header-border {
+		d: var(--header-border-flat);
+		transition: d var(--header-transition-ms, 500ms) ease-in-out;
+	}
+
+	.header-border-custom {
+		d: var(--header-border-notched);
 	}
 
 	.header-shape {
@@ -117,6 +154,7 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
+		.header-border,
 		.header-shape {
 			transition: none;
 		}

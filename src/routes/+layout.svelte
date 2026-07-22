@@ -49,12 +49,12 @@
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
-<div class="relative z-10 flex w-dvw h-dvh flex-col overflow-hidden">
+<div class="relative z-10 flex h-dvh w-dvw flex-col overflow-hidden">
 	<DotsBackground />
 	<Header />
 
 	<main
-		class="mx-auto w-full md:max-w-4xl max-w-full lg:max-w-7xl flex-1 px-4 pb-8 sm:px-6 sm:pb-12 lg:pb-16 min-h-dvh overflow-scroll"
+		class="mx-auto min-h-dvh w-full max-w-full flex-1 overflow-scroll px-4 pb-8 sm:px-6 sm:pb-12 md:max-w-4xl lg:max-w-7xl lg:pb-16"
 		style:padding-top={headerOffset}
 		style:transition="padding-top {HEADER_TRANSITION_MS}ms ease-in-out"
 	>

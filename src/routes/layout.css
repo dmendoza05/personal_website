@@ -21,6 +21,10 @@
 	--color-card: var(--card);
 }
 
+@utility bg-glass {
+	@apply bg-background/60 backdrop-blur-xs;
+}
+
 :root {
 	--bg: #fafafa;
 	--fg: #171717;
