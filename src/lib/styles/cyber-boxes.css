@@ -1,0 +1,178 @@
+:root {
+	/* PAGE STYLES */
+
+	/* notches */
+	--page-tr-notch-x: 100%;
+	--page-tr-notch-y: 0%;
+	--page-bl-notch-x: 0%;
+	--page-bl-notch-y: 100%;
+
+	/* misc */
+	--page-notch-size: 28px;
+
+	/* HEADER STYLES */
+
+	/* notches */
+	--header-clip-expanded: polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px);
+	--header-clip-nav: polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px);
+	--header-border-expanded: path('M0 0H1V1H0Z');
+	--header-border-nav: path('M0 0H1V1H0Z');
+
+	/* misc */
+	--header-transition-ms: 500ms;
+	--header-transition-ease: ease-in-out;
+
+	/* CARD STYLES */
+
+	/* notches */
+	--card-clip: polygon(0 0, 1px 0, 1px 1px, 0 1px);
+	--card-notch-size: 16px;
+	--card-notch-size-resolved: var(--card-notch-size);
+
+	/* misc */
+	--card-indicator-color: var(--accent);
+	--card-indicator-gap: 8px;
+	--card-indicator-transition-ms: 280ms;
+	--card-indicator-transition-ease: ease-out;
+	--card-indicator-travel: 45%;
+	--card-active-color: var(--accent);
+	--card-active-bg: color-mix(in srgb, var(--card-active-color) 14%, var(--bg));
+
+	/* SHARED STYLES */
+	--svg-shape-stroke-color: var(--border);
+	--svg-shape-stroke-width: 3;
+}
+
+/* page styles */
+
+/* notches */
+.page-shape {
+	clip-path: polygon(
+		0 0,
+		var(--page-tr-notch-x) 0,
+		100% var(--page-tr-notch-y),
+		100% 100%,
+		var(--page-bl-notch-x) 100%,
+		0 var(--page-bl-notch-y)
+	);
+}
+
+/* header styles */
+
+/* notches */
+.header-border {
+	d: var(--header-border-expanded);
+	transition: d var(--header-transition-ms) var(--header-transition-ease);
+}
+
+.header-border-nav {
+	d: var(--header-border-nav);
+}
+
+.header-shape {
+	clip-path: var(--header-clip-expanded);
+	transition: clip-path var(--header-transition-ms) var(--header-transition-ease);
+}
+
+.header-shape-nav {
+	clip-path: var(--header-clip-nav);
+}
+
+/* card styles */
+
+/* notches */
+.card-shape {
+	clip-path: var(--card-clip);
+	transition: background-color var(--card-indicator-transition-ms)
+		var(--card-indicator-transition-ease);
+}
+
+.card-root {
+	color: var(--fg);
+	transition: color var(--card-indicator-transition-ms) var(--card-indicator-transition-ease);
+}
+
+.card-root svg path {
+	transition: stroke var(--card-indicator-transition-ms) var(--card-indicator-transition-ease);
+}
+
+.card-notch-indicator {
+	position: absolute;
+	z-index: 5;
+	width: calc(var(--card-notch-size-resolved) - var(--card-indicator-gap));
+	height: calc(var(--card-notch-size-resolved) - var(--card-indicator-gap));
+	pointer-events: none;
+	background: var(--card-indicator-color);
+	opacity: 0;
+	transition:
+		opacity var(--card-indicator-transition-ms) var(--card-indicator-transition-ease),
+		transform var(--card-indicator-transition-ms) var(--card-indicator-transition-ease);
+}
+
+.card-notch-indicator-tl {
+	top: 0;
+	left: 0;
+	clip-path: polygon(0 0, 100% 0, 0 100%);
+	transform: translate(var(--card-indicator-travel), var(--card-indicator-travel));
+}
+
+.card-notch-indicator-tr {
+	top: 0;
+	right: 0;
+	clip-path: polygon(0 0, 100% 0, 100% 100%);
+	transform: translate(calc(var(--card-indicator-travel) * -1), var(--card-indicator-travel));
+}
+
+.card-notch-indicator-bl {
+	bottom: 0;
+	left: 0;
+	clip-path: polygon(0 0, 0 100%, 100% 100%);
+	transform: translate(var(--card-indicator-travel), calc(var(--card-indicator-travel) * -1));
+}
+
+.card-notch-indicator-br {
+	right: 0;
+	bottom: 0;
+	clip-path: polygon(100% 0, 100% 100%, 0 100%);
+	transform: translate(
+		calc(var(--card-indicator-travel) * -1),
+		calc(var(--card-indicator-travel) * -1)
+	);
+}
+
+.card-root:hover,
+.card-root:focus-within,
+.card-root:active,
+.card-root.card-active {
+	--svg-shape-stroke-color: var(--card-active-color);
+	--fg: var(--card-active-color);
+	--muted: var(--card-active-color);
+	color: var(--card-active-color);
+}
+
+.card-root:hover .card-shape,
+.card-root:focus-within .card-shape,
+.card-root:active .card-shape,
+.card-root.card-active .card-shape {
+	background-color: var(--card-active-bg);
+}
+
+.card-root:hover .card-notch-indicator,
+.card-root:focus-within .card-notch-indicator,
+.card-root:active .card-notch-indicator,
+.card-root.card-active .card-notch-indicator {
+	opacity: 1;
+	transform: translate(0, 0);
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.header-border,
+	.header-shape {
+		transition: none;
+	}
+
+	.card-notch-indicator {
+		transition: opacity var(--card-indicator-transition-ms) var(--card-indicator-transition-ease);
+		transform: none;
+	}
+}
