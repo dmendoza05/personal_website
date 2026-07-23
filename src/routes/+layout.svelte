@@ -5,6 +5,7 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
+	import { initNavigationScene } from '$lib/scene';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import Header from '$lib/components/header/Header.svelte';
@@ -21,6 +22,9 @@
 	let { children } = $props();
 
 	let isSmViewport = $state(false);
+	let pageSceneEl: HTMLDivElement | undefined = $state();
+
+	const pageScene = initNavigationScene(() => pageSceneEl, { preset: 'fadeUp' });
 
 	afterNavigate(({ to }) => {
 		const path = to?.url.pathname;
@@ -38,6 +42,8 @@
 		const smQuery = window.matchMedia(SM_VIEWPORT_QUERY);
 		isSmViewport = smQuery.matches;
 		const stopExpandedHeight = initExpandedHeaderHeight();
+
+		if (pageSceneEl) void pageScene.enter(pageSceneEl);
 
 		function onSmViewportChange() {
 			isSmViewport = smQuery.matches;
@@ -67,8 +73,9 @@
 		style:padding-top={headerOffset}
 		style:transition="padding-top {HEADER_TRANSITION_MS}ms {HEADER_TRANSITION_EASE}"
 	>
-		{@render children()}
-
+		<div bind:this={pageSceneEl}>
+			{@render children()}
+		</div>
 	</main>
 	<Footer />
 </div>
