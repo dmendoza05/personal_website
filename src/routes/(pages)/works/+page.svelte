@@ -14,7 +14,7 @@
 </svelte:head>
 
 <Page>
-	<SectionHeading title={m.works_title()} description={m.works_description()} />
+	<SectionHeading id="works" title={m.works_title()} description={m.works_description()} />
 
 	<TabsController id="works" label={m.works_title()} defaultTab="projects">
 		{#snippet tabs()}

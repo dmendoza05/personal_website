@@ -1,12 +1,28 @@
 <script lang="ts">
 	import { slide } from 'svelte/transition';
+	import {
+		getPreferences,
+		isSectionDescriptionOpen,
+		setSectionDescriptionOpen
+	} from '$lib/preferences';
 
-	let { title, description }: { title: string; description?: string } = $props();
+	let {
+		id,
+		title,
+		description
+	}: {
+		id: string;
+		title: string;
+		description?: string;
+	} = $props();
 
-	let descriptionOpen = $state(true);
+	const preferences = getPreferences();
+
+	const descriptionOpen = $derived(isSectionDescriptionOpen(preferences, id));
+	const descriptionDomId = $derived(`section-description-${id}`);
 
 	function toggleDescription() {
-		descriptionOpen = !descriptionOpen;
+		setSectionDescriptionOpen(id, !descriptionOpen);
 	}
 </script>
 
@@ -20,9 +36,9 @@
 			{#if description}
 				<button
 					type="button"
-					class="mt-1 inline-flex h-9 w-9 shrink-0 items-center justify-center text-muted transition-colors hover:text-foreground sm:mt-2"
+					class="mt-1 inline-flex h-9 shrink-0 items-center justify-center text-muted transition-colors hover:text-foreground sm:mt-2"
 					aria-expanded={descriptionOpen}
-					aria-controls="page-description"
+					aria-controls={descriptionDomId}
 					onclick={toggleDescription}
 				>
 					<span class="sr-only">{descriptionOpen ? 'Hide description' : 'Show description'}</span>
@@ -43,7 +59,7 @@
 
 	{#if description && descriptionOpen}
 		<p
-			id="page-description"
+			id={descriptionDomId}
 			class="mt-2 text-lg leading-relaxed text-muted sm:text-lg rajdhani"
 			transition:slide={{ duration: 200 }}
 		>

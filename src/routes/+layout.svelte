@@ -19,6 +19,7 @@
 		HEADER_TRANSITION_MS,
 		SM_VIEWPORT_QUERY
 	} from '$lib/components/header/header-state';
+	import { initPreferences } from '$lib/preferences';
 
 	let { children } = $props();
 
@@ -31,6 +32,7 @@
 		const smQuery = window.matchMedia(SM_VIEWPORT_QUERY);
 		isSmViewport = smQuery.matches;
 		const stopExpandedHeight = initExpandedHeaderHeight();
+		const stopPreferences = initPreferences();
 
 		if (pageSceneEl) void pageScene.enter(pageSceneEl);
 
@@ -43,6 +45,7 @@
 		return () => {
 			smQuery.removeEventListener('change', onSmViewportChange);
 			stopExpandedHeight();
+			stopPreferences();
 		};
 	});
 

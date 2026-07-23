@@ -15,7 +15,7 @@
 </svelte:head>
 
 <Page>
-	<SectionHeading title={m.blog_title()} description={m.blog_description()} />
+	<SectionHeading id="blog" title={m.blog_title()} description={m.blog_description()} />
 
 	{#if posts.length === 0}
 		<p class="text-sm text-muted sm:text-base">No posts yet. Check back soon!</p>
