@@ -68,8 +68,8 @@
 		style:transition="padding-top {HEADER_TRANSITION_MS}ms {HEADER_TRANSITION_EASE}"
 	>
 		{@render children()}
-	</main>
 
+	</main>
 	<Footer />
 </div>
 

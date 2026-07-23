@@ -116,8 +116,8 @@
 				class:header-border-nav={revealed}
 				class="header-border"
 				fill="none"
-				stroke="var(--border)"
-				stroke-width="1"
+				stroke="var(--svg-shape-stroke-color)"
+				stroke-width="var(--svg-shape-stroke-width)"
 				vector-effect="non-scaling-stroke"
 				style:--header-transition-ms="{transitionMs}ms"
 				style:--header-transition-ease={transitionEase}
@@ -138,31 +138,3 @@
 		</div>
 	</div>
 </header>
-
-<style>
-	.header-border {
-		d: var(--header-border-expanded);
-		transition: d var(--header-transition-ms, 500ms) var(--header-transition-ease, ease-in-out);
-	}
-
-	.header-border-nav {
-		d: var(--header-border-nav);
-	}
-
-	.header-shape {
-		clip-path: var(--header-clip-expanded);
-		transition: clip-path var(--header-transition-ms, 500ms)
-			var(--header-transition-ease, ease-in-out);
-	}
-
-	.header-shape-nav {
-		clip-path: var(--header-clip-nav);
-	}
-
-	@media (prefers-reduced-motion: reduce) {
-		.header-border,
-		.header-shape {
-			transition: none;
-		}
-	}
-</style>

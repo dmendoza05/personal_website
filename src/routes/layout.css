@@ -5,6 +5,7 @@
 	```
  */
 @import '../lib/styles/typography.css';
+@import '../lib/styles/cyber-boxes.css';
 @import 'tailwindcss';
 
 @plugin '@tailwindcss/forms';

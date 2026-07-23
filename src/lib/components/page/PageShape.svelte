@@ -1,8 +1,6 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 
-	const NOTCH_SIZE_PX = 28;
-
 	let {
 		children
 	}: {
@@ -38,13 +36,19 @@
 		};
 	});
 
+	function pageNotchSizePx() {
+		const raw = getComputedStyle(shapeEl).getPropertyValue('--page-notch-size');
+		const parsed = Number.parseFloat(raw);
+		return Number.isFinite(parsed) ? parsed : 28;
+	}
+
 	function updatePageShape() {
 		const shapeRect = shapeEl.getBoundingClientRect();
 		if (!shapeRect.width || !shapeRect.height) return;
 
 		const w = shapeRect.width;
 		const h = shapeRect.height;
-		const notch = Math.min(NOTCH_SIZE_PX, w * 0.15, h * 0.15);
+		const notch = Math.min(pageNotchSizePx(), w * 0.15, h * 0.15);
 		const trNotchX = w - notch;
 		const blNotchX = notch;
 		const blNotchY = h - notch;
@@ -70,8 +74,8 @@
 		<path
 			d={borderPath}
 			fill="none"
-			stroke="var(--border)"
-			stroke-width="1"
+			stroke="var(--svg-shape-stroke-color)"
+			stroke-width="var(--svg-shape-stroke-width)"
 			vector-effect="non-scaling-stroke"
 		/>
 	</svg>
@@ -86,16 +90,3 @@
 		{@render children()}
 	</div>
 </div>
-
-<style>
-	.page-shape {
-		clip-path: polygon(
-			0 0,
-			var(--page-tr-notch-x) 0,
-			100% var(--page-tr-notch-y),
-			100% 100%,
-			var(--page-bl-notch-x) 100%,
-			0 var(--page-bl-notch-y)
-		);
-	}
-</style>
