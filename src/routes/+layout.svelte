@@ -8,7 +8,7 @@
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
 	import { initNavigationScene } from '$lib/scene';
 	import './layout.css';
-	import favicon from '$lib/assets/favicon.svg';
+	import favicon from '$lib/assets/favicon.png';
 	import Header from '$lib/components/header/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import DotsBackground from '$lib/components/DotsBackground.svelte';
@@ -73,11 +73,11 @@
 	<Header />
 
 	<main
-		class="mx-auto min-h-dvh w-full max-w-full flex-1 overflow-scroll px-4 pb-8 sm:px-6 sm:pb-12 md:max-w-4xl lg:max-w-7xl lg:pb-16"
+		class="mx-auto min-h-dvh w-full max-w-full flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-4 pb-8 sm:px-6 sm:pb-12 lg:pb-16"
 		style:padding-top={headerOffset}
 		style:transition="padding-top {HEADER_TRANSITION_MS}ms {HEADER_TRANSITION_EASE}"
 	>
-		<div bind:this={pageSceneEl}>
+		<div class="mx-auto max-w-full md:max-w-4xl lg:max-w-7xl" bind:this={pageSceneEl}>
 			{@render children()}
 		</div>
 	</main>
