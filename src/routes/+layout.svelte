@@ -1,5 +1,6 @@
 <script lang="ts">
 	import type { Pathname } from '$app/types';
+	import { browser } from '$app/environment';
 	import { afterNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
@@ -26,18 +27,6 @@
 
 	const pageScene = initNavigationScene(() => pageSceneEl, { preset: 'fadeUp' });
 
-	afterNavigate(({ to }) => {
-		const path = to?.url.pathname;
-		if (!path) return;
-
-		void fetch('/api/pageview', {
-			method: 'POST',
-			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify({ path }),
-			keepalive: true
-		}).catch(() => {});
-	});
-
 	onMount(() => {
 		const smQuery = window.matchMedia(SM_VIEWPORT_QUERY);
 		isSmViewport = smQuery.matches;
@@ -55,6 +44,21 @@
 			smQuery.removeEventListener('change', onSmViewportChange);
 			stopExpandedHeight();
 		};
+	});
+
+	afterNavigate(({ to }) => {
+		// afterNavigate also runs during SSR; only track views in the browser
+		if (!browser) return;
+
+		const path = to?.url.pathname;
+		if (!path) return;
+
+		void fetch('/api/pageview', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ path }),
+			keepalive: true
+		}).catch(() => {});
 	});
 
 	const headerOffset = $derived(
