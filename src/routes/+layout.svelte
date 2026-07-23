@@ -1,10 +1,12 @@
 <script lang="ts">
 	import type { Pathname } from '$app/types';
+	import { browser } from '$app/environment';
 	import { afterNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
+	import { initNavigationScene } from '$lib/scene';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.svg';
 	import Header from '$lib/components/header/Header.svelte';
@@ -21,23 +23,16 @@
 	let { children } = $props();
 
 	let isSmViewport = $state(false);
+	let pageSceneEl: HTMLDivElement | undefined = $state();
 
-	afterNavigate(({ to }) => {
-		const path = to?.url.pathname;
-		if (!path) return;
-
-		void fetch('/api/pageview', {
-			method: 'POST',
-			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify({ path }),
-			keepalive: true
-		}).catch(() => {});
-	});
+	const pageScene = initNavigationScene(() => pageSceneEl, { preset: 'fadeUp' });
 
 	onMount(() => {
 		const smQuery = window.matchMedia(SM_VIEWPORT_QUERY);
 		isSmViewport = smQuery.matches;
 		const stopExpandedHeight = initExpandedHeaderHeight();
+
+		if (pageSceneEl) void pageScene.enter(pageSceneEl);
 
 		function onSmViewportChange() {
 			isSmViewport = smQuery.matches;
@@ -49,6 +44,21 @@
 			smQuery.removeEventListener('change', onSmViewportChange);
 			stopExpandedHeight();
 		};
+	});
+
+	afterNavigate(({ to }) => {
+		// afterNavigate also runs during SSR; only track views in the browser
+		if (!browser) return;
+
+		const path = to?.url.pathname;
+		if (!path) return;
+
+		void fetch('/api/pageview', {
+			method: 'POST',
+			headers: { 'content-type': 'application/json' },
+			body: JSON.stringify({ path }),
+			keepalive: true
+		}).catch(() => {});
 	});
 
 	const headerOffset = $derived(
@@ -67,8 +77,9 @@
 		style:padding-top={headerOffset}
 		style:transition="padding-top {HEADER_TRANSITION_MS}ms {HEADER_TRANSITION_EASE}"
 	>
-		{@render children()}
-
+		<div bind:this={pageSceneEl}>
+			{@render children()}
+		</div>
 	</main>
 	<Footer />
 </div>

@@ -1,15 +1,17 @@
 <script lang="ts">
 	import TabContent from '$lib/components/tabs/TabContent.svelte';
 	import ResumeSection from './ResumeSection.svelte';
+	import type { SceneHandler, ScenePreset } from '$lib/scene';
 
 	interface Props {
-		onenter?: () => void;
-		onexit?: () => void;
+		preset?: ScenePreset;
+		onenter?: SceneHandler;
+		onexit?: SceneHandler;
 	}
 
-	let { onenter, onexit }: Props = $props();
+	let { preset, onenter, onexit }: Props = $props();
 </script>
 
-<TabContent id="experience" {onenter} {onexit}>
+<TabContent id="experience" {preset} {onenter} {onexit}>
 	<ResumeSection />
 </TabContent>
