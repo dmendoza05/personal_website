@@ -27,10 +27,10 @@ export type Resume = {
 
 export const resume: Resume = {
 	name: 'Daniel Mendoza',
-	title: 'Software Engineer III',
+	title: 'Software Engineer',
 	location: 'Los Angeles Metropolitan Area',
 	summary:
-		'Software Engineer III at Age of Learning with 10+ years building front-end web and mobile experiences for education products. Work spans ABCmouse, ReadingIQ, Flutter apps, and in-house content tooling.',
+		'Software Engineer with 10+ years experience building front-end web and mobile experiences for education products. Work spans ABCmouse, ReadingIQ, Mastery Schools products, and in-house content tooling.',
 	experience: [
 		{
 			company: 'Age of Learning',
@@ -39,7 +39,8 @@ export const resume: Resume = {
 			location: 'Glendale, CA',
 			bullets: [
 				'Build in-house tooling for content creation and organization',
-				'Helped develop and ship My Music Academy: Playful Piano with Flutter'
+				'Expiremented with early AI implementation for educationalcontent creation and in-game integration',
+				'Collaborated with other developers to implement various games, features and tools for the My Reading Academy and My Math Academy products'
 			]
 		},
 		{
@@ -48,9 +49,9 @@ export const resume: Resume = {
 			period: 'Oct 2018 – May 2022',
 			location: 'Glendale, CA',
 			bullets: [
-				'Front-end engineer for ReadingIQ and the ABCmouse International product',
-				'Maintained the ReadingIQ web and mobile platform',
-				'Contributed to the ABCmouse International app and its release in several target countries'
+				'Maintained, published, and released the ReadingIQ web and mobile platform(iOS and Android)',
+				'Contributed to the ABCmouse International app and its release in several target countries',
+				'Learned Unity and C#, to help support the development of the Internation ABCmouse Products',
 			]
 		},
 		{
@@ -59,7 +60,9 @@ export const resume: Resume = {
 			period: 'Jun 2017 – Oct 2018',
 			location: 'Glendale, CA',
 			bullets: [
-				'Front-end engineer supporting ABCmouse and ReadingIQ product development'
+				'Front-end engineer supporting ABCmouse and ReadingIQ product development',
+				'Helped create the book player for the web version of ReadingIQ',
+				'Created and implemented different features for ABCmouse 1.0 product'
 			]
 		},
 		{
@@ -67,7 +70,11 @@ export const resume: Resume = {
 			role: 'Associate Software Engineer',
 			period: 'Oct 2015 – Jun 2017',
 			location: 'Glendale, CA',
-			bullets: []
+			bullets: [
+				'Fixed multiple live-bugs and released them for the ABCmouse 1.0 product',
+				'Supported the legacy frontend and backend systems for the ABCmouse 1.0 product',
+				'Collaborated to update the ABCmouse 1.0 product to the new Angular 1.0 framework'
+			]
 		}
 	],
 	education: [

@@ -17,28 +17,28 @@
 			skills: ['html', 'css']
 		},
 		{
+			id: 'comfortable',
+			label: 'Comfortable using it everyday',
+			color: '#ffbf7f',
+			skills: ['flutter', 'javascript', 'typescript', 'dart', 'angular','git']
+		},
+		{
 			id: 'professional',
 			label: 'Used it on the job',
-			color: '#ffbf7f',
-			skills: ['flutter', 'javascript', 'typescript', 'dart', 'angular', 'react', 'git']
+			color: '#ffdf7f',
+			skills: ['php', 'python', 'bash']
 		},
 		{
 			id: 'hobby',
 			label: 'Hobby projects only',
-			color: '#ffdf7f',
-			skills: ['agile']
-		},
-		{
-			id: 'project',
-			label: 'Built one thing with it',
 			color: '#ffff7f',
-			skills: ['nodejs', 'postgresql', 'mongodb', 'ruby']
+			skills: ['nodejs', 'postgresql', 'mongodb', 'ruby', 'wordpress']
 		},
 		{
-			id: 'read-docs',
-			label: "Read the docs, but haven't used it",
+			id: 'playground',
+			label: 'Used CodePen or another playground with it',
 			color: '#bfff7f',
-			skills: []
+			skills: [  'react', ]
 		},
 		{
 			id: 'learn',

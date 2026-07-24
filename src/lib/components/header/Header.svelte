@@ -199,6 +199,29 @@
 						</a>
 					</li>
 				{/each}
+				<li class="opacity-0 motion-reduce:opacity-100">
+					<a
+						href="/resume.pdf"
+						download
+						class="inline-flex items-center gap-1.5 rounded-md px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-card hover:text-foreground md:py-1.5 md:hover:bg-transparent"
+					>
+						{m.resume_title()}
+						<svg
+							class="h-4 w-4"
+							viewBox="0 0 24 24"
+							fill="none"
+							stroke="currentColor"
+							stroke-width="2"
+							aria-hidden="true"
+						>
+							<path
+								stroke-linecap="round"
+								stroke-linejoin="round"
+								d="M12 3v12m0 0l-4-4m4 4l4-4M5 21h14"
+							/>
+						</svg>
+					</a>
+				</li>
 			</ul>
 		</nav>
 	</div>
