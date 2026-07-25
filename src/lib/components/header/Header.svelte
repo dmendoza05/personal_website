@@ -202,7 +202,7 @@
 				<li class="opacity-0 motion-reduce:opacity-100">
 					<a
 						href="/resume.pdf"
-						download
+						download="Daniel_Mendoza_Resume.pdf"
 						class="inline-flex items-center gap-1.5 rounded-md px-3 py-2.5 text-sm font-medium text-muted transition-colors hover:bg-card hover:text-foreground md:py-1.5 md:hover:bg-transparent"
 					>
 						{m.resume_title()}

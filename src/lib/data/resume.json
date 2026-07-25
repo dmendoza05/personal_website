@@ -1,0 +1,84 @@
+{
+	"name": "Daniel Mendoza",
+	"title": "Software Engineer",
+	"location": "Los Angeles Metropolitan Area",
+	"website": "danielmendoza.io",
+	"linkedin": "linkedin.com/in/dmendoza05",
+	"github": "github.com/dmendoza05",
+	"summary": "Software Engineer with 10+ years of experience building front-end web and mobile experiences for education products. Work spans ABCmouse, ReadingIQ, Mastery Schools products, and in-house content tooling. Skilled in JavaScript, TypeScript, Angular, React, Flutter, and collaborative agile delivery.",
+	"experience": [
+		{
+			"company": "Age of Learning",
+			"role": "Software Engineer III",
+			"period": "May 2022 – Present",
+			"location": "Glendale, CA",
+			"bullets": [
+				"Build and maintain in-house tooling for educational content creation and organization",
+				"Prototype early AI features for educational content creation and in-game integration",
+				"Collaborate with cross-functional teams to implement games, features, and tools for My Reading Academy and My Math Academy"
+			]
+		},
+		{
+			"company": "Age of Learning",
+			"role": "Software Engineer II",
+			"period": "Oct 2018 – May 2022",
+			"location": "Glendale, CA",
+			"bullets": [
+				"Maintained, published, and released the ReadingIQ web and mobile platforms (iOS and Android)",
+				"Contributed to the ABCmouse International app and its launch in multiple target markets",
+				"Adopted Unity and C# to support development of International ABCmouse products"
+			]
+		},
+		{
+			"company": "Age of Learning",
+			"role": "Software Engineer I",
+			"period": "Jun 2017 – Oct 2018",
+			"location": "Glendale, CA",
+			"bullets": [
+				"Supported front-end development for ABCmouse and ReadingIQ product initiatives",
+				"Helped build the book player for the web version of ReadingIQ",
+				"Designed and implemented features for the ABCmouse 1.0 product"
+			]
+		},
+		{
+			"company": "Age of Learning",
+			"role": "Associate Software Engineer",
+			"period": "Oct 2015 – Jun 2017",
+			"location": "Glendale, CA",
+			"bullets": [
+				"Fixed and shipped production bugs for the ABCmouse 1.0 product",
+				"Supported legacy front-end and back-end systems for ABCmouse 1.0",
+				"Collaborated on migrating ABCmouse 1.0 to the Angular framework"
+			]
+		}
+	],
+	"education": [
+		{
+			"school": "General Assembly",
+			"degree": "Full Stack Web Development",
+			"period": "2014 – 2015"
+		}
+	],
+	"skills": [
+		"javascript",
+		"typescript",
+		"html",
+		"css",
+		"flutter",
+		"dart",
+		"angular",
+		"react",
+		"nodejs",
+		"csharp",
+		"unity",
+		"postgresql",
+		"mongodb",
+		"ruby",
+		"git",
+		"agile"
+	],
+	"languages": [
+		{ "name": "English", "proficiency": "Native or bilingual proficiency" },
+		{ "name": "Tagalog", "proficiency": "Native or bilingual proficiency" }
+	]
+}
