@@ -11,40 +11,40 @@
 
 	const tiers: SkillTier[] = [
 		{
-			id: 'mastered',
-			label: 'Could teach a class on this',
-			color: '#ff7f7f',
-			skills: ['html', 'css']
-		},
-		{
 			id: 'comfortable',
 			label: 'Comfortable using it everyday',
-			color: '#ffbf7f',
-			skills: ['flutter', 'javascript', 'typescript', 'dart', 'angular','git']
+			color: '#ff7f7f',
+			skills: ['html', 'css', 'flutter', 'javascript', 'typescript', 'dart', 'git']
 		},
 		{
-			id: 'professional',
+			id: 'professionally-plus',
+			label: 'Used it on the job (but better)',
+			color: '#ffbf7f',
+			skills: ['litjs', 'angular', 'bash']
+		},
+		{
+			id: 'professionally',
 			label: 'Used it on the job',
 			color: '#ffdf7f',
-			skills: ['php', 'python', 'bash']
+			skills: ['docker', 'php', 'python', 'phaserjs', 'pixijs', 'unity', 'csharp', 'grpc', 'nodejs', 'aws', 'snowflake', 'datadog']
 		},
 		{
 			id: 'hobby',
 			label: 'Hobby projects only',
 			color: '#ffff7f',
-			skills: ['nodejs', 'postgresql', 'mongodb', 'ruby', 'wordpress']
+			skills: ['postgresql', 'mongodb', 'ruby', 'wordpress', 'flameengine']
 		},
 		{
 			id: 'playground',
 			label: 'Used CodePen or another playground with it',
 			color: '#bfff7f',
-			skills: [  'react', ]
+			skills: ['react']
 		},
 		{
 			id: 'learn',
 			label: 'Would love to learn ',
 			color: '#7fbfff',
-			skills: ['rust', 'go']
+			skills: ['rust', 'go', 'haskell', 'graphql']
 		}
 	];
 </script>

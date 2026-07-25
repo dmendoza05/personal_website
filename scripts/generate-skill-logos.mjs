@@ -30,6 +30,7 @@ const refs = {
 	c: ['simple-icons', 'c'],
 	go: ['simple-icons', 'go'],
 	rust: ['simple-icons', 'rust'],
+	haskell: ['simple-icons', 'haskell'],
 	php: ['simple-icons', 'php'],
 	ruby: ['simple-icons', 'ruby'],
 	swift: ['simple-icons', 'swift'],
@@ -48,6 +49,7 @@ const refs = {
 	vue: ['simple-icons', 'vuedotjs'],
 	nuxt: ['simple-icons', 'nuxt'],
 	angular: ['simple-icons', 'angular'],
+	litjs: ['simple-icons', 'lit'],
 	svelte: ['simple-icons', 'svelte'],
 	sveltekit: ['simple-icons', 'svelte'],
 	astro: ['simple-icons', 'astro'],
@@ -62,12 +64,14 @@ const refs = {
 	zustand: ['devicon', 'zustand'],
 	threejs: ['simple-icons', 'threedotjs'],
 	animejs: ['simple-icons', 'animedotjs'],
+	pixijs: ['devicon', 'pixijs'],
 	flutter: ['simple-icons', 'flutter'],
 	'react-native': ['simple-icons', 'react'],
 	swiftui: ['simple-icons', 'swift'],
 	ionic: ['simple-icons', 'ionic'],
 	android: ['simple-icons', 'android'],
 	ios: ['simple-icons', 'apple'],
+	unity: ['simple-icons', 'unity'],
 	nodejs: ['simple-icons', 'nodedotjs'],
 	express: ['simple-icons', 'express'],
 	nestjs: ['simple-icons', 'nestjs'],
@@ -185,6 +189,16 @@ const refs = {
 	i18n: ['simple-icons', 'i18next']
 };
 
+/** Force brand / pack colors onto `currentColor` so logos inherit CSS text color. */
+function toCurrentColor(body) {
+	return body
+		.replace(
+			/\b(fill|stroke)="(?!none|currentColor)[^"]*"/gi,
+			(_, attr) => `${attr}="currentColor"`
+		)
+		.replace(/\b(fill|stroke):\s*(?!none\b|currentColor\b)[^;"']*/gi, '$1:currentColor');
+}
+
 const out = {};
 const failed = [];
 
@@ -197,7 +211,7 @@ for (const [id, [pack, name]] of Object.entries(refs)) {
 
 	const svg = iconToSVG(data, { height: '1em' });
 	out[id] = {
-		body: svg.body,
+		body: toCurrentColor(svg.body),
 		viewBox: svg.attributes.viewBox ?? '0 0 24 24',
 		width: svg.attributes.width ?? '1em',
 		height: svg.attributes.height ?? '1em'

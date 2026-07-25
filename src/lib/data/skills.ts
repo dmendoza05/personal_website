@@ -38,6 +38,7 @@ export const skills = [
 	{ id: 'c', label: 'C', category: 'language', areas: ['backend'] },
 	{ id: 'go', label: 'Go', category: 'language', areas: ['backend', 'devops'] },
 	{ id: 'rust', label: 'Rust', category: 'language', areas: ['backend'] },
+	{ id: 'haskell', label: 'Haskell', category: 'language', areas: ['backend'] },
 	{ id: 'php', label: 'PHP', category: 'language', areas: ['backend'] },
 	{ id: 'ruby', label: 'Ruby', category: 'language', areas: ['backend'] },
 	{ id: 'swift', label: 'Swift', category: 'language', areas: ['mobile'] },
@@ -58,6 +59,7 @@ export const skills = [
 	{ id: 'vue', label: 'Vue', category: 'framework', areas: ['frontend'] },
 	{ id: 'nuxt', label: 'Nuxt', category: 'framework', areas: ['frontend', 'backend'] },
 	{ id: 'angular', label: 'Angular', category: 'framework', areas: ['frontend'] },
+	{ id: 'litjs', label: 'Lit', category: 'library', areas: ['frontend'] },
 	{ id: 'svelte', label: 'Svelte', category: 'framework', areas: ['frontend'] },
 	{ id: 'sveltekit', label: 'SvelteKit', category: 'framework', areas: ['frontend', 'backend'] },
 	{ id: 'astro', label: 'Astro', category: 'framework', areas: ['frontend'] },
@@ -72,6 +74,8 @@ export const skills = [
 	{ id: 'zustand', label: 'Zustand', category: 'library', areas: ['frontend'] },
 	{ id: 'threejs', label: 'Three.js', category: 'library', areas: ['frontend'] },
 	{ id: 'animejs', label: 'Anime.js', category: 'library', areas: ['frontend'] },
+	{ id: 'phaserjs', label: 'Phaser', category: 'framework', areas: ['frontend'] },
+	{ id: 'pixijs', label: 'PixiJS', category: 'library', areas: ['frontend'] },
 
 	// Mobile
 	{ id: 'flutter', label: 'Flutter', category: 'framework', areas: ['mobile'] },
@@ -80,6 +84,8 @@ export const skills = [
 	{ id: 'ionic', label: 'Ionic', category: 'framework', areas: ['mobile'] },
 	{ id: 'android', label: 'Android', category: 'platform', areas: ['mobile'] },
 	{ id: 'ios', label: 'iOS', category: 'platform', areas: ['mobile'] },
+	{ id: 'unity', label: 'Unity', category: 'platform', areas: ['frontend', 'mobile'] },
+	{ id: 'flameengine', label: 'Flame Engine', category: 'framework', areas: ['mobile'] },
 
 	// Backend
 	{ id: 'nodejs', label: 'Node.js', category: 'platform', areas: ['backend'] },
