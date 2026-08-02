@@ -32,6 +32,7 @@
 		untrack(() => (initial === 'fullname' ? 'fullname-default' : 'initials-default'))
 	);
 	let animation: Timeline | undefined;
+	let svg: SVGSVGElement;
 	let anielMask: SVGRectElement;
 	let endozaMask: SVGRectElement;
 	let d: SVGPathElement;
@@ -86,14 +87,18 @@
 			animation
 				.add(anielMask, { x: ANIEL_X + ANIEL_WIDTH, width: 0 }, 0)
 				.add(d, { translateX: ANIEL_WIDTH }, 0)
+				.add(svg, { marginLeft: -ANIEL_WIDTH }, 0)
 				.add(endozaMask, { width: 0 }, 0)
-				.add(tail, { translateX: -ENDOZA_WIDTH }, 0);
+				.add(tail, { translateX: -ENDOZA_WIDTH }, 0)
+				.add(svg, { marginRight: -ENDOZA_WIDTH }, 0);
 		} else {
 			animation
 				.add(endozaMask, { width: ENDOZA_WIDTH }, 0)
 				.add(tail, { translateX: 0 }, 0)
+				.add(svg, { marginRight: 0 }, 0)
 				.add(anielMask, { x: ANIEL_X, width: ANIEL_WIDTH }, 0)
-				.add(d, { translateX: 0 }, 0);
+				.add(d, { translateX: 0 }, 0)
+				.add(svg, { marginLeft: 0 }, 0);
 		}
 	}
 
@@ -105,10 +110,13 @@
 		endozaMask.setAttribute('width', String(initials ? 0 : ENDOZA_WIDTH));
 		d.style.transform = `translateX(${initials ? ANIEL_WIDTH : 0}px)`;
 		tail.style.transform = `translateX(${initials ? -ENDOZA_WIDTH : 0}px)`;
+		svg.style.marginLeft = `${initials ? -ANIEL_WIDTH : 0}px`;
+		svg.style.marginRight = `${initials ? -ENDOZA_WIDTH : 0}px`;
 	}
 </script>
 
 <svg
+	bind:this={svg}
 	xmlns="http://www.w3.org/2000/svg"
 	width="294"
 	height="44"
@@ -117,6 +125,8 @@
 	class={className}
 	aria-hidden="true"
 	data-state={state}
+	style:margin-left="{initial === 'initials' ? -ANIEL_WIDTH : 0}px"
+	style:margin-right="{initial === 'initials' ? -ENDOZA_WIDTH : 0}px"
 >
 	<g>
 		<g id="danielmendoza">

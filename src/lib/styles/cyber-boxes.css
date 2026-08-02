@@ -15,8 +15,10 @@
 	/* notches */
 	--header-clip-expanded: polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px);
 	--header-clip-nav: polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px);
+	--header-clip-rect: polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px);
 	--header-border-expanded: path('M0 0H1V1H0Z');
 	--header-border-nav: path('M0 0H1V1H0Z');
+	--header-border-rect: path('M0 0H1V1H0Z');
 
 	/* misc */
 	--header-transition-ms: 500ms;
@@ -69,6 +71,10 @@
 	d: var(--header-border-nav);
 }
 
+.header-border-rect {
+	d: var(--header-border-rect);
+}
+
 .header-shape {
 	clip-path: var(--header-clip-expanded);
 	transition: clip-path var(--header-transition-ms) var(--header-transition-ease);
@@ -76,6 +82,10 @@
 
 .header-shape-nav {
 	clip-path: var(--header-clip-nav);
+}
+
+.header-shape-rect {
+	clip-path: var(--header-clip-rect);
 }
 
 /* card styles */

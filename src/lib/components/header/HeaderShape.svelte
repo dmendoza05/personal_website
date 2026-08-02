@@ -10,15 +10,17 @@
 	const NAV_NOTCH_INSET_RATIO = 0.2;
 	const FALLBACK_CLIP = 'polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px)';
 
+	export type HeaderShapeMode = 'expanded' | 'nav' | 'rect';
+
 	let {
-		revealed = false,
+		mode = 'expanded',
 		content,
 		height,
 		transitionMs = HEADER_TRANSITION_MS,
 		transitionEase = HEADER_TRANSITION_EASE,
 		children
 	}: {
-		revealed?: boolean;
+		mode?: HeaderShapeMode;
 		content: HTMLElement | undefined;
 		height: string;
 		transitionMs?: number;
@@ -27,11 +29,13 @@
 	} = $props();
 
 	let shapeEl: HTMLDivElement;
-	// Default = expanded (inset + 4 corner notches). Custom = nav bottom tab.
+	// Expanded = inset + 4 corner notches. Nav = bottom tab. Rect = full-bleed bar.
 	let clipPathExpanded = $state(FALLBACK_CLIP);
 	let clipPathNav = $state(FALLBACK_CLIP);
+	let clipPathRect = $state(FALLBACK_CLIP);
 	let borderPathExpanded = $state("path('M0 0H1V1H0Z')");
 	let borderPathNav = $state("path('M0 0H1V1H0Z')");
+	let borderPathRect = $state("path('M0 0H1V1H0Z')");
 	let svgViewBox = $state('0 0 1 1');
 
 	$effect(() => {
@@ -99,6 +103,11 @@
 		clipPathNav = `polygon(0 0, ${w}px 0, ${w}px ${navBarMiddleYPx}px, ${navDiagonalRightPx}px ${navBarMiddleYPx}px, ${navNotchRightPx}px ${navNotchBottomYPx}px, ${navNotchLeftPx}px ${navNotchBottomYPx}px, ${navDiagonalLeftPx}px ${navBarMiddleYPx}px, 0 ${navBarMiddleYPx}px)`;
 		borderPathNav = `path('M0 0L${w} 0L${w} ${navBarMiddleYPx}L${navDiagonalRightPx} ${navBarMiddleYPx}L${navNotchRightPx} ${navNotchBottomYPx}L${navNotchLeftPx} ${navNotchBottomYPx}L${navDiagonalLeftPx} ${navBarMiddleYPx}L0 ${navBarMiddleYPx}Z')`;
 
+		// Rect: full-bleed bar (8 points, flat bottom — morphs cleanly to/from nav).
+		const barBottom = navNotchBottomYPx;
+		clipPathRect = `polygon(0 0, ${w}px 0, ${w}px ${barBottom}px, ${w}px ${barBottom}px, ${w}px ${barBottom}px, 0 ${barBottom}px, 0 ${barBottom}px, 0 ${barBottom}px)`;
+		borderPathRect = `path('M0 0L${w} 0L${w} ${barBottom}L${w} ${barBottom}L${w} ${barBottom}L0 ${barBottom}L0 ${barBottom}L0 ${barBottom}Z')`;
+
 		svgViewBox = `0 0 ${w} ${h}`;
 	}
 </script>
@@ -113,7 +122,8 @@
 			aria-hidden="true"
 		>
 			<path
-				class:header-border-nav={revealed}
+				class:header-border-nav={mode === 'nav'}
+				class:header-border-rect={mode === 'rect'}
 				class="header-border"
 				fill="none"
 				stroke="var(--svg-shape-stroke-color)"
@@ -123,16 +133,19 @@
 				style:--header-transition-ease={transitionEase}
 				style:--header-border-expanded={borderPathExpanded}
 				style:--header-border-nav={borderPathNav}
+				style:--header-border-rect={borderPathRect}
 			/>
 		</svg>
 		<div
 			bind:this={shapeEl}
-			class:header-shape-nav={revealed}
+			class:header-shape-nav={mode === 'nav'}
+			class:header-shape-rect={mode === 'rect'}
 			class="header-shape w-dvw bg-glass"
 			style:--header-transition-ms="{transitionMs}ms"
 			style:--header-transition-ease={transitionEase}
 			style:--header-clip-expanded={clipPathExpanded}
 			style:--header-clip-nav={clipPathNav}
+			style:--header-clip-rect={clipPathRect}
 		>
 			{@render children()}
 		</div>

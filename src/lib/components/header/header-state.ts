@@ -1,5 +1,5 @@
-/** Below Tailwind `sm` (40rem / 640px). */
-export const SM_VIEWPORT_QUERY = '(max-width: 639px)';
+/** Below Tailwind `md` (48rem / 768px) — compact icon header. */
+export const SM_VIEWPORT_QUERY = '(max-width: 767px)';
 
 /** Tailwind `md` and up (48rem / 768px) — expanded header is one-third viewport. */
 export const MD_VIEWPORT_QUERY = '(min-width: 768px)';
