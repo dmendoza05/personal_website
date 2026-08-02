@@ -17,7 +17,8 @@
 		"db:generate": "drizzle-kit generate",
 		"db:migrate": "drizzle-kit migrate",
 		"db:studio": "drizzle-kit studio",
-		"skills:logos": "node scripts/generate-skill-logos.mjs"
+		"skills:logos": "node scripts/generate-skill-logos.mjs",
+		"resume:pdf": "node scripts/generate-resume.mjs"
 	},
 	"devDependencies": {
 		"@commitlint/cli": "21.2.1",
@@ -36,6 +37,7 @@
 		"@tailwindcss/typography": "^0.5.19",
 		"@tailwindcss/vite": "^4.3.0",
 		"@types/node": "^24",
+		"@types/pdfkit": "0.17.6",
 		"@vitest/browser-playwright": "^4.1.8",
 		"dotenv": "17.4.2",
 		"drizzle-kit": "0.31.10",
@@ -45,6 +47,7 @@
 		"globals": "^17.6.0",
 		"husky": "9.1.7",
 		"lint-staged": "17.0.8",
+		"pdfkit": "0.19.1",
 		"playwright": "^1.60.0",
 		"prettier": "^3.8.3",
 		"prettier-plugin-svelte": "^4.1.0",
