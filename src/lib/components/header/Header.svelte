@@ -128,7 +128,7 @@
 		<a
 			href={resolve('/')}
 			aria-label="Home"
-			class="inline-block shrink-0"
+			class="inline-block shrink-0 ml-8 md:ml-0"
 			style:height="{logoHeight}px"
 			style:transition={HEADER_TRANSITION}
 		>
