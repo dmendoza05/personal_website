@@ -1,6 +1,6 @@
 # Personal website
 
-SvelteKit portfolio with a markdown blog, Neon Postgres (comments + page views), and Vercel-ready deploy.
+SvelteKit portfolio with a markdown blog, Neon Postgres (comments + page views), and Cloudflare-ready deploy.
 
 ## Developing
 
@@ -26,21 +26,19 @@ Schema lives in `src/lib/server/db/schema.ts` (`comments`, `page_views`).
 
 ## Building
 
+`pnpm build` applies pending Drizzle migrations (needs `DATABASE_URL`), then builds for Cloudflare Workers.
+
 ```sh
 pnpm build
 pnpm preview
 ```
 
-## Deploy to Vercel
+## Deploy to Cloudflare
 
 1. Push this repo to GitHub.
-2. In [Vercel](https://vercel.com), import the project (SvelteKit preset). Build command: `pnpm build`.
-3. Add env var `DATABASE_URL` (Neon pooled connection string) for Production and Preview.
-4. Apply migrations once against that database:
-   ```sh
-   DATABASE_URL='your-neon-url' pnpm db:migrate
-   ```
-   Or paste the SQL from `drizzle/*.sql` into the Neon SQL editor.
-5. Optionally attach the custom domain `danielmendoza.dev` in Vercel and point DNS.
+2. In [Cloudflare Workers & Pages](https://dash.cloudflare.com), create a Worker connected to the repo (or run `pnpm deploy` with Wrangler).
+3. Build command: `pnpm build`. Build output / deploy uses `.svelte-kit/cloudflare` via `wrangler.jsonc`.
+4. Add env var `DATABASE_URL` (Neon pooled connection string) for Production — required at **build** time so migrations can run, and at **runtime** for the app.
+5. Attach the custom domain `danielmendoza.io` in Cloudflare (DNS is already on Cloudflare).
 
-`@sveltejs/adapter-auto` detects Vercel; no adapter change required.
+Uses `@sveltejs/adapter-cloudflare` with `nodejs_compat` and `nodejs_als`. Schema migrations run automatically as part of `pnpm build`.
