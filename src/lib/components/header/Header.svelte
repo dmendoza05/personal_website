@@ -136,8 +136,9 @@
 				bind:this={logo}
 				initial="initials"
 				duration={HEADER_TRANSITION_MS}
-				class="h-full w-auto text-white"
-				oncomplete={onLogoComplete}
+				height={logoHeight}
+				class="text-white"
+				onFullNameComplete={onLogoComplete}
 			/>
 		</a>
 

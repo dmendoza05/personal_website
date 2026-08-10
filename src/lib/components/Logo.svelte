@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { onDestroy, untrack } from 'svelte';
+	import { onDestroy, onMount, untrack } from 'svelte';
 	import { createTimeline, type Timeline } from 'animejs';
 
 	export type LogoState =
@@ -7,29 +7,60 @@
 
 	type LogoMode = 'fullname' | 'initials';
 
-	interface Props {
+	/** Size by width or height — never both — so aspect ratio stays fixed. */
+	type LogoSizeProps =
+		| { width?: number; height?: never }
+		| { height?: number; width?: never };
+
+	type Props = LogoSizeProps & {
 		initial?: LogoMode;
 		duration?: number;
 		class?: string;
-		onstart?: (state: LogoState) => void;
-		oncomplete?: (state: LogoState) => void;
-	}
+		onFullNameStart?: () => void;
+		onFullNameComplete?: () => void;
+		onInitialsStart?: () => void;
+		onInitialsComplete?: () => void;
+		onEnterStart?: () => void;
+		onEnterCompletes?: () => void;
+		onExitStart?: () => void;
+		onExitComplete?: () => void;
+	};
 
 	let {
 		initial = 'initials',
 		duration = 900,
+		width,
+		height,
 		class: className,
-		onstart,
-		oncomplete
+		onFullNameStart,
+		onFullNameComplete,
+		onInitialsStart,
+		onInitialsComplete,
+		onEnterStart,
+		onEnterCompletes,
+		onExitStart,
+		onExitComplete
 	}: Props = $props();
 
+	const BASE_WIDTH = 294;
+	const BASE_HEIGHT = 44;
 	const ANIEL_X = 74;
 	const ANIEL_WIDTH = 55;
 	const ENDOZA_X = 152.5;
 	const ENDOZA_WIDTH = 84.25;
 
-	let state = $state<LogoState>(
+	let logoState = $state<LogoState>(
 		untrack(() => (initial === 'fullname' ? 'fullname-default' : 'initials-default'))
+	);
+	/** CSS px per viewBox unit — keeps margin collapse correct when the SVG is scaled. */
+	let displayScale = $state(
+		untrack(() =>
+			width != null
+				? width / BASE_WIDTH
+				: height != null
+					? height / BASE_HEIGHT
+					: 1
+		)
 	);
 	let animation: Timeline | undefined;
 	let svg: SVGSVGElement;
@@ -38,24 +69,60 @@
 	let d: SVGPathElement;
 	let tail: SVGPathElement;
 
+	onMount(() => {
+		const ro = new ResizeObserver(([entry]) => {
+			const width = entry.contentRect.width;
+			if (width > 0) displayScale = width / BASE_WIDTH;
+		});
+		ro.observe(svg);
+		return () => ro.disconnect();
+	});
+
 	onDestroy(() => {
 		animation?.pause();
 	});
 
+	const preferredWidth = $derived(
+		width != null
+			? width
+			: height != null
+				? (height * BASE_WIDTH) / BASE_HEIGHT
+				: undefined
+	);
+
+	$effect(() => {
+		const scale = displayScale;
+		if (!svg || logoState.endsWith('-playing')) return;
+
+		const initials = logoState.startsWith('initials');
+		svg.style.marginLeft = `${initials ? -ANIEL_WIDTH * scale : 0}px`;
+		svg.style.marginRight = `${initials ? -ENDOZA_WIDTH * scale : 0}px`;
+	});
+
 	export function getState() {
-		return state;
+		return logoState;
 	}
 
 	export function toInitials() {
-		if (state !== 'fullname-default' && state !== 'fullname-playing') return;
+		if (logoState !== 'fullname-default' && logoState !== 'fullname-playing') return;
 
 		play('initials');
 	}
 
 	export function toFullname() {
-		if (state !== 'initials-default' && state !== 'initials-playing') return;
+		if (logoState !== 'initials-default' && logoState !== 'initials-playing') return;
 
 		play('fullname');
+	}
+
+	export function playEnter() {
+		onEnterStart?.();
+		onEnterCompletes?.();
+	}
+
+	export function playExit() {
+		onExitStart?.();
+		onExitComplete?.();
 	}
 
 	function play(target: LogoMode) {
@@ -63,23 +130,27 @@
 
 		const playingState: LogoState = `${target}-playing`;
 		const completeState: LogoState = `${target}-default`;
+		const scale = displayScale;
 
-		state = playingState;
-		onstart?.(state);
+		logoState = playingState;
+		if (target === 'fullname') onFullNameStart?.();
+		else onInitialsStart?.();
 
 		if (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
-			setFinalValues(target);
-			state = completeState;
-			oncomplete?.(state);
+			setFinalValues(target, scale);
+			logoState = completeState;
+			if (target === 'fullname') onFullNameComplete?.();
+			else onInitialsComplete?.();
 			return;
 		}
 
 		animation = createTimeline({
 			defaults: { duration, ease: 'inOutCubic' },
 			onComplete: () => {
-				state = completeState;
+				logoState = completeState;
 				animation = undefined;
-				oncomplete?.(state);
+				if (target === 'fullname') onFullNameComplete?.();
+				else onInitialsComplete?.();
 			}
 		});
 
@@ -87,10 +158,10 @@
 			animation
 				.add(anielMask, { x: ANIEL_X + ANIEL_WIDTH, width: 0 }, 0)
 				.add(d, { translateX: ANIEL_WIDTH }, 0)
-				.add(svg, { marginLeft: -ANIEL_WIDTH }, 0)
+				.add(svg, { marginLeft: -ANIEL_WIDTH * scale }, 0)
 				.add(endozaMask, { width: 0 }, 0)
 				.add(tail, { translateX: -ENDOZA_WIDTH }, 0)
-				.add(svg, { marginRight: -ENDOZA_WIDTH }, 0);
+				.add(svg, { marginRight: -ENDOZA_WIDTH * scale }, 0);
 		} else {
 			animation
 				.add(endozaMask, { width: ENDOZA_WIDTH }, 0)
@@ -102,7 +173,7 @@
 		}
 	}
 
-	function setFinalValues(target: LogoMode) {
+	function setFinalValues(target: LogoMode, scale = displayScale) {
 		const initials = target === 'initials';
 
 		anielMask.setAttribute('x', String(initials ? ANIEL_X + ANIEL_WIDTH : ANIEL_X));
@@ -110,23 +181,24 @@
 		endozaMask.setAttribute('width', String(initials ? 0 : ENDOZA_WIDTH));
 		d.style.transform = `translateX(${initials ? ANIEL_WIDTH : 0}px)`;
 		tail.style.transform = `translateX(${initials ? -ENDOZA_WIDTH : 0}px)`;
-		svg.style.marginLeft = `${initials ? -ANIEL_WIDTH : 0}px`;
-		svg.style.marginRight = `${initials ? -ENDOZA_WIDTH : 0}px`;
+		svg.style.marginLeft = `${initials ? -ANIEL_WIDTH * scale : 0}px`;
+		svg.style.marginRight = `${initials ? -ENDOZA_WIDTH * scale : 0}px`;
 	}
 </script>
 
 <svg
 	bind:this={svg}
 	xmlns="http://www.w3.org/2000/svg"
-	width="294"
-	height="44"
-	viewBox="0 0 294 44"
+	width={BASE_WIDTH}
+	height={BASE_HEIGHT}
+	viewBox="0 0 {BASE_WIDTH} {BASE_HEIGHT}"
 	fill="none"
-	class={className}
+	class={['max-w-full', className]}
 	aria-hidden="true"
-	data-state={state}
-	style:margin-left="{initial === 'initials' ? -ANIEL_WIDTH : 0}px"
-	style:margin-right="{initial === 'initials' ? -ENDOZA_WIDTH : 0}px"
+	data-state={logoState}
+	style:width={preferredWidth != null ? `min(100%, ${preferredWidth}px)` : undefined}
+	style:height={preferredWidth != null ? 'auto' : undefined}
+	style:aspect-ratio={preferredWidth != null ? `${BASE_WIDTH} / ${BASE_HEIGHT}` : undefined}
 >
 	<g>
 		<g id="danielmendoza">
