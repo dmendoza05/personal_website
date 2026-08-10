@@ -41,4 +41,18 @@ pnpm preview
 4. Add env var `DATABASE_URL` (Neon pooled connection string) for Production — required at **build** time so migrations can run, and at **runtime** for the app.
 5. Attach the custom domain `danielmendoza.io` in Cloudflare (DNS is already on Cloudflare).
 
+### Analytics dashboard secrets
+
+The `/dashboard` page loads Cloudflare zone analytics via `/api/analytics` (token stays server-side).
+
+1. Create an API token with **Analytics → Read** for your zone.
+2. Set secrets (do not commit them):
+
+```sh
+wrangler secret put CF_ANALYTICS_TOKEN
+wrangler secret put CF_ZONE_ID
+```
+
+For local dev, add the same keys to `.env` or `.dev.vars`.
+
 Uses `@sveltejs/adapter-cloudflare` with `nodejs_compat` and `nodejs_als`. Schema migrations run automatically as part of `pnpm build`.

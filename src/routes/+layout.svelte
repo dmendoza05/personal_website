@@ -5,6 +5,7 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.png';
 	import { initPreferences } from '$lib/preferences';
+	import DotsBackground from '$lib/components/DotsBackground.svelte';
 
 	let { children } = $props();
 
@@ -34,4 +35,7 @@
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
-{@render children()}
+<div class="relative z-10 flex h-dvh w-dvw flex-col overflow-hidden">
+	<DotsBackground />
+	{@render children()}
+</div>

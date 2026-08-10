@@ -4,12 +4,13 @@
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import { locales, localizeHref } from '$lib/paraglide/runtime';
-	import { initNavigationScene } from '$lib/scene';
 	import Header from '$lib/components/header/Header.svelte';
 	import Footer from '$lib/components/Footer.svelte';
-	import DotsBackground from '$lib/components/DotsBackground.svelte';
 	import { headerOffsetForPath } from '$lib/components/header/header-height';
-	import { getExpandedHeaderHeight, initExpandedHeaderHeight } from '$lib/components/header/header-expanded-height.svelte';
+	import {
+		getExpandedHeaderHeight,
+		initExpandedHeaderHeight
+	} from '$lib/components/header/header-expanded-height.svelte';
 	import {
 		HEADER_TRANSITION_EASE,
 		HEADER_TRANSITION_MS,
@@ -19,16 +20,11 @@
 	let { children } = $props();
 
 	let isSmViewport = $state(false);
-	let pageSceneEl: HTMLDivElement | undefined = $state();
-
-	const pageScene = initNavigationScene(() => pageSceneEl, { preset: 'fadeUp' });
 
 	onMount(() => {
 		const smQuery = window.matchMedia(SM_VIEWPORT_QUERY);
 		isSmViewport = smQuery.matches;
 		const stopExpandedHeight = initExpandedHeaderHeight();
-
-		if (pageSceneEl) void pageScene.enter(pageSceneEl);
 
 		function onSmViewportChange() {
 			isSmViewport = smQuery.matches;
@@ -47,21 +43,18 @@
 	);
 </script>
 
-<div class="relative z-10 flex h-dvh w-dvw flex-col overflow-hidden">
-	<DotsBackground />
-	<Header />
+<Header />
 
-	<main
-		class="mx-auto min-h-dvh w-full max-w-full flex-1 overflow-y-auto [scrollbar-width:none] [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-4 pb-8 sm:px-6 sm:pb-12 lg:pb-16"
-		style:padding-top={headerOffset}
-		style:transition="padding-top {HEADER_TRANSITION_MS}ms {HEADER_TRANSITION_EASE}"
-	>
-		<div class="mx-auto max-w-full md:max-w-4xl lg:max-w-7xl" bind:this={pageSceneEl}>
-			{@render children()}
-		</div>
-	</main>
-	<Footer />
-</div>
+<main
+	class="mx-auto min-h-dvh w-full max-w-full flex-1 overflow-y-auto scrollbar-none [-ms-overflow-style:none] [&::-webkit-scrollbar]:hidden px-4 pb-8 sm:px-6 sm:pb-12 lg:pb-16"
+	style:padding-top={headerOffset}
+	style:transition="padding-top {HEADER_TRANSITION_MS}ms {HEADER_TRANSITION_EASE}"
+>
+	<div class="mx-auto max-w-full md:max-w-4xl lg:max-w-7xl">
+		{@render children()}
+	</div>
+</main>
+<Footer />
 
 <div style="display:none">
 	{#each locales as locale (locale)}
