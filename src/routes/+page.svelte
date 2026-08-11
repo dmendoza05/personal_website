@@ -6,7 +6,7 @@
 	import { createTimeline, stagger, type Timeline } from 'animejs';
 	import Logo from '$lib/components/Logo.svelte';
 	import NewsBanner from '$lib/components/NewsBanner.svelte';
-	import { HEADER_TRANSITION_MS } from '$lib/components/header/header-state';
+	import { HEADER_TRANSITION_MS } from '$lib/components/header/constants';
 	import { site } from '$lib/data/site';
 	import { m } from '$lib/paraglide/messages.js';
 

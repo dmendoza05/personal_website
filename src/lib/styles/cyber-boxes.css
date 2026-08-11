@@ -10,18 +10,6 @@
 	/* misc */
 	--page-notch-size: 28px;
 
-	/* HEADER STYLES */
-
-	/* notches */
-	--header-clip-nav: polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px);
-	--header-clip-rect: polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px);
-	--header-border-nav: path('M0 0H1V1H0Z');
-	--header-border-rect: path('M0 0H1V1H0Z');
-
-	/* misc */
-	--header-transition-ms: 500ms;
-	--header-transition-ease: ease-in-out;
-
 	/* CARD STYLES */
 
 	/* notches */
@@ -55,27 +43,6 @@
 		var(--page-bl-notch-x) 100%,
 		0 var(--page-bl-notch-y)
 	);
-}
-
-/* header styles */
-
-/* notches */
-.header-border {
-	d: var(--header-border-nav);
-	transition: d var(--header-transition-ms) var(--header-transition-ease);
-}
-
-.header-border-rect {
-	d: var(--header-border-rect);
-}
-
-.header-shape {
-	clip-path: var(--header-clip-nav);
-	transition: clip-path var(--header-transition-ms) var(--header-transition-ease);
-}
-
-.header-shape-rect {
-	clip-path: var(--header-clip-rect);
 }
 
 /* card styles */
@@ -166,11 +133,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-	.header-border,
-	.header-shape {
-		transition: none;
-	}
-
 	.card-notch-indicator {
 		transition: opacity var(--card-indicator-transition-ms) var(--card-indicator-transition-ease);
 		transform: none;

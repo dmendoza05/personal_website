@@ -35,7 +35,7 @@
 
 <svelte:head><link rel="icon" href={favicon} /></svelte:head>
 
-<div class="relative z-10 flex h-dvh w-dvw flex-col overflow-hidden">
-	<DotsBackground />
+<div class="relative z-10 h-dvh w-dvw overflow-hidden">
 	{@render children()}
+	<DotsBackground />
 </div>
