@@ -21,6 +21,13 @@
 
 	type NavIcon = 'works' | 'about' | 'blog';
 
+	let {
+		initialShape = 'nav'
+	}: {
+		/** Shape shown before the logo reveal completes. */
+		initialShape?: HeaderShapeMode;
+	} = $props();
+
 	const navItems: { href: Pathname; label: () => string; icon: NavIcon }[] = [
 		{ href: '/works', label: () => m.nav_works(), icon: 'works' },
 		{ href: '/about', label: () => m.nav_about(), icon: 'about' },
@@ -57,7 +64,7 @@
 		headerOffsetForState(headerState, getExpandedHeaderHeight())
 	);
 	const shapeMode = $derived.by((): HeaderShapeMode => {
-		if (!shapeRevealed || headerState === 'expanded') return 'expanded';
+		if (!shapeRevealed) return initialShape;
 		if (headerState === 'compact') return 'rect';
 		return 'nav';
 	});

@@ -18,10 +18,8 @@ export const HEADER_LOGO_HEIGHT = {
 	compact: 35
 } as const satisfies Record<HeaderState, number>;
 
-/** Expanded header: gap from viewport edge to shape edge. */
+/** Expanded header: gap from viewport edge to content. */
 export const HEADER_EXPANDED_MARGIN_PX = 25;
-/** Expanded header: chamfer size on each corner. */
-export const HEADER_EXPANDED_CORNER_NOTCH_PX = 28;
 
 /** Expanded height fallback; runtime uses px via `expandedHeaderHeightPx()`. */
 export const HEADER_HEIGHT_EXPANDED = '100dvh';

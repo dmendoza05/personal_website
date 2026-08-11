@@ -13,10 +13,8 @@
 	/* HEADER STYLES */
 
 	/* notches */
-	--header-clip-expanded: polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px);
 	--header-clip-nav: polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px);
 	--header-clip-rect: polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px);
-	--header-border-expanded: path('M0 0H1V1H0Z');
 	--header-border-nav: path('M0 0H1V1H0Z');
 	--header-border-rect: path('M0 0H1V1H0Z');
 
@@ -63,12 +61,8 @@
 
 /* notches */
 .header-border {
-	d: var(--header-border-expanded);
-	transition: d var(--header-transition-ms) var(--header-transition-ease);
-}
-
-.header-border-nav {
 	d: var(--header-border-nav);
+	transition: d var(--header-transition-ms) var(--header-transition-ease);
 }
 
 .header-border-rect {
@@ -76,12 +70,8 @@
 }
 
 .header-shape {
-	clip-path: var(--header-clip-expanded);
-	transition: clip-path var(--header-transition-ms) var(--header-transition-ease);
-}
-
-.header-shape-nav {
 	clip-path: var(--header-clip-nav);
+	transition: clip-path var(--header-transition-ms) var(--header-transition-ease);
 }
 
 .header-shape-rect {

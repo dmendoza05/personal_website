@@ -1,19 +1,14 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import {
-		HEADER_EXPANDED_CORNER_NOTCH_PX,
-		HEADER_EXPANDED_MARGIN_PX,
-		HEADER_TRANSITION_EASE,
-		HEADER_TRANSITION_MS
-	} from './header-state';
+	import { HEADER_TRANSITION_EASE, HEADER_TRANSITION_MS } from './header-state';
 
 	const NAV_NOTCH_INSET_RATIO = 0.2;
 	const FALLBACK_CLIP = 'polygon(0 0, 1px 0, 1px 1px, 1px 1px, 1px 1px, 0 1px, 0 1px, 0 1px)';
 
-	export type HeaderShapeMode = 'expanded' | 'nav' | 'rect';
+	export type HeaderShapeMode = 'nav' | 'rect';
 
 	let {
-		mode = 'expanded',
+		mode = 'nav',
 		content,
 		height,
 		transitionMs = HEADER_TRANSITION_MS,
@@ -29,11 +24,9 @@
 	} = $props();
 
 	let shapeEl: HTMLDivElement;
-	// Expanded = inset + 4 corner notches. Nav = bottom tab. Rect = full-bleed bar.
-	let clipPathExpanded = $state(FALLBACK_CLIP);
+	// Nav = bottom tab. Rect = full-bleed bar.
 	let clipPathNav = $state(FALLBACK_CLIP);
 	let clipPathRect = $state(FALLBACK_CLIP);
-	let borderPathExpanded = $state("path('M0 0H1V1H0Z')");
 	let borderPathNav = $state("path('M0 0H1V1H0Z')");
 	let borderPathRect = $state("path('M0 0H1V1H0Z')");
 	let svgViewBox = $state('0 0 1 1');
@@ -76,21 +69,6 @@
 		const w = shapeRect.width;
 		const h = shapeRect.height;
 
-		// Expanded: inset from viewport + chamfered corners (8 points).
-		const margin = HEADER_EXPANDED_MARGIN_PX;
-		const left = margin;
-		const right = w - margin;
-		const top = margin;
-		const bottom = h - margin;
-		const notch = Math.min(
-			HEADER_EXPANDED_CORNER_NOTCH_PX,
-			Math.max(0, (right - left) / 4),
-			Math.max(0, (bottom - top) / 4)
-		);
-
-		clipPathExpanded = `polygon(${left + notch}px ${top}px, ${right - notch}px ${top}px, ${right}px ${top + notch}px, ${right}px ${bottom - notch}px, ${right - notch}px ${bottom}px, ${left + notch}px ${bottom}px, ${left}px ${bottom - notch}px, ${left}px ${top + notch}px)`;
-		borderPathExpanded = `path('M${left + notch} ${top}L${right - notch} ${top}L${right} ${top + notch}L${right} ${bottom - notch}L${right - notch} ${bottom}L${left + notch} ${bottom}L${left} ${bottom - notch}L${left} ${top + notch}Z')`;
-
 		// Nav: full-bleed bar with center bottom tab (same 8-point order for morph).
 		const contentLeft = contentRect.left - shapeRect.left;
 		const navNotchLeftPx = contentLeft + contentRect.width * NAV_NOTCH_INSET_RATIO;
@@ -122,7 +100,6 @@
 			aria-hidden="true"
 		>
 			<path
-				class:header-border-nav={mode === 'nav'}
 				class:header-border-rect={mode === 'rect'}
 				class="header-border"
 				fill="none"
@@ -131,19 +108,16 @@
 				vector-effect="non-scaling-stroke"
 				style:--header-transition-ms="{transitionMs}ms"
 				style:--header-transition-ease={transitionEase}
-				style:--header-border-expanded={borderPathExpanded}
 				style:--header-border-nav={borderPathNav}
 				style:--header-border-rect={borderPathRect}
 			/>
 		</svg>
 		<div
 			bind:this={shapeEl}
-			class:header-shape-nav={mode === 'nav'}
 			class:header-shape-rect={mode === 'rect'}
 			class="header-shape w-dvw bg-glass"
 			style:--header-transition-ms="{transitionMs}ms"
 			style:--header-transition-ease={transitionEase}
-			style:--header-clip-expanded={clipPathExpanded}
 			style:--header-clip-nav={clipPathNav}
 			style:--header-clip-rect={clipPathRect}
 		>
