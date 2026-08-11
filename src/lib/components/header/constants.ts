@@ -36,9 +36,9 @@ export const NAV_ICON_PATHS: Record<NavIcon | 'resume', string> = {
 };
 
 export const NAV_ITEMS: { href: Pathname; label: () => string; icon: NavIcon }[] = [
-	{ href: '/works', label: () => m.nav_works(), icon: 'works' },
+	// hide this for now: { href: '/works', label: () => m.nav_works(), icon: 'works' },
 	{ href: '/about', label: () => m.nav_about(), icon: 'about' },
-	{ href: '/blog', label: () => m.nav_blog(), icon: 'blog' }
+	// hide this for now: { href: '/blog', label: () => m.nav_blog(), icon: 'blog' }
 ];
 
 export const ROUTE_FADE_UP = {

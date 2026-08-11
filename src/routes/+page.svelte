@@ -15,7 +15,7 @@
 
 	const routes: { href: Pathname; label: () => string }[] = [
 		{ href: '/about', label: () => m.nav_about() },
-		{ href: '/works', label: () => m.nav_works() },
+		// Hide this for now: { href: '/works', label: () => m.nav_works() },
 		{ href: '/blog', label: () => m.nav_blog() }
 	];
 
