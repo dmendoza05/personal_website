@@ -22,7 +22,7 @@ Uses [Drizzle](https://orm.drizzle.team) + [Neon](https://neon.tech) Postgres.
 | `pnpm db:migrate` | Apply migrations to the database in `DATABASE_URL` |
 | `pnpm db:studio` | Open Drizzle Studio |
 
-Schema lives in `src/lib/server/db/schema.ts` (`comments`, `page_views`).
+Schema lives in `src/lib/server/db/schema.ts` (`comments`, `page_view_counts`, `page_view_daily`).
 
 ## Building
 

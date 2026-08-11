@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { buildAnalyticsResponse, parseRange } from './analytics';
+import { buildAnalyticsResponse, parseRange } from './index';
 
 describe('parseRange', () => {
 	it('defaults to 7d', () => {
