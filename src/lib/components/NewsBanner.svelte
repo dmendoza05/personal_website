@@ -8,12 +8,14 @@
 		onEnterStart,
 		onEnterCompletes,
 		onExitStart,
-		onExitComplete
+		onExitComplete,
+		onRouteClick
 	}: {
 		onEnterStart?: () => void;
 		onEnterCompletes?: () => void;
 		onExitStart?: () => void;
 		onExitComplete?: () => void;
+		onRouteClick?: (event: MouseEvent) => void;
 	} = $props();
 
 	const PHASE_MS = 1000;
@@ -235,6 +237,7 @@
 			href={resolve('/dashboard')}
 			class="news-banner__track relative min-w-0 cursor-pointer overflow-hidden flex border-t border-white/10 bg-black/30 backdrop-blur-sm"
 			aria-label={m.dashboard_title()}
+			onclick={onRouteClick}
 		>
 			<div class="news-banner__marquee flex w-max" aria-hidden="true">
 				{#each [0, 1] as set (set)}

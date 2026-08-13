@@ -16,7 +16,7 @@
 	const routes: { href: Pathname; label: () => string }[] = [
 		{ href: '/about', label: () => m.nav_about() },
 		// Hide this for now: { href: '/works', label: () => m.nav_works() },
-		{ href: '/blog', label: () => m.nav_blog() }
+		// Hide this for now: { href: '/blog', label: () => m.nav_blog() }
 	];
 
 	const socials = [
@@ -208,6 +208,6 @@
 	</section>
 
 	{#if newsReady}
-		<NewsBanner />
+		<NewsBanner onRouteClick={(event) => onRouteClick(event, '/dashboard')} />
 	{/if}
 </div>
