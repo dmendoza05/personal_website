@@ -6,11 +6,10 @@
 		BarElement,
 		CategoryScale,
 		LinearScale,
-		Legend,
 		Tooltip
 	} from 'chart.js';
 	import type { AnalyticsCountry } from '$lib/analytics';
-	import { colorWithAlpha } from './chart-colors';
+	import { chartTooltip, readChartTheme } from './chart-theme';
 
 	let {
 		countries,
@@ -20,7 +19,7 @@
 		requestsLabel: string;
 	} = $props();
 
-	Chart.register(BarController, BarElement, CategoryScale, LinearScale, Legend, Tooltip);
+	Chart.register(BarController, BarElement, CategoryScale, LinearScale, Tooltip);
 
 	let canvas: HTMLCanvasElement | undefined = $state();
 	let chart: Chart<'bar'> | undefined;
@@ -38,9 +37,8 @@
 
 		if (!canvas) return;
 
-		const accent = getComputedStyle(document.documentElement).getPropertyValue('--accent').trim() || '#3b82f6';
-		const muted = getComputedStyle(document.documentElement).getPropertyValue('--muted').trim() || '#a3a3a3';
-		const foreground = getComputedStyle(document.documentElement).getPropertyValue('--fg').trim() || '#fafafa';
+		const theme = readChartTheme();
+		const numberFormat = new Intl.NumberFormat(theme.locale, { maximumFractionDigits: 0 });
 
 		if (!chart) {
 			chart = new Chart(canvas, {
@@ -51,8 +49,8 @@
 						{
 							label: requestsLabel,
 							data: values,
-							backgroundColor: colorWithAlpha(accent, 0.7),
-							borderColor: accent,
+							backgroundColor: theme.countryFill,
+							borderColor: theme.accent,
 							borderWidth: 1,
 							borderRadius: 2
 						}
@@ -65,18 +63,30 @@
 					plugins: {
 						legend: { display: false },
 						tooltip: {
-							titleFont: { family: 'Rajdhani, sans-serif' },
-							bodyFont: { family: 'Rajdhani, sans-serif' }
+							...chartTooltip(theme),
+							callbacks: {
+								label(item) {
+									const value =
+										typeof item.parsed.x === 'number'
+											? numberFormat.format(item.parsed.x)
+											: item.formattedValue;
+									return ` ${item.dataset.label}: ${value}`;
+								}
+							}
 						}
 					},
 					scales: {
 						x: {
 							beginAtZero: true,
-							ticks: { color: muted, precision: 0 },
-							grid: { color: colorWithAlpha(muted, 0.15) }
+							border: { display: false },
+							ticks: { display: false },
+							grid: { color: theme.grid }
 						},
 						y: {
-							ticks: { color: foreground },
+							ticks: {
+								color: theme.foreground,
+								font: { family: 'Rajdhani, sans-serif', size: 11 }
+							},
 							grid: { display: false }
 						}
 					}
@@ -92,6 +102,6 @@
 	});
 </script>
 
-<div class="h-72 w-full sm:h-80">
+<div class="h-full min-h-0 w-full">
 	<canvas bind:this={canvas} aria-label={requestsLabel}></canvas>
 </div>

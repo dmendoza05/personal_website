@@ -115,7 +115,7 @@
 		<span class="card-notch-indicator {CORNER_CLASS[corner]}" aria-hidden="true"></span>
 	{/each}
 
-	<div bind:this={shapeEl} class="card-shape w-full bg-glass" style:--card-clip={clipPath}>
+	<div bind:this={shapeEl} class="card-shape h-full w-full bg-glass" style:--card-clip={clipPath}>
 		<div class={contentClass}>
 			{@render children()}
 		</div>

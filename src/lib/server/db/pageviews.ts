@@ -1,4 +1,4 @@
-import { and, eq, gte, lte, sql, sum } from 'drizzle-orm';
+import { and, desc, eq, gte, lte, sql, sum } from 'drizzle-orm';
 import { getDb } from './index';
 import { pageViewCounts, pageViewDaily } from './schema';
 
@@ -30,6 +30,20 @@ export async function recordPageView(path: string) {
 				viewCount: sql`${pageViewDaily.viewCount} + 1`
 			}
 		});
+}
+
+export async function getTopPages(limit = 8) {
+	const db = getDb();
+	const rows = await db
+		.select({
+			path: pageViewCounts.path,
+			views: pageViewCounts.viewCount
+		})
+		.from(pageViewCounts)
+		.orderBy(desc(pageViewCounts.viewCount))
+		.limit(limit);
+
+	return rows;
 }
 
 export async function getPageViewCount(path: string) {

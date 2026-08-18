@@ -5,6 +5,7 @@ import type {
 	AnalyticsTimeseriesPoint,
 	AnalyticsTotals
 } from '$lib/analytics';
+import { inclusiveWindow, utcToday } from './dates';
 
 export type {
 	AnalyticsCountry,
@@ -89,18 +90,7 @@ export function parseRange(value: string | null): AnalyticsRange {
 
 export function dateBoundsForRange(range: AnalyticsRange): { start: string; end: string } {
 	const days = range === '30d' ? 30 : 7;
-	const end = new Date();
-	const start = new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate()));
-	start.setUTCDate(start.getUTCDate() - (days - 1));
-
-	return {
-		start: formatUtcDate(start),
-		end: formatUtcDate(new Date(Date.UTC(end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate())))
-	};
-}
-
-function formatUtcDate(date: Date): string {
-	return date.toISOString().slice(0, 10);
+	return inclusiveWindow(utcToday(), days);
 }
 
 function num(value: number | null | undefined): number {
