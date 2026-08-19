@@ -5,11 +5,7 @@
 
 <section class="space-y-8 sm:space-y-10">
 	<div>
-		<p class="text-sm leading-relaxed text-muted sm:text-base">{resume.summary}</p>
-	</div>
-
-	<div>
-		<h3 class="mb-4 text-lg font-semibold text-foreground">{m.resume_experience()}</h3>
+		<h3 class="mb-4 text-lg font-semibold text-foreground">{m.resume_history()}</h3>
 		<div class="space-y-6">
 			{#each resume.experience as job (job.role + job.period)}
 				<div class="border-l-2 border-accent/30 pl-4">

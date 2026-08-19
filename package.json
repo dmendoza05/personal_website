@@ -3,12 +3,14 @@
 	"private": true,
 	"version": "0.0.1",
 	"type": "module",
-	"packageManager": "pnpm@11.10.0",
+	"packageManager": "pnpm@11.22.0",
 	"scripts": {
 		"dev": "vite dev",
 		"build": "drizzle-kit migrate && vite build",
 		"preview": "vite preview",
 		"deploy": "pnpm build && wrangler deploy",
+		"deploy:ingest": "wrangler deploy --config workers/analytics-ingest/wrangler.jsonc",
+		"analytics:ingest": "wrangler --config workers/analytics-ingest/wrangler.jsonc dev --test-scheduled",
 		"prepare": "husky",
 		"check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
 		"check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
@@ -67,6 +69,7 @@
 	"dependencies": {
 		"@neondatabase/serverless": "1.1.0",
 		"animejs": "4.5.0",
+		"chart.js": "4.5.1",
 		"drizzle-orm": "0.45.2"
 	}
 }

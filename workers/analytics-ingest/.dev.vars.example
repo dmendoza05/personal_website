@@ -1,0 +1,6 @@
+# Copy to .dev.vars in this directory for `wrangler dev`.
+# Use the Neon pooled connection string (-pooler host).
+ENVIRONMENT=development
+DATABASE_URL=
+CF_ANALYTICS_TOKEN=
+CF_ZONE_ID=

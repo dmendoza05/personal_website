@@ -6,7 +6,15 @@ declare global {
 		// interface Locals {}
 		// interface PageData {}
 		// interface PageState {}
-		// interface Platform {}
+		interface Platform {
+			env: {
+				CF_ANALYTICS_TOKEN?: string;
+				CF_ZONE_ID?: string;
+				DATABASE_URL?: string;
+				ASSETS?: Fetcher;
+				[key: string]: unknown;
+			};
+		}
 	}
 }
 
