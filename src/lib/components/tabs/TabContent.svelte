@@ -1,77 +1,78 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { tick, untrack } from 'svelte';
-	import {
-		createSceneController,
-		DEFAULT_SCENE_PRESET,
-		type SceneHandler,
-		type ScenePreset
-	} from '$lib/scene';
+	import { tick } from 'svelte';
+	import type { SceneHandler } from '$lib/scene';
 	import { getTabsContext, panelElementId, tabElementId } from './tabs-context';
 
 	interface Props {
 		children: Snippet;
 		id: string;
-		/** Built-in animejs preset. Ignored when custom onenter/onexit are provided. */
-		preset?: ScenePreset;
 		onenter?: SceneHandler;
 		onexit?: SceneHandler;
 	}
 
-	let {
-		children,
-		id,
-		preset = DEFAULT_SCENE_PRESET,
-		onenter,
-		onexit
-	}: Props = $props();
+	let { children, id, onenter, onexit }: Props = $props();
 
 	const tabs = getTabsContext();
-	const scene = createSceneController({
-		get preset() {
-			return preset;
-		}
-	});
 
 	let rendered = $state(false);
 	let panelEl: HTMLDivElement | undefined = $state();
 	let generation = 0;
-	/** Initially active tab is covered by the page scene; other tabs animate on first open. */
-	let skipNextEnter = untrack(() => tabs.activeTab === id);
 
 	const active = $derived(tabs.activeTab === id);
 
 	$effect(() => {
+		return tabs.registerPanel(id, {
+			exit: async () => {
+				const el = innerTarget(panelEl);
+				const runId = ++generation;
+
+				if (!el) {
+					rendered = false;
+					return;
+				}
+
+				await Promise.resolve(onexit?.(el)).catch(() => {});
+				if (runId === generation) rendered = false;
+			}
+		});
+	});
+
+	$effect(() => {
 		const isActive = active;
-		const enter = onenter ?? ((el: HTMLElement) => scene.enter(el));
-		const exit = onexit ?? ((el: HTMLElement) => scene.exit(el));
+		const chromeReady = tabs.chromeReady;
+		const leaving = tabs.leaving;
 
 		if (isActive) {
+			if (!chromeReady || leaving) return;
+
 			const runId = ++generation;
 			rendered = true;
 
 			void tick().then(() => {
-				if (runId !== generation || !panelEl) return;
-				if (skipNextEnter) {
-					skipNextEnter = false;
-					return;
-				}
-				void Promise.resolve(enter(panelEl));
+				if (runId !== generation) return;
+				const el = innerTarget(panelEl);
+				if (!el) return;
+				void Promise.resolve(onenter?.(el));
 			});
 			return;
 		}
 
 		if (!rendered) return;
 
-		skipNextEnter = false;
 		const runId = ++generation;
-		const el = panelEl;
-		void Promise.resolve(el ? exit(el) : undefined)
+		const el = innerTarget(panelEl);
+		void Promise.resolve(el ? onexit?.(el) : undefined)
 			.catch(() => {})
 			.finally(() => {
 				if (runId === generation) rendered = false;
 			});
 	});
+
+	function innerTarget(panel: HTMLDivElement | undefined) {
+		const child = panel?.firstElementChild;
+		return child instanceof HTMLElement ? child : undefined;
+	}
 </script>
 
 {#if rendered}

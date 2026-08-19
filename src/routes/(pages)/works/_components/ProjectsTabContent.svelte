@@ -1,19 +1,13 @@
 <script lang="ts">
 	import ProjectCard from '$lib/components/ProjectCard.svelte';
 	import TabContent from '$lib/components/tabs/TabContent.svelte';
+	import { createSceneController } from '$lib/scene';
 	import { projects } from '$lib/data/projects';
-	import type { SceneHandler, ScenePreset } from '$lib/scene';
 
-	interface Props {
-		preset?: ScenePreset;
-		onenter?: SceneHandler;
-		onexit?: SceneHandler;
-	}
-
-	let { preset, onenter, onexit }: Props = $props();
+	const scene = createSceneController();
 </script>
 
-<TabContent id="projects" {preset} {onenter} {onexit}>
+<TabContent id="projects" onenter={scene.enter} onexit={scene.exit}>
 	<div class="grid gap-4 sm:grid-cols-2 sm:gap-6">
 		{#each projects as project (project.slug)}
 			<ProjectCard {project} />

@@ -20,7 +20,7 @@
 	aria-selected={active}
 	id={tabElementId(tabs.controllerId, tabId)}
 	tabindex={active ? 0 : -1}
-	class="relative -mb-px border-b-2 px-3 py-2 text-2xl transition-colors uppercase tracking-normal rajdhani font-bold {active
+	class="relative z-10 -mb-px border-b-2 px-3 py-2 text-2xl transition-colors uppercase tracking-normal rajdhani font-bold opacity-0 motion-reduce:opacity-100 {active
 		? 'border-accent text-accent'
 		: 'border-transparent text-muted hover:text-foreground'}"
 >

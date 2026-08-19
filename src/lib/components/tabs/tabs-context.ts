@@ -1,9 +1,16 @@
 import { getContext, setContext } from 'svelte';
 
+export interface TabPanelHandle {
+	exit: () => Promise<void>;
+}
+
 interface TabsContext {
 	readonly activeTab: string;
+	readonly chromeReady: boolean;
 	readonly controllerId: string;
+	readonly leaving: boolean;
 	hrefFor: (id: string) => string;
+	registerPanel: (id: string, handle: TabPanelHandle) => () => void;
 }
 
 const TABS_CONTEXT = Symbol('tabs');
