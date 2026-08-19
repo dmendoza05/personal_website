@@ -21,6 +21,7 @@
 	"about_title": "About",
 	"about_description": "Some words about me and my technical experiences.",
 	"resume_title": "Resume",
+	"resume_download_verb": "download",
 	"resume_download_pdf": "Download PDF",
 	"resume_experience": "Experience",
 	"resume_history": "Work History",

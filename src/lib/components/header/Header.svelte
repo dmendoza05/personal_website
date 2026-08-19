@@ -6,6 +6,7 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { createTimeline, type Timeline } from 'animejs';
 	import Logo from '$lib/components/Logo.svelte';
+	import ResumeDownloadButton from './ResumeDownloadButton.svelte';
 	import {
 		HEADER_HEIGHT,
 		HEADER_LOGO_HEIGHT,
@@ -20,7 +21,6 @@
 		resolveHeaderState,
 		SM_VIEWPORT_QUERY
 	} from './constants';
-	import { m } from '$lib/paraglide/messages.js';
 
 	let isSmViewport = $state(false);
 	let logo: Logo;
@@ -229,19 +229,7 @@
 					</li>
 				{/each}
 				<li class="opacity-0 motion-reduce:opacity-100">
-					<a
-						href="/resume.pdf"
-						download="Daniel_Mendoza_Resume.pdf"
-						class="{navLinkClass()}{isCompact ? '' : ' gap-1.5'}"
-						aria-label={isCompact ? m.resume_title() : undefined}
-					>
-						{#if isCompact}
-							{@render strokeIcon(NAV_ICON_PATHS.resume, 'h-5 w-5')}
-						{:else}
-							{m.resume_title()}
-							{@render strokeIcon(NAV_ICON_PATHS.resume, 'h-4 w-4')}
-						{/if}
-					</a>
+					<ResumeDownloadButton />
 				</li>
 			</ul>
 		</nav>
