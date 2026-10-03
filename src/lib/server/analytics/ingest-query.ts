@@ -9,9 +9,18 @@ export type DailyPoint = {
 	pageVisits: number;
 };
 
+type CountryMapEntry = {
+	clientCountryName?: string | null;
+	requests?: number | null;
+};
+
 type GraphqlGroup = {
-	sum?: { pageViews?: number | null; requests?: number | null } | null;
-	uniq?: { visitors?: number | null } | null;
+	sum?: {
+		pageViews?: number | null;
+		requests?: number | null;
+		countryMap?: CountryMapEntry[] | null;
+	} | null;
+	uniq?: { uniques?: number | null; visitors?: number | null } | null;
 	dimensions?: {
 		date?: string | null;
 		clientCountryName?: string | null;
@@ -45,7 +54,7 @@ query ($zoneTag: String!, $start: Date!, $end: Date!) {
         filter: { date_geq: $start, date_leq: $end }
         orderBy: [date_ASC]
       ) {
-        uniq { visitors }
+        uniq { uniques }
         sum { pageViews }
         dimensions { date }
       }
@@ -71,7 +80,7 @@ query (
         filter: { date_geq: $seriesStart, date_leq: $end }
         orderBy: [date_ASC]
       ) {
-        uniq { visitors }
+        uniq { uniques }
         sum { pageViews }
         dimensions { date }
       }
@@ -79,25 +88,25 @@ query (
         limit: 1
         filter: { date_geq: $start7d, date_leq: $end }
       ) {
-        uniq { visitors }
+        uniq { uniques }
       }
       unique30d: httpRequests1dGroups(
         limit: 1
         filter: { date_geq: $start30d, date_leq: $end }
       ) {
-        uniq { visitors }
+        uniq { uniques }
       }
       unique90d: httpRequests1dGroups(
         limit: 1
         filter: { date_geq: $start90d, date_leq: $end }
       ) {
-        uniq { visitors }
+        uniq { uniques }
       }
       uniqueLifetime: httpRequests1dGroups(
         limit: 1
         filter: { date_geq: $startLifetime, date_leq: $end }
       ) {
-        uniq { visitors }
+        uniq { uniques }
       }
     }
   }
@@ -111,18 +120,15 @@ query ($zoneTag: String!, $start: Date!, $end: Date!) {
       countries: httpRequests1dGroups(
         limit: 8
         filter: { date_geq: $start, date_leq: $end }
-        orderBy: [sum_requests_DESC]
+        orderBy: [date_ASC]
       ) {
-        sum { requests }
-        dimensions { clientCountryName }
-      }
-      devices: httpRequests1dGroups(
-        limit: 10
-        filter: { date_geq: $start, date_leq: $end }
-        orderBy: [sum_requests_DESC]
-      ) {
-        sum { requests }
-        dimensions { clientDeviceType }
+        dimensions { date }
+        sum {
+          countryMap {
+            clientCountryName
+            requests
+          }
+        }
       }
     }
   }
@@ -150,14 +156,14 @@ export function parseDailyPoints(payload: IngestGraphqlPayload): DailyPoint[] {
 	return (zone.timeseries ?? [])
 		.map((group) => ({
 			date: group.dimensions?.date ?? '',
-			uniqueVisitors: num(group.uniq?.visitors),
+			uniqueVisitors: num(group.uniq?.uniques ?? group.uniq?.visitors),
 			pageVisits: num(group.sum?.pageViews)
 		}))
 		.filter((point) => point.date.length > 0);
 }
 
 export function parseRangeUnique(groups: GraphqlGroup[] | null | undefined): number | null {
-	const visitors = groups?.[0]?.uniq?.visitors;
+	const visitors = groups?.[0]?.uniq?.uniques ?? groups?.[0]?.uniq?.visitors;
 	if (typeof visitors !== 'number' || !Number.isFinite(visitors)) return null;
 	return visitors;
 }
@@ -207,14 +213,29 @@ export function parseDimensionRows(payload: IngestGraphqlPayload): DimensionRow[
 	const zone = payload.data?.viewer?.zones?.[0];
 	if (!zone) return [];
 
-	const countries = (zone.countries ?? [])
-		.map((group) => ({
-			kind: 'country' as const,
-			key: group.dimensions?.clientCountryName?.trim() || 'Unknown',
-			value: num(group.sum?.requests)
-		}))
-		.filter((row) => row.value > 0)
-		.slice(0, 8);
+	const countryTotals = new Map<string, number>();
+	for (const group of zone.countries ?? []) {
+		const entries = group.sum?.countryMap?.length
+			? group.sum.countryMap
+			: [
+					{
+						clientCountryName: group.dimensions?.clientCountryName,
+						requests: group.sum?.requests
+					}
+				];
+
+		for (const entry of entries) {
+			const value = num(entry.requests);
+			if (value <= 0) continue;
+			const key = entry.clientCountryName?.trim() || 'Unknown';
+			countryTotals.set(key, (countryTotals.get(key) ?? 0) + value);
+		}
+	}
+
+	const countries = [...countryTotals.entries()]
+		.sort((left, right) => right[1] - left[1])
+		.slice(0, 8)
+		.map(([key, value]) => ({ kind: 'country' as const, key, value }));
 
 	const deviceTotals: Record<string, number> = {};
 	for (const group of zone.devices ?? []) {

@@ -167,9 +167,12 @@ async function upsertDimensions(
 	await db
 		.delete(analyticsDimensions)
 		.where(and(eq(analyticsDimensions.window, window), eq(analyticsDimensions.kind, 'country')));
-	await db
-		.delete(analyticsDimensions)
-		.where(and(eq(analyticsDimensions.window, window), eq(analyticsDimensions.kind, 'device')));
+
+	if (rows.some((row) => row.kind === 'device')) {
+		await db
+			.delete(analyticsDimensions)
+			.where(and(eq(analyticsDimensions.window, window), eq(analyticsDimensions.kind, 'device')));
+	}
 
 	if (rows.length === 0) return;
 
