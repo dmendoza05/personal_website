@@ -12,6 +12,7 @@ export type DailyPoint = {
 type CountryMapEntry = {
 	clientCountryName?: string | null;
 	requests?: number | null;
+	pageViews?: number | null;
 };
 
 type GraphqlGroup = {
@@ -118,16 +119,16 @@ query ($zoneTag: String!, $start: Date!, $end: Date!) {
   viewer {
     zones(filter: { zoneTag: $zoneTag }) {
       countries: httpRequests1dGroups(
-        limit: 8
+        limit: 1000
         filter: { date_geq: $start, date_leq: $end }
-        orderBy: [date_ASC]
+        orderBy: [sum_requests_DESC]
       ) {
-        dimensions { date }
         sum {
-          countryMap {
-            clientCountryName
-            requests
-          }
+          requests
+          pageViews
+        }
+        dimensions {
+          clientCountryName
         }
       }
     }
@@ -201,7 +202,7 @@ export function filterPointsFrom(points: DailyPoint[], minDay: string): DailyPoi
 	return points.filter((point) => point.date >= minDay);
 }
 
-export type DimensionKind = 'country' | 'device';
+export type DimensionKind = 'country' | 'country_pageview' | 'device';
 
 export type DimensionRow = {
 	kind: DimensionKind;
@@ -213,29 +214,41 @@ export function parseDimensionRows(payload: IngestGraphqlPayload): DimensionRow[
 	const zone = payload.data?.viewer?.zones?.[0];
 	if (!zone) return [];
 
-	const countryTotals = new Map<string, number>();
+	const countryTotals = new Map<string, { requests: number; pageViews: number }>();
 	for (const group of zone.countries ?? []) {
 		const entries = group.sum?.countryMap?.length
 			? group.sum.countryMap
 			: [
 					{
 						clientCountryName: group.dimensions?.clientCountryName,
-						requests: group.sum?.requests
+						requests: group.sum?.requests,
+						pageViews: group.sum?.pageViews
 					}
 				];
 
 		for (const entry of entries) {
-			const value = num(entry.requests);
-			if (value <= 0) continue;
+			const requests = num(entry.requests);
+			const pageViews = num(entry.pageViews);
+			if (requests <= 0 && pageViews <= 0) continue;
 			const key = entry.clientCountryName?.trim() || 'Unknown';
-			countryTotals.set(key, (countryTotals.get(key) ?? 0) + value);
+			const current = countryTotals.get(key) ?? { requests: 0, pageViews: 0 };
+			current.requests += requests;
+			current.pageViews += pageViews;
+			countryTotals.set(key, current);
 		}
 	}
 
-	const countries = [...countryTotals.entries()]
-		.sort((left, right) => right[1] - left[1])
-		.slice(0, 8)
-		.map(([key, value]) => ({ kind: 'country' as const, key, value }));
+	const countries: DimensionRow[] = [...countryTotals.entries()]
+		.sort(
+			(left, right) =>
+				right[1].requests - left[1].requests || right[1].pageViews - left[1].pageViews
+		)
+		.flatMap(([key, total]) => {
+			const rows: DimensionRow[] = [];
+			if (total.requests > 0) rows.push({ kind: 'country', key, value: total.requests });
+			if (total.pageViews > 0) rows.push({ kind: 'country_pageview', key, value: total.pageViews });
+			return rows;
+		});
 
 	const deviceTotals: Record<string, number> = {};
 	for (const group of zone.devices ?? []) {

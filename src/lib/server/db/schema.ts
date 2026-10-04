@@ -1,4 +1,13 @@
-import { boolean, date, integer, pgTable, primaryKey, serial, text, timestamp } from 'drizzle-orm/pg-core';
+import {
+	boolean,
+	date,
+	integer,
+	pgTable,
+	primaryKey,
+	serial,
+	text,
+	timestamp
+} from 'drizzle-orm/pg-core';
 
 export const comments = pgTable('comments', {
 	id: serial('id').primaryKey(),
@@ -44,7 +53,7 @@ export const analyticsRollups = pgTable('analytics_rollups', {
 	fetchedAt: timestamp('fetched_at', { withTimezone: true }).defaultNow().notNull()
 });
 
-/** Snapshot of country / device breakdowns for a named window. */
+/** Snapshot of country requests, country page views, and device breakdowns for a named window. */
 export const analyticsDimensions = pgTable(
 	'analytics_dimensions',
 	{

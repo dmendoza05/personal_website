@@ -18,10 +18,12 @@
 </script>
 
 <HudModule {loading} {errorMessage} {onRetry}>
-	<p class="flex h-12 shrink-0 items-center text-xs font-semibold uppercase tracking-[0.2em] text-muted rajdhani">
+	<p
+		class="flex h-12 shrink-0 items-center text-xs font-semibold uppercase tracking-[0.2em] text-muted rajdhani"
+	>
 		{m.dashboard_chart_countries()}
 	</p>
 	<div class="min-h-0 flex-1">
-		<CountriesChart {countries} requestsLabel={m.dashboard_stat_requests()} />
+		<CountriesChart countries={countries.slice(0, 8)} requestsLabel={m.dashboard_stat_requests()} />
 	</div>
 </HudModule>

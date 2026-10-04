@@ -7,6 +7,8 @@
 		loadCountries
 	} from './vector-earth';
 
+	let { onCountry }: { onCountry?: (name: string) => void } = $props();
+
 	const globe = {
 		/** How far the poles lean, in radians. `(23.4 * Math.PI) / 180` matches Earth. */
 		axialTilt: (1 * Math.PI) / 180,
@@ -15,7 +17,7 @@
 		/** Space around the globe. `1` fills the view; higher values make it smaller. */
 		margin: 1.2,
 		/** Ocean fill. `transparent` shows the page behind the globe. */
-		ocean: 'rgba(255, 255, 255, 0.22)',
+		ocean: 'rgba(255, 255, 255, 0.5)',
 		/** Base continent fill. Each country is a shade of this color. */
 		land: '#f4efe4',
 		/** Country border color. */
@@ -82,6 +84,12 @@
 				renderer.render(scene, camera);
 			}
 
+			function showCountry(name: string) {
+				if (name === countryName) return;
+				countryName = name;
+				onCountry?.(name);
+			}
+
 			const material = new THREE.MeshLambertMaterial({
 				map: texture,
 				transparent: true
@@ -142,7 +150,7 @@
 				hovering = true;
 				canvas.setPointerCapture(event.pointerId);
 				canvas.style.cursor = 'grabbing';
-				countryName = '';
+				showCountry('');
 				if (activeCountry) {
 					activeCountry = null;
 					paint(null);
@@ -183,7 +191,7 @@
 					paint(name);
 				}
 
-				countryName = name ?? '';
+				showCountry(name ?? '');
 				const parent = canvas.parentElement?.getBoundingClientRect();
 				if (parent) {
 					labelX = event.clientX - parent.left + 14;
@@ -199,13 +207,13 @@
 					activeCountry = null;
 					paint(null);
 				}
-				countryName = '';
+				showCountry('');
 			}
 
 			function tick(now: number) {
 				const delta = (now - last) / 1000;
 				last = now;
-				if (!activeCountry) earth.rotation.y += delta * globe.rotationSpeed;
+				if (!activeCountry && !dragging) earth.rotation.y += delta * globe.rotationSpeed;
 				renderer.render(scene, camera);
 				frame = requestAnimationFrame(tick);
 			}
@@ -279,7 +287,7 @@
 
 	.country-label {
 		position: absolute;
-		z-index: 2;
+		z-index: 20;
 		padding: 0.2rem 0.55rem;
 		border: 1px solid var(--border);
 		background: var(--card);

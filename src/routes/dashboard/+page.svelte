@@ -18,7 +18,7 @@
 	} from '$lib/dashboard';
 	import CountriesPanel from './_components/CountriesPanel.svelte';
 	import DevicesBreakdown from './_components/DevicesBreakdown.svelte';
-	import EarthGlobe from './_components/EarthGlobe.svelte';
+	import EarthData from './_components/EarthData.svelte';
 	import StatBox from './_components/StatBox.svelte';
 	import TimeseriesPanel from './_components/TimeseriesPanel.svelte';
 	import TopPagesList from './_components/TopPagesList.svelte';
@@ -229,6 +229,6 @@
 	</div>
 {:else}
 	<div class="relative h-[calc(100dvh-5.75rem)] w-full">
-		<EarthGlobe />
+		<EarthData />
 	</div>
 {/if}
