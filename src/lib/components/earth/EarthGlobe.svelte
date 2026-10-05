@@ -214,7 +214,7 @@
 			function turnFromDrag(deltaX: number, deltaY: number) {
 				const rect = canvas.getBoundingClientRect();
 				const span = Math.min(rect.width, rect.height) || 1;
-				earth.rotation.y -= (deltaX / span) * globe.dragRange;
+				earth.rotation.y += (deltaX / span) * globe.dragRange;
 				pitch = Math.min(maxPitch, Math.max(-maxPitch, pitch + (deltaY / span) * globe.dragRange));
 				view.rotation.x = pitch;
 				if (reduceMotion) renderer.render(scene, camera);
