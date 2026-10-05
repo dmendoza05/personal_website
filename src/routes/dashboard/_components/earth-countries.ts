@@ -38,7 +38,9 @@ const COUNTRY_ALIASES: Record<string, string> = {
 	'state of palestine': 'palestine',
 	'cape verde': 'cabo verde',
 	'brunei darussalam': 'brunei',
-	'east timor': 'timor-leste'
+	'east timor': 'timor-leste',
+	'ivory coast': "cote d'ivoire",
+	turkiye: 'turkey'
 };
 
 export function countryLookupKey(name: string): string {

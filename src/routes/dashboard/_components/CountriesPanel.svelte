@@ -1,29 +1,140 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages.js';
-	import CountriesChart from '$lib/components/analytics/CountriesChart.svelte';
-	import type { DashboardCountry } from '$lib/dashboard';
-	import HudModule from './HudModule.svelte';
+	import { formatDashboardNumber, type DashboardCountry } from '$lib/dashboard';
+	import { countryAcronym, countryFlag } from './country-codes';
+	import { countryLookupKey } from './earth-countries';
+
+	type CountryMetric = 'pageViews' | 'requests';
 
 	let {
 		countries,
 		loading = false,
 		errorMessage = '',
-		onRetry
+		onRetry,
+		activeName = '',
+		onSelect
 	}: {
 		countries: DashboardCountry[];
 		loading?: boolean;
 		errorMessage?: string;
 		onRetry?: () => void;
+		activeName?: string;
+		onSelect?: (country: string) => void;
 	} = $props();
+
+	const METRICS: CountryMetric[] = ['pageViews', 'requests'];
+
+	let metric = $state<CountryMetric>('pageViews');
+	let listEl = $state<HTMLDivElement>();
+
+	const activeKey = $derived(countryLookupKey(activeName));
+	const listed = $derived(
+		countries
+			.filter((entry) => entry[metric] > 0)
+			.sort(
+				(left, right) => right[metric] - left[metric] || left.country.localeCompare(right.country)
+			)
+	);
+
+	$effect(() => {
+		if (!activeKey || !listEl) return;
+		listEl.querySelector('[data-active="true"]')?.scrollIntoView({ block: 'nearest' });
+	});
+
+	function metricLabel(target: CountryMetric): string {
+		if (target === 'pageViews') return m.dashboard_tab_pageviews();
+		return m.dashboard_tab_requests();
+	}
+
+	function tabClass(target: CountryMetric): string {
+		return `h-9 w-full border px-2 text-xs font-semibold uppercase tracking-[0.14em] rajdhani ${
+			metric === target
+				? 'border-accent bg-accent text-accent-foreground'
+				: 'border-border bg-card/70 text-muted hover:border-accent/60 hover:text-foreground'
+		}`;
+	}
+
+	function isActive(entry: DashboardCountry): boolean {
+		return activeKey !== '' && countryLookupKey(entry.country) === activeKey;
+	}
+
+	function choose(entry: DashboardCountry) {
+		onSelect?.(entry.country);
+	}
 </script>
 
-<HudModule {loading} {errorMessage} {onRetry}>
-	<p
-		class="flex h-12 shrink-0 items-center text-xs font-semibold uppercase tracking-[0.2em] text-muted rajdhani"
-	>
+<div class="flex min-h-0 flex-1 flex-col">
+	<p class="px-3 pt-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted rajdhani">
 		{m.dashboard_chart_countries()}
 	</p>
-	<div class="min-h-0 flex-1">
-		<CountriesChart countries={countries.slice(0, 8)} requestsLabel={m.dashboard_stat_requests()} />
-	</div>
-</HudModule>
+
+	{#if loading}
+		<p class="px-3 py-4 text-xs text-muted rajdhani">{m.dashboard_loading()}</p>
+	{:else if errorMessage}
+		<div class="px-3 py-4">
+			<p class="text-xs text-muted rajdhani">{errorMessage}</p>
+			{#if onRetry}
+				<button
+					type="button"
+					class="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent rajdhani"
+					onclick={onRetry}
+				>
+					{m.dashboard_retry()}
+				</button>
+			{/if}
+		</div>
+	{:else}
+		<div
+			class="grid grid-cols-2 gap-2 px-3 pt-3"
+			role="tablist"
+			aria-label={m.dashboard_chart_countries()}
+		>
+			{#each METRICS as target (target)}
+				<button
+					type="button"
+					role="tab"
+					class={tabClass(target)}
+					aria-selected={metric === target}
+					onclick={() => (metric = target)}
+				>
+					{metricLabel(target)}
+				</button>
+			{/each}
+		</div>
+
+		{#if listed.length === 0}
+			<p class="px-3 py-4 text-xs text-muted rajdhani">{m.dashboard_empty()}</p>
+		{:else}
+			<div class="mt-2 min-h-0 flex-1 overflow-y-auto" bind:this={listEl}>
+				<ul>
+					{#each listed as entry (entry.country)}
+						{@const amount = entry[metric]}
+						{@const active = isActive(entry)}
+						<li>
+							<button
+								type="button"
+								data-active={active ? 'true' : undefined}
+								class="flex w-full items-center gap-3 px-3 py-2 text-left text-xs {active
+									? 'bg-accent/10 font-semibold'
+									: 'hover:bg-accent/5'}"
+								aria-pressed={active}
+								aria-label={`${entry.country} ${formatDashboardNumber(amount)}`}
+								title={entry.country}
+								onclick={() => choose(entry)}
+							>
+								<span
+									class="inline-block w-6 text-center text-base leading-none"
+									aria-hidden="true"
+								>
+									{countryFlag(entry.country)}
+								</span>
+								<span class="tracking-[0.14em]">{countryAcronym(entry.country)}</span>
+								<span class="ml-auto orbitron">{formatDashboardNumber(amount)}</span>
+							</button>
+						</li>
+					{/each}
+				</ul>
+			</div>
+		{/if}
+	{/if}
+</div>

@@ -1,35 +1,52 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import {
+		countryView,
 		createEarthCanvas,
 		drawVectorEarthMap,
 		findCountry,
 		loadCountries
 	} from './vector-earth';
 
-	let { onCountry }: { onCountry?: (name: string) => void } = $props();
+	let {
+		onCountry,
+		spinning = $bindable(true),
+		size = $bindable(1 / 1.2),
+		focusName = '',
+		focusRequest = 0
+	}: {
+		onCountry?: (name: string) => void;
+		/** When false, auto-spin stops. Drag and country hover still work. */
+		spinning?: boolean;
+		/** Fraction of the view the globe fills. `1` fills the shorter side. */
+		size?: number;
+		/** GeoJSON country name to turn toward. */
+		focusName?: string;
+		/** Increments each time the globe should turn toward `focusName`. */
+		focusRequest?: number;
+	} = $props();
 
 	const globe = {
 		/** How far the poles lean, in radians. `(23.4 * Math.PI) / 180` matches Earth. */
 		axialTilt: (1 * Math.PI) / 180,
 		/** Spin speed in radians per second. Negative turns the globe west to east. */
 		rotationSpeed: -0.1,
-		/** Space around the globe. `1` fills the view; higher values make it smaller. */
-		margin: 1.2,
 		/** Ocean fill. `transparent` shows the page behind the globe. */
-		ocean: 'rgba(255, 255, 255, 0.5)',
-		/** Base continent fill. Each country is a shade of this color. */
-		land: '#f4efe4',
-		/** Country border color. */
-		coast: '#1a2332',
-		/** Fill for the country under the pointer. */
-		highlight: '#fff4c2',
-		/** Latitude and longitude line color. */
-		grid: 'rgba(255, 255, 255, 0.22)',
-		/** Country border thickness, in pixels on the 2048px-wide map. */
-		coastWidth: 1,
-		/** Latitude and longitude line thickness, in pixels on the 2048px-wide map. */
-		gridWidth: 1,
+		ocean: 'rgba(0, 0, 0, 1)',
+		/** Color of the dots that form land. */
+		land: '#d7deea',
+		/** Dot color for the country under the pointer. */
+		highlight: 'rgba(10, 150, 255, 1)',
+		/** Distance between land dots, in pixels on the 2048px-wide map. */
+		dotGap: 5,
+		/** Radius of each land dot, in pixels on the map. */
+		dotSize: 1.5,
+		/** Color of the rim glow around the globe. */
+		glow: '#d7deea',
+		/** How far the glow spreads past the surface. `1` is a hairline; higher is wider. */
+		glowSize: 1.8,
+		/** Brightness of the rim. `0` hides it. */
+		glowStrength: 0.15,
 		/** Radians the globe turns when a drag crosses its full width or height. */
 		dragRange: Math.PI
 	};
@@ -38,6 +55,11 @@
 	let countryName = $state('');
 	let labelX = $state(0);
 	let labelY = $state(0);
+	let applyView: (() => void) | null = null;
+	let applyFocus: ((name: string) => void) | null = null;
+	let seenFocus = 0;
+
+	const controls = { spinning, size, focusName: '', focusRequest: 0 };
 
 	onMount(() => {
 		let disposed = false;
@@ -45,7 +67,7 @@
 
 		void (async () => {
 			const THREE = await import('three');
-			const countries = await loadCountries();
+			const countries = loadCountries();
 			if (disposed) return;
 
 			const map = createEarthCanvas();
@@ -68,9 +90,20 @@
 			const geometry = new THREE.SphereGeometry(1, 64, 64);
 			const texture = new THREE.CanvasTexture(map);
 			texture.colorSpace = THREE.SRGBColorSpace;
-			texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+			texture.generateMipmaps = false;
+			texture.minFilter = THREE.LinearFilter;
+			texture.magFilter = THREE.LinearFilter;
 
 			let activeCountry: string | null = null;
+			let pinnedCountry: string | null = null;
+			let focusAnimation: {
+				fromYaw: number;
+				toYaw: number;
+				fromPitch: number;
+				toPitch: number;
+				start: number;
+				duration: number;
+			} | null = null;
 			let hovering = false;
 			let dragging = false;
 			let dragX = 0;
@@ -90,6 +123,10 @@
 				onCountry?.(name);
 			}
 
+			function shownCountry(): string | null {
+				return activeCountry ?? pinnedCountry;
+			}
+
 			const material = new THREE.MeshLambertMaterial({
 				map: texture,
 				transparent: true
@@ -101,6 +138,43 @@
 			const view = new THREE.Group();
 			view.add(tilt);
 			scene.add(view);
+
+			const glowColor = new THREE.Color(globe.glow);
+			const glowMap = document.createElement('canvas');
+			glowMap.width = 512;
+			glowMap.height = 512;
+			const glowContext = glowMap.getContext('2d');
+			const glowTexture = new THREE.CanvasTexture(glowMap);
+			glowTexture.colorSpace = THREE.SRGBColorSpace;
+			const glowMaterial = new THREE.SpriteMaterial({
+				map: glowTexture,
+				transparent: true,
+				depthWrite: false,
+				depthTest: false,
+				blending: THREE.AdditiveBlending
+			});
+			const glow = new THREE.Sprite(glowMaterial);
+			glow.scale.set(globe.glowSize * 2, globe.glowSize * 2, 1);
+			glow.renderOrder = 2;
+			view.add(glow);
+
+			if (glowContext) {
+				const red = Math.round(glowColor.r * 255);
+				const green = Math.round(glowColor.g * 255);
+				const blue = Math.round(glowColor.b * 255);
+				const rgba = (alpha: number) => `rgba(${red}, ${green}, ${blue}, ${alpha})`;
+				const limb = Math.min(0.96, 1 / globe.glowSize);
+				const gradient = glowContext.createRadialGradient(256, 256, 0, 256, 256, 256);
+				gradient.addColorStop(0, rgba(0));
+				gradient.addColorStop(Math.max(0, limb - 0.028), rgba(0));
+				gradient.addColorStop(Math.max(0, limb - 0.01), rgba(globe.glowStrength * 0.35));
+				gradient.addColorStop(limb, rgba(globe.glowStrength));
+				gradient.addColorStop(Math.min(0.99, limb + 0.03), rgba(0));
+				gradient.addColorStop(1, rgba(0));
+				glowContext.fillStyle = gradient;
+				glowContext.fillRect(0, 0, 512, 512);
+				glowTexture.needsUpdate = true;
+			}
 
 			scene.add(new THREE.AmbientLight(0xffffff, 0.82));
 			const sun = new THREE.DirectionalLight(0xffffff, 0.4);
@@ -122,10 +196,15 @@
 
 				const verticalFov = (camera.fov * Math.PI) / 180;
 				const horizontalFov = 2 * Math.atan(Math.tan(verticalFov / 2) * camera.aspect);
-				const distanceForHeight = globe.margin / Math.tan(verticalFov / 2);
-				const distanceForWidth = globe.margin / Math.tan(horizontalFov / 2);
+				const margin = 1 / Math.max(controls.size, 0.05);
+				const distanceForHeight = margin / Math.tan(verticalFov / 2);
+				const distanceForWidth = margin / Math.tan(horizontalFov / 2);
 				camera.position.z = Math.max(distanceForHeight, distanceForWidth);
 				camera.updateProjectionMatrix();
+				const distance = camera.position.z;
+				const silhouette = distance / Math.sqrt(Math.max(distance * distance - 1, 1e-4));
+				const glowSpan = silhouette * globe.glowSize * 2;
+				glow.scale.set(glowSpan, glowSpan, 1);
 				renderer.render(scene, camera);
 			}
 
@@ -145,6 +224,7 @@
 				if (event.button !== 0) return;
 
 				dragging = true;
+				focusAnimation = null;
 				dragX = event.clientX;
 				dragY = event.clientY;
 				hovering = true;
@@ -153,7 +233,7 @@
 				showCountry('');
 				if (activeCountry) {
 					activeCountry = null;
-					paint(null);
+					paint(pinnedCountry);
 				}
 			}
 
@@ -188,7 +268,7 @@
 
 				if (name !== activeCountry) {
 					activeCountry = name;
-					paint(name);
+					paint(name ?? pinnedCountry);
 				}
 
 				showCountry(name ?? '');
@@ -205,7 +285,7 @@
 				hovering = false;
 				if (activeCountry) {
 					activeCountry = null;
-					paint(null);
+					paint(pinnedCountry);
 				}
 				showCountry('');
 			}
@@ -213,7 +293,18 @@
 			function tick(now: number) {
 				const delta = (now - last) / 1000;
 				last = now;
-				if (!activeCountry && !dragging) earth.rotation.y += delta * globe.rotationSpeed;
+				if (focusAnimation) {
+					const progress = Math.min(1, (now - focusAnimation.start) / focusAnimation.duration);
+					const eased = 1 - (1 - progress) ** 3;
+					earth.rotation.y =
+						focusAnimation.fromYaw + (focusAnimation.toYaw - focusAnimation.fromYaw) * eased;
+					pitch =
+						focusAnimation.fromPitch + (focusAnimation.toPitch - focusAnimation.fromPitch) * eased;
+					view.rotation.x = pitch;
+					if (progress >= 1) focusAnimation = null;
+				} else if (controls.spinning && !activeCountry && !dragging) {
+					earth.rotation.y += delta * globe.rotationSpeed;
+				}
 				renderer.render(scene, camera);
 				frame = requestAnimationFrame(tick);
 			}
@@ -234,6 +325,37 @@
 				start();
 			}
 
+			function focusOn(name: string) {
+				const country = countries.find((entry) => entry.name === name);
+				if (!country) return;
+
+				pinnedCountry = country.name;
+				paint(shownCountry());
+
+				const target = countryView(country.longitude, country.latitude, maxPitch);
+				const fromYaw = earth.rotation.y;
+				const deltaYaw = Math.atan2(Math.sin(target.yaw - fromYaw), Math.cos(target.yaw - fromYaw));
+				const toYaw = fromYaw + deltaYaw;
+
+				if (reduceMotion) {
+					focusAnimation = null;
+					earth.rotation.y = toYaw;
+					pitch = target.pitch;
+					view.rotation.x = pitch;
+					renderer.render(scene, camera);
+					return;
+				}
+
+				focusAnimation = {
+					fromYaw,
+					toYaw,
+					fromPitch: pitch,
+					toPitch: target.pitch,
+					start: performance.now(),
+					duration: 900
+				};
+			}
+
 			const observer = new ResizeObserver(resize);
 			observer.observe(canvas);
 			canvas.addEventListener('pointerdown', onPointerDown);
@@ -243,8 +365,11 @@
 			canvas.addEventListener('pointerleave', onPointerLeave);
 			motionQuery.addEventListener('change', onMotionChange);
 			paint(null);
+			applyView = resize;
+			applyFocus = focusOn;
 			resize();
 			start();
+			if (controls.focusRequest > 0) focusOn(controls.focusName);
 
 			stop = () => {
 				cancelAnimationFrame(frame);
@@ -258,14 +383,34 @@
 				geometry.dispose();
 				material.dispose();
 				texture.dispose();
+				glowTexture.dispose();
+				glowMaterial.dispose();
 				renderer.dispose();
 			};
 		})();
 
 		return () => {
 			disposed = true;
+			applyView = null;
+			applyFocus = null;
 			stop();
 		};
+	});
+
+	$effect(() => {
+		controls.spinning = spinning;
+		controls.size = size;
+		applyView?.();
+	});
+
+	$effect(() => {
+		const request = focusRequest;
+		const name = focusName;
+		if (request === 0 || request === seenFocus) return;
+		seenFocus = request;
+		controls.focusName = name;
+		controls.focusRequest = request;
+		applyFocus?.(name);
 	});
 </script>
 

@@ -17,6 +17,7 @@
 		type DashboardTopPage
 	} from '$lib/dashboard';
 	import CountriesPanel from './_components/CountriesPanel.svelte';
+	import HudModule from './_components/HudModule.svelte';
 	import DevicesBreakdown from './_components/DevicesBreakdown.svelte';
 	import EarthData from './_components/EarthData.svelte';
 	import StatBox from './_components/StatBox.svelte';
@@ -211,12 +212,14 @@
 			class="dashboard-module col-span-12 row-span-14 md:col-span-6 lg:col-span-4"
 			style:--enter-delay="7"
 		>
-			<CountriesPanel
-				{countries}
-				loading={uniquesStatus === 'loading' && visitsStatus === 'loading'}
-				errorMessage={uniquesStatus === 'error' && visitsStatus === 'error' ? uniquesError : ''}
-				onRetry={retryBreakdowns}
-			/>
+			<HudModule loading={uniquesStatus === 'loading' && visitsStatus === 'loading'}>
+				<CountriesPanel
+					{countries}
+					loading={uniquesStatus === 'loading' && visitsStatus === 'loading'}
+					errorMessage={uniquesStatus === 'error' && visitsStatus === 'error' ? uniquesError : ''}
+					onRetry={retryBreakdowns}
+				/>
+			</HudModule>
 		</div>
 		<div class="dashboard-module col-span-12 row-span-14 lg:col-span-4" style:--enter-delay="8">
 			<DevicesBreakdown
