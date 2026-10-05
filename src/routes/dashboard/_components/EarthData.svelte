@@ -1,12 +1,19 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages.js';
-	import { type DashboardCountry, type DashboardResponse } from '$lib/dashboard';
+	import {
+		type DashboardCountry,
+		type DashboardDevice,
+		type DashboardResponse
+	} from '$lib/dashboard';
 	import EarthGlobe from '$lib/components/earth/EarthGlobe.svelte';
 	import { loadCountries } from '$lib/components/earth/vector-earth';
 	import { countryLookupKey } from './earth-countries';
+	import AllTimeVisitorsPanel from './AllTimeVisitorsPanel.svelte';
 	import CountriesPanel from './CountriesPanel.svelte';
+	import DevicesPanel from './DevicesPanel.svelte';
 	import GlobeControls from './GlobeControls.svelte';
+	import VisitorsPanel from './VisitorsPanel.svelte';
 
 	type LoadStatus = 'loading' | 'ready' | 'error';
 
@@ -18,6 +25,8 @@
 	let focusName = $state('');
 	let focusRequest = $state(0);
 	let countries = $state<DashboardCountry[]>([]);
+	let devices = $state<DashboardDevice[]>([]);
+	let lifetimeUniqueVisitors = $state<number | null>(null);
 	let status = $state<LoadStatus>('loading');
 	let errorMessage = $state('');
 
@@ -62,11 +71,14 @@
 				throw new Error('error' in payload && payload.error ? payload.error : m.dashboard_error());
 			}
 
-			countries = (payload as DashboardResponse).countries.map((entry) => ({
+			const dashboard = payload as DashboardResponse;
+			lifetimeUniqueVisitors = dashboard.lifetimeUniqueVisitors;
+			countries = dashboard.countries.map((entry) => ({
 				country: entry.country,
 				requests: entry.requests,
 				pageViews: entry.pageViews ?? 0
 			}));
+			devices = dashboard.devices;
 			status = 'ready';
 		} catch (error) {
 			status = 'error';
@@ -88,17 +100,58 @@
 		{/if}
 	</div>
 
-	<section
-		class="absolute right-4 bottom-4 left-4 z-10 flex max-h-[min(42vh,22rem)] flex-col overflow-hidden border border-border bg-card/95 text-foreground backdrop-blur-sm md:top-4 md:right-4 md:bottom-auto md:left-auto md:w-88 md:max-h-[calc(100%-2rem)]"
-		aria-label={m.dashboard_chart_countries()}
+	<div
+		class="absolute inset-0 z-10 overflow-y-auto p-4 md:pointer-events-none md:overflow-visible md:p-0"
 	>
-		<CountriesPanel
-			{countries}
-			loading={status === 'loading'}
-			errorMessage={status === 'error' ? errorMessage : ''}
-			onRetry={load}
-			{activeName}
-			onSelect={selectCountry}
-		/>
-	</section>
+		<div class="flex flex-col gap-3 md:contents">
+			<div
+				class="flex flex-col gap-3 md:pointer-events-auto md:absolute md:top-4 md:left-4 md:w-88"
+			>
+				<section
+					class="border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					aria-label={m.dashboard_stat_all_time_uniques()}
+				>
+					<AllTimeVisitorsPanel
+						value={lifetimeUniqueVisitors}
+						loading={status === 'loading'}
+						errorMessage={status === 'error' ? errorMessage : ''}
+						onRetry={load}
+					/>
+				</section>
+
+				<section
+					class="border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					aria-label={m.dashboard_chart_uniques()}
+				>
+					<VisitorsPanel />
+				</section>
+
+				<section
+					class="border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					aria-label={m.dashboard_chart_most_used_devices()}
+				>
+					<DevicesPanel
+						{devices}
+						loading={status === 'loading'}
+						errorMessage={status === 'error' ? errorMessage : ''}
+						onRetry={load}
+					/>
+				</section>
+			</div>
+
+			<section
+				class="flex max-h-[min(75vh,24rem)] flex-col overflow-hidden border border-border bg-card/95 text-foreground backdrop-blur-sm md:pointer-events-auto md:absolute md:top-4 md:right-4 md:left-auto md:max-h-[calc(100%-2rem)] md:w-88"
+				aria-label={m.dashboard_chart_countries()}
+			>
+				<CountriesPanel
+					{countries}
+					loading={status === 'loading'}
+					errorMessage={status === 'error' ? errorMessage : ''}
+					onRetry={load}
+					{activeName}
+					onSelect={selectCountry}
+				/>
+			</section>
+		</div>
+	</div>
 </div>

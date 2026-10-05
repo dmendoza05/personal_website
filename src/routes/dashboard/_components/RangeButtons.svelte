@@ -4,10 +4,12 @@
 
 	let {
 		range,
-		onRangeChange
+		onRangeChange,
+		compact = false
 	}: {
 		range: ChartRange;
 		onRangeChange: (range: ChartRange) => void;
+		compact?: boolean;
 	} = $props();
 
 	function rangeLabel(target: ChartRange): string {
@@ -18,7 +20,11 @@
 	}
 
 	function rangeButtonClass(target: ChartRange): string {
-		return `h-12 w-full rounded-sm border px-2 text-center text-xs font-semibold uppercase leading-tight tracking-[0.2em] transition-colors rajdhani ${
+		const size = compact
+			? 'h-9 px-1 text-[0.65rem] tracking-[0.08em] whitespace-nowrap'
+			: 'h-12 px-2 text-xs tracking-[0.2em]';
+
+		return `w-full rounded-sm border text-center font-semibold uppercase leading-none transition-colors rajdhani ${size} ${
 			range === target
 				? 'border-accent bg-accent text-accent-foreground'
 				: 'border-border bg-card/70 text-muted hover:border-accent/60 hover:text-foreground'
@@ -26,7 +32,11 @@
 	}
 </script>
 
-<div class="grid h-24 shrink-0 grid-cols-2 gap-2 sm:h-12 sm:grid-cols-4">
+<div
+	class={compact
+		? 'grid shrink-0 grid-cols-4 gap-1'
+		: 'grid h-24 shrink-0 grid-cols-2 gap-2 sm:h-12 sm:grid-cols-4'}
+>
 	{#each CHART_RANGES as targetRange (targetRange)}
 		<button type="button" class={rangeButtonClass(targetRange)} onclick={() => onRangeChange(targetRange)}>
 			{rangeLabel(targetRange)}
