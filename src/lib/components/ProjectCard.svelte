@@ -7,7 +7,7 @@
 	let { project }: { project: Project } = $props();
 
 	const chip =
-		'inline-flex h-9 items-center gap-1.5 border border-border bg-card/70 px-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted rajdhani transition-colors';
+		'inline-flex h-9 items-center gap-1.5 border border-border bg-card/70 text-xs font-semibold uppercase tracking-[0.14em] text-muted rajdhani transition-colors';
 
 	const type = $derived(getProjectType(project.type));
 </script>
@@ -52,9 +52,9 @@
 
 		<ul class="mt-3 flex flex-wrap gap-1">
 			{#each project.tags as tag (tag)}
-				<li class="{chip} pointer-events-none">
-					<SkillLogo id={tag} class="size-3 shrink-0" />
-					{getSkill(tag).label}
+				<li class="{chip} pointer-events-none w-9 justify-center sm:w-auto sm:px-2">
+					<SkillLogo id={tag} class="size-4 shrink-0 sm:size-3" />
+					<span class="hidden sm:inline">{getSkill(tag).label}</span>
 				</li>
 			{/each}
 		</ul>
@@ -66,7 +66,7 @@
 						href={project.href}
 						target="_blank"
 						rel="noopener noreferrer"
-						class="{chip} hover:border-accent/60 hover:text-foreground"
+						class="{chip} px-2 hover:border-accent/60 hover:text-foreground"
 					>
 						Live demo
 					</a>
@@ -76,7 +76,7 @@
 						href={project.repo}
 						target="_blank"
 						rel="noopener noreferrer"
-						class="{chip} hover:border-accent/60 hover:text-foreground"
+						class="{chip} px-2 hover:border-accent/60 hover:text-foreground"
 					>
 						Source
 					</a>

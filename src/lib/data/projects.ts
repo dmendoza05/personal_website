@@ -52,15 +52,27 @@ export type WorksFilter = {
 
 export const projects: Project[] = [
 	{
-		slug: 'personal-website',
-		title: 'Personal Website',
+		slug: 'danielmendoza-website',
+		title: 'danielmendoza.io',
 		description:
 			'A SvelteKit portfolio site with projects, an about page, and a markdown-powered blog. Built with Tailwind CSS and i18n support.',
 		type: 'website',
 		tags: ['sveltekit', 'typescript', 'tailwindcss'],
 		keywords: ['portfolio', 'i18n'],
+		thumbnail: '/projects/danielmendoza-website.jpg',
 		repo: 'https://github.com/dmendoza05/personal-website',
 		featured: true
+	},
+	{
+		slug: 'darkside',
+		title: 'Darkside',
+		description:
+			'A Chrome extension that applies a dark theme to any website, with controls for brightness, contrast, and warmth.',
+		type: 'chrome-extension',
+		tags: ['javascript', 'html', 'css'],
+		keywords: ['dark mode', 'eye care'],
+		thumbnail: '/projects/darkside.jpg',
+		repo: 'https://chromewebstore.google.com/detail/darkside/kkddlokgbhgmebbfngdapjkaloifdbbb'
 	}
 ];
 
