@@ -25,4 +25,10 @@ describe('findCountryStats', () => {
 		expect(findCountryStats(countries, '')).toBeNull();
 		expect(findCountryStats(countries, 'Antarctica')).toBeNull();
 	});
+
+	it('matches an analytics row stored under an ISO code', () => {
+		const coded: DashboardCountry[] = [{ country: 'US', requests: 8, pageViews: 3 }];
+		expect(findCountryStats(coded, 'United States of America', 'US')).toEqual(coded[0]);
+		expect(findCountryStats(coded, 'United States of America')).toBeNull();
+	});
 });

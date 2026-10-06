@@ -50,9 +50,16 @@ export function countryLookupKey(name: string): string {
 
 export function findCountryStats(
 	countries: DashboardCountry[],
-	name: string
+	name: string,
+	code = ''
 ): DashboardCountry | null {
 	const key = countryLookupKey(name);
-	if (!key) return null;
-	return countries.find((entry) => countryLookupKey(entry.country) === key) ?? null;
+	if (key) {
+		const byName = countries.find((entry) => countryLookupKey(entry.country) === key);
+		if (byName) return byName;
+	}
+
+	const normalized = code.trim().toUpperCase();
+	if (!normalized) return null;
+	return countries.find((entry) => entry.country.trim().toUpperCase() === normalized) ?? null;
 }

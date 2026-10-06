@@ -1,5 +1,7 @@
 import { describe, expect, it } from 'vitest';
 import {
+	COUNTRY_PAGEVIEWS_QUERY,
+	DEVICES_QUERY,
 	DIMENSIONS_QUERY,
 	INCREMENTAL_QUERY,
 	TIMESERIES_QUERY,
@@ -87,6 +89,42 @@ describe('parseDimensionRows', () => {
 		]);
 	});
 
+	it('estimates device requests from sampled adaptive groups', () => {
+		const rows = parseDimensionRows({
+			data: {
+				viewer: {
+					zones: [
+						{
+							devices: [
+								{
+									count: 10,
+									avg: { sampleInterval: 1 },
+									dimensions: { clientDeviceType: 'desktop' }
+								},
+								{
+									count: 4,
+									avg: { sampleInterval: 2 },
+									dimensions: { clientDeviceType: 'mobile' }
+								},
+								{
+									count: 1,
+									avg: { sampleInterval: 1 },
+									dimensions: { clientDeviceType: 'tablet' }
+								}
+							]
+						}
+					]
+				}
+			}
+		});
+
+		expect(rows).toEqual([
+			{ kind: 'device', key: 'desktop', value: 10 },
+			{ kind: 'device', key: 'mobile', value: 8 },
+			{ kind: 'device', key: 'other', value: 1 }
+		]);
+	});
+
 	it('sums page views for each country, including countries with no requests', () => {
 		const rows = parseDimensionRows({
 			data: {
@@ -117,6 +155,43 @@ describe('parseDimensionRows', () => {
 			{ kind: 'country', key: 'United States', value: 20 },
 			{ kind: 'country_pageview', key: 'United States', value: 5 },
 			{ kind: 'country_pageview', key: 'Mexico', value: 4 }
+		]);
+	});
+
+	it('estimates country page views from sampled html responses', () => {
+		const rows = parseDimensionRows({
+			data: {
+				viewer: {
+					zones: [
+						{
+							countries: [
+								{
+									dimensions: { clientCountryName: 'US' },
+									sum: { requests: 20 }
+								}
+							],
+							countryPageViews: [
+								{
+									dimensions: { clientCountryName: 'US' },
+									count: 4,
+									avg: { sampleInterval: 1 }
+								},
+								{
+									dimensions: { clientCountryName: 'MX' },
+									count: 2,
+									avg: { sampleInterval: 3 }
+								}
+							]
+						}
+					]
+				}
+			}
+		});
+
+		expect(rows).toEqual([
+			{ kind: 'country', key: 'US', value: 20 },
+			{ kind: 'country_pageview', key: 'US', value: 4 },
+			{ kind: 'country_pageview', key: 'MX', value: 6 }
 		]);
 	});
 });
@@ -192,10 +267,22 @@ describe('GraphQL documents', () => {
 		expect(uniqueSection).not.toContain('dimensions');
 	});
 
-	it('loads country requests and page views by country name', () => {
+	it('loads country requests from daily groups and page views from html responses', () => {
 		expect(DIMENSIONS_QUERY).toContain('clientCountryName');
 		expect(DIMENSIONS_QUERY).toContain('requests');
-		expect(DIMENSIONS_QUERY).toContain('pageViews');
+		expect(DIMENSIONS_QUERY).not.toContain('pageViews');
 		expect(DIMENSIONS_QUERY).not.toContain('clientDeviceType');
+
+		expect(COUNTRY_PAGEVIEWS_QUERY).toContain('httpRequestsAdaptiveGroups');
+		expect(COUNTRY_PAGEVIEWS_QUERY).toContain('edgeResponseContentTypeName: "html"');
+		expect(COUNTRY_PAGEVIEWS_QUERY).toContain('edgeResponseStatus: 200');
+		expect(COUNTRY_PAGEVIEWS_QUERY).toContain('requestSource: "eyeball"');
+		expect(COUNTRY_PAGEVIEWS_QUERY).toContain('sampleInterval');
+		expect(COUNTRY_PAGEVIEWS_QUERY).toContain('clientCountryName');
+
+		expect(DEVICES_QUERY).toContain('httpRequestsAdaptiveGroups');
+		expect(DEVICES_QUERY).toContain('clientDeviceType');
+		expect(DEVICES_QUERY).toContain('sampleInterval');
+		expect(DEVICES_QUERY).toContain('requestSource: "eyeball"');
 	});
 });

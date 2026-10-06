@@ -2,13 +2,16 @@
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import {
+		formatDashboardNumber,
+		formatFetchedAt,
 		type DashboardCountry,
 		type DashboardDevice,
 		type DashboardResponse
 	} from '$lib/dashboard';
 	import EarthGlobe from '$lib/components/earth/EarthGlobe.svelte';
 	import { loadCountries } from '$lib/components/earth/vector-earth';
-	import { countryLookupKey } from './earth-countries';
+	import { countryAcronym, countryCode, countryFlag } from './country-codes';
+	import { countryLookupKey, findCountryStats } from './earth-countries';
 	import AllTimeVisitorsPanel from './AllTimeVisitorsPanel.svelte';
 	import CountriesPanel from './CountriesPanel.svelte';
 	import DevicesPanel from './DevicesPanel.svelte';
@@ -27,6 +30,7 @@
 	let countries = $state<DashboardCountry[]>([]);
 	let devices = $state<DashboardDevice[]>([]);
 	let lifetimeUniqueVisitors = $state<number | null>(null);
+	let fetchedAt = $state('');
 	let status = $state<LoadStatus>('loading');
 	let errorMessage = $state('');
 
@@ -35,6 +39,26 @@
 	});
 
 	const activeName = $derived(hovered || selected);
+	const lastUpdatedLabel = $derived(fetchedAt ? formatFetchedAt(fetchedAt) : '');
+	const hoveredFlag = $derived(hovered ? countryFlag(hovered) : '');
+	const hoveredAcronym = $derived(hovered ? countryAcronym(hovered) : '');
+	const hoveredStats = $derived(
+		hovered ? findCountryStats(countries, hovered, countryCode(hovered)) : null
+	);
+	const hoverDetails = $derived(
+		hoveredStats
+			? [
+					{
+						label: m.dashboard_tab_pageviews(),
+						value: formatDashboardNumber(hoveredStats.pageViews)
+					},
+					{
+						label: m.dashboard_tab_requests(),
+						value: formatDashboardNumber(hoveredStats.requests)
+					}
+				]
+			: []
+	);
 
 	function setCountry(name: string) {
 		hovered = name;
@@ -73,6 +97,7 @@
 
 			const dashboard = payload as DashboardResponse;
 			lifetimeUniqueVisitors = dashboard.lifetimeUniqueVisitors;
+			fetchedAt = dashboard.range.fetchedAt;
 			countries = dashboard.countries.map((entry) => ({
 				country: entry.country,
 				requests: entry.requests,
@@ -94,7 +119,16 @@
 		onpointerenter={showControls}
 		onpointerleave={hideControls}
 	>
-		<EarthGlobe bind:spinning bind:size {focusName} {focusRequest} onCountry={setCountry} />
+		<EarthGlobe
+			bind:spinning
+			bind:size
+			{focusName}
+			{focusRequest}
+			details={hoverDetails}
+			flag={hoveredFlag}
+			acronym={hoveredAcronym}
+			onCountry={setCountry}
+		/>
 		{#if globeHovered}
 			<GlobeControls bind:spinning bind:size />
 		{/if}
@@ -154,4 +188,12 @@
 			</section>
 		</div>
 	</div>
+
+	{#if lastUpdatedLabel}
+		<p
+			class="pointer-events-none absolute bottom-4 left-1/2 z-10 -translate-x-1/2 text-center text-xs text-muted rajdhani"
+		>
+			{m.dashboard_last_updated({ time: lastUpdatedLabel })}
+		</p>
+	{/if}
 </div>

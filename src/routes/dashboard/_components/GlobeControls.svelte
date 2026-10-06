@@ -26,7 +26,7 @@
 
 <!--  -->
 <section
-	class="absolute bottom-4 left-1/2 -translate-x-1/2 z-10 flex items-center gap-2 border border-border bg-card/95 p-2 text-foreground backdrop-blur-sm"
+	class="absolute bottom-16 left-1/2 z-10 flex -translate-x-1/2 items-center gap-2 border border-border bg-card/95 p-2 text-foreground backdrop-blur-sm"
 	aria-label={m.dashboard_globe_size()}
 >
 	<button
