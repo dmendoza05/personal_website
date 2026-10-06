@@ -1,4 +1,6 @@
 .panel-shell {
+	height: 0;
+	overflow: hidden;
 	animation: panel-from-left var(--shell-ms, 750ms) cubic-bezier(0.33, 1, 0.68, 1) both;
 	animation-delay: calc(var(--shell, 0) * var(--shell-stagger, 100ms));
 }
@@ -91,6 +93,8 @@
 	.panel-piece.is-in,
 	.panel-meter,
 	.panel-meter.is-in {
+		height: auto !important;
+		overflow: visible;
 		animation: none;
 		opacity: 1;
 		transform: none;

@@ -16,6 +16,7 @@
 	import CountriesPanel from './CountriesPanel.svelte';
 	import DevicesPanel from './DevicesPanel.svelte';
 	import GlobeControls from './GlobeControls.svelte';
+	import PanelShell from './PanelShell.svelte';
 	import {
 		PANEL_SHELL_MS,
 		PANEL_SHELL_STAGGER_MS,
@@ -158,10 +159,10 @@
 			<div
 				class="flex flex-col gap-3 md:pointer-events-auto md:absolute md:top-4 md:left-4 md:w-88"
 			>
-				<section
-					class="panel-shell border border-border bg-card/95 text-foreground backdrop-blur-sm"
-					style:--shell="0"
-					aria-label={m.dashboard_stat_all_time_uniques()}
+				<PanelShell
+					class="border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					shell={0}
+					label={m.dashboard_stat_all_time_uniques()}
 				>
 					<AllTimeVisitorsPanel
 						value={lifetimeUniqueVisitors}
@@ -170,20 +171,20 @@
 						onRetry={load}
 						phase={phases[0]}
 					/>
-				</section>
+				</PanelShell>
 
-				<section
-					class="panel-shell border border-border bg-card/95 text-foreground backdrop-blur-sm"
-					style:--shell="1"
-					aria-label={m.dashboard_chart_uniques()}
+				<PanelShell
+					class="border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					shell={1}
+					label={m.dashboard_chart_uniques()}
 				>
 					<VisitorsPanel phase={phases[1]} />
-				</section>
+				</PanelShell>
 
-				<section
-					class="panel-shell border border-border bg-card/95 text-foreground backdrop-blur-sm"
-					style:--shell="2"
-					aria-label={m.dashboard_chart_most_used_devices()}
+				<PanelShell
+					class="border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					shell={2}
+					label={m.dashboard_chart_most_used_devices()}
 				>
 					<DevicesPanel
 						{devices}
@@ -192,13 +193,13 @@
 						onRetry={load}
 						phase={phases[2]}
 					/>
-				</section>
+				</PanelShell>
 			</div>
 
-			<section
-				class="panel-shell panel-shell-right flex max-h-[min(75vh,24rem)] flex-col overflow-hidden border border-border bg-card/95 text-foreground backdrop-blur-sm md:pointer-events-auto md:absolute md:top-4 md:right-4 md:left-auto md:max-h-[calc(100%-2rem)] md:w-88"
-				style:--shell="3"
-				aria-label={m.dashboard_chart_countries()}
+			<PanelShell
+				class="panel-shell-right flex max-h-[min(75vh,24rem)] flex-col border border-border bg-card/95 text-foreground backdrop-blur-sm md:pointer-events-auto md:absolute md:top-4 md:right-4 md:left-auto md:max-h-[calc(100%-2rem)] md:w-88"
+				shell={3}
+				label={m.dashboard_chart_countries()}
 			>
 				<CountriesPanel
 					{countries}
@@ -209,7 +210,7 @@
 					onSelect={selectCountry}
 					phase={phases[3]}
 				/>
-			</section>
+			</PanelShell>
 		</div>
 	</div>
 
