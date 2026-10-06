@@ -9,7 +9,7 @@ import type {
 import { normalizeDevices } from '$lib/dashboard';
 import { getDb } from './index';
 import { analyticsDaily, analyticsDimensions, analyticsRollups } from './schema';
-import { getTopPages } from './pageviews';
+import { RESUME_DOWNLOAD_PATH, getPageViewCount, getTopPages } from './pageviews';
 import { rollupWindowBounds, utcToday, type RollupWindow } from '../analytics/dates';
 import { assembleDashboardResponse, type DashboardQuery } from '../analytics/dashboard-query';
 
@@ -115,14 +115,18 @@ async function loadBreakdowns(): Promise<{
 	topPages: DashboardTopPage[];
 	countries: DashboardCountry[];
 	devices: DashboardDevice[];
+	resumeDownloads: number;
 }> {
-	const topPages = await getTopPages(8).catch(() => [] as DashboardTopPage[]);
+	const [topPages, resumeDownloads] = await Promise.all([
+		getTopPages(8).catch(() => [] as DashboardTopPage[]),
+		getPageViewCount(RESUME_DOWNLOAD_PATH).catch(() => 0)
+	]);
 
 	try {
 		const [countries, devices] = await Promise.all([loadCountries(), loadDevices()]);
-		return { topPages, countries, devices };
+		return { topPages, countries, devices, resumeDownloads };
 	} catch {
-		return { topPages, countries: [], devices: normalizeDevices([]) };
+		return { topPages, countries: [], devices: normalizeDevices([]), resumeDownloads };
 	}
 }
 

@@ -17,6 +17,7 @@
 	import DevicesPanel from './DevicesPanel.svelte';
 	import GlobeControls from './GlobeControls.svelte';
 	import PanelShell from './PanelShell.svelte';
+	import ResumeDownloadsPanel from './ResumeDownloadsPanel.svelte';
 	import {
 		PANEL_SHELL_MS,
 		PANEL_SHELL_STAGGER_MS,
@@ -37,10 +38,11 @@
 	let countries = $state<DashboardCountry[]>([]);
 	let devices = $state<DashboardDevice[]>([]);
 	let lifetimeUniqueVisitors = $state<number | null>(null);
+	let resumeDownloads = $state<number | null>(null);
 	let fetchedAt = $state('');
 	let status = $state<LoadStatus>('loading');
 	let errorMessage = $state('');
-	let phases = $state<PanelPhase[]>(['shell', 'shell', 'shell', 'shell']);
+	let phases = $state<PanelPhase[]>(['shell', 'shell', 'shell', 'shell', 'shell']);
 
 	onMount(() => {
 		const cancels = phases.map((_, index) =>
@@ -113,6 +115,7 @@
 
 			const dashboard = payload as DashboardResponse;
 			lifetimeUniqueVisitors = dashboard.lifetimeUniqueVisitors;
+			resumeDownloads = dashboard.resumeDownloads ?? 0;
 			fetchedAt = dashboard.range.fetchedAt;
 			countries = dashboard.countries.map((entry) => ({
 				country: entry.country,
@@ -196,21 +199,39 @@
 				</PanelShell>
 			</div>
 
-			<PanelShell
-				class="panel-shell-right flex max-h-[min(75vh,24rem)] flex-col border border-border bg-card/95 text-foreground backdrop-blur-sm md:pointer-events-auto md:absolute md:top-4 md:right-4 md:left-auto md:max-h-[calc(100%-2rem)] md:w-88"
-				shell={3}
-				label={m.dashboard_chart_countries()}
+			<div
+				class="flex flex-col gap-3 md:pointer-events-auto md:absolute md:top-4 md:right-4 md:bottom-4 md:w-88"
 			>
-				<CountriesPanel
-					{countries}
-					loading={status === 'loading'}
-					errorMessage={status === 'error' ? errorMessage : ''}
-					onRetry={load}
-					{activeName}
-					onSelect={selectCountry}
-					phase={phases[3]}
-				/>
-			</PanelShell>
+				<PanelShell
+					class="panel-shell-right flex min-h-0 max-h-[min(75vh,24rem)] flex-col border border-border bg-card/95 text-foreground backdrop-blur-sm md:max-h-[calc(100%-6.5rem)]"
+					shell={3}
+					label={m.dashboard_chart_countries()}
+				>
+					<CountriesPanel
+						{countries}
+						loading={status === 'loading'}
+						errorMessage={status === 'error' ? errorMessage : ''}
+						onRetry={load}
+						{activeName}
+						onSelect={selectCountry}
+						phase={phases[3]}
+					/>
+				</PanelShell>
+
+				<PanelShell
+					class="panel-shell-right shrink-0 border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					shell={4}
+					label={m.dashboard_stat_resume_downloads()}
+				>
+					<ResumeDownloadsPanel
+						value={resumeDownloads}
+						loading={status === 'loading'}
+						errorMessage={status === 'error' ? errorMessage : ''}
+						onRetry={load}
+						phase={phases[4]}
+					/>
+				</PanelShell>
+			</div>
 		</div>
 	</div>
 

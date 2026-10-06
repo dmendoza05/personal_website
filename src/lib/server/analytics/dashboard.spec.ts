@@ -81,6 +81,7 @@ describe('assembleDashboardResponse', () => {
 			{ device: 'mobile', requests: 0 },
 			{ device: 'other', requests: 0 }
 		]);
+		expect(result.resumeDownloads).toBe(0);
 	});
 
 	it('leaves custom unique visitors null', () => {
