@@ -36,7 +36,7 @@ export const NAV_ICON_PATHS: Record<NavIcon | 'resume', string> = {
 };
 
 export const NAV_ITEMS: { href: Pathname; label: () => string; icon: NavIcon }[] = [
-	// hide this for now: { href: '/works', label: () => m.nav_works(), icon: 'works' },
+	{ href: '/works', label: () => m.nav_works(), icon: 'works' },
 	{ href: '/about', label: () => m.nav_about(), icon: 'about' },
 	// hide this for now: { href: '/blog', label: () => m.nav_blog(), icon: 'blog' }
 ];
