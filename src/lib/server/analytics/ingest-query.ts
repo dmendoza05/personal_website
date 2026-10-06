@@ -16,6 +16,8 @@ type CountryMapEntry = {
 };
 
 type GraphqlGroup = {
+	count?: number | null;
+	avg?: { sampleInterval?: number | null } | null;
 	sum?: {
 		pageViews?: number | null;
 		requests?: number | null;
@@ -39,6 +41,7 @@ export type IngestGraphqlPayload = {
 				unique90d?: GraphqlGroup[] | null;
 				uniqueLifetime?: GraphqlGroup[] | null;
 				countries?: GraphqlGroup[] | null;
+				countryPageViews?: GraphqlGroup[] | null;
 				devices?: GraphqlGroup[] | null;
 			}> | null;
 		} | null;
@@ -125,7 +128,6 @@ query ($zoneTag: String!, $start: Date!, $end: Date!) {
       ) {
         sum {
           requests
-          pageViews
         }
         dimensions {
           clientCountryName
@@ -136,8 +138,71 @@ query ($zoneTag: String!, $start: Date!, $end: Date!) {
 }
 `;
 
+/**
+ * Daily `httpRequests1dGroups.pageViews` is a zone total and stays empty when
+ * grouped by country. Page views are successful HTML responses, which adaptive
+ * groups can count per country.
+ */
+export const COUNTRY_PAGEVIEWS_QUERY = `
+query ($zoneTag: String!, $start: Time!, $end: Time!) {
+  viewer {
+    zones(filter: { zoneTag: $zoneTag }) {
+      countryPageViews: httpRequestsAdaptiveGroups(
+        limit: 1000
+        filter: {
+          datetime_geq: $start
+          datetime_lt: $end
+          requestSource: "eyeball"
+          edgeResponseContentTypeName: "html"
+          edgeResponseStatus: 200
+        }
+        orderBy: [count_DESC]
+      ) {
+        count
+        avg { sampleInterval }
+        dimensions { clientCountryName }
+      }
+    }
+  }
+}
+`;
+
+/** Daily groups have no device dimension. Adaptive groups can group requests by device type. */
+export const DEVICES_QUERY = `
+query ($zoneTag: String!, $start: Time!, $end: Time!) {
+  viewer {
+    zones(filter: { zoneTag: $zoneTag }) {
+      devices: httpRequestsAdaptiveGroups(
+        limit: 15
+        filter: {
+          datetime_geq: $start
+          datetime_lt: $end
+          requestSource: "eyeball"
+        }
+        orderBy: [count_DESC]
+      ) {
+        count
+        avg { sampleInterval }
+        dimensions { clientDeviceType }
+      }
+    }
+  }
+}
+`;
+
 function num(value: number | null | undefined): number {
 	return typeof value === 'number' && Number.isFinite(value) ? value : 0;
+}
+
+/** Adaptive `count` is sampled; multiply by `sampleInterval` to estimate the total. */
+function sampledCount(
+	count: number | null | undefined,
+	sampleInterval: number | null | undefined
+): number {
+	const events = num(count);
+	if (events <= 0) return 0;
+	const interval = num(sampleInterval);
+	return Math.round(events * (interval > 0 ? interval : 1));
 }
 
 export function graphqlErrorMessage(payload: IngestGraphqlPayload): string | null {
@@ -238,6 +303,15 @@ export function parseDimensionRows(payload: IngestGraphqlPayload): DimensionRow[
 		}
 	}
 
+	for (const group of zone.countryPageViews ?? []) {
+		const pageViews = sampledCount(group.count, group.avg?.sampleInterval);
+		if (pageViews <= 0) continue;
+		const key = group.dimensions?.clientCountryName?.trim() || 'Unknown';
+		const current = countryTotals.get(key) ?? { requests: 0, pageViews: 0 };
+		current.pageViews += pageViews;
+		countryTotals.set(key, current);
+	}
+
 	const countries: DimensionRow[] = [...countryTotals.entries()]
 		.sort(
 			(left, right) =>
@@ -253,7 +327,10 @@ export function parseDimensionRows(payload: IngestGraphqlPayload): DimensionRow[
 	const deviceTotals: Record<string, number> = {};
 	for (const group of zone.devices ?? []) {
 		const key = bucketDevice(group.dimensions?.clientDeviceType ?? '');
-		deviceTotals[key] = (deviceTotals[key] ?? 0) + num(group.sum?.requests);
+		const requests =
+			num(group.sum?.requests) || sampledCount(group.count, group.avg?.sampleInterval);
+		if (requests <= 0) continue;
+		deviceTotals[key] = (deviceTotals[key] ?? 0) + requests;
 	}
 
 	const devices: DimensionRow[] = (['desktop', 'mobile', 'other'] as const)

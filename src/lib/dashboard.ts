@@ -55,6 +55,7 @@ export type DashboardResponse = {
 	topPages: DashboardTopPage[];
 	countries: DashboardCountry[];
 	devices: DashboardDevice[];
+	resumeDownloads: number;
 };
 
 export function formatDashboardNumber(value: number | null | undefined): string {

@@ -2,6 +2,9 @@ import { and, desc, eq, gte, lte, sql, sum } from 'drizzle-orm';
 import { getDb } from './index';
 import { pageViewCounts, pageViewDaily } from './schema';
 
+/** Stored in the page-view counters so the total shows up with the other paths. */
+export const RESUME_DOWNLOAD_PATH = '/resume.pdf';
+
 function utcDayString(date = new Date()): string {
 	return date.toISOString().slice(0, 10);
 }

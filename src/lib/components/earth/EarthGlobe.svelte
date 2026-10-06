@@ -13,7 +13,10 @@
 		spinning = $bindable(true),
 		size = $bindable(1 / 1.2),
 		focusName = '',
-		focusRequest = 0
+		focusRequest = 0,
+		details = [],
+		flag = '',
+		acronym = ''
 	}: {
 		onCountry?: (name: string) => void;
 		/** When false, auto-spin stops. Drag and country hover still work. */
@@ -24,6 +27,12 @@
 		focusName?: string;
 		/** Increments each time the globe should turn toward `focusName`. */
 		focusRequest?: number;
+		/** Extra lines shown under the hovered country name. */
+		details?: Array<{ label: string; value: string }>;
+		/** Emoji flag for the hovered country. */
+		flag?: string;
+		/** Short country code shown beside the name. */
+		acronym?: string;
 	} = $props();
 
 	const globe = {
@@ -416,7 +425,27 @@
 
 <canvas bind:this={canvas} class="globe" aria-label="Rotating Earth"></canvas>
 {#if countryName}
-	<p class="country-label" style:left="{labelX}px" style:top="{labelY}px">{countryName}</p>
+	<div class="country-label" style:left="{labelX}px" style:top="{labelY}px">
+		<div class="country-heading">
+			{#if flag}
+				<span class="country-flag" aria-hidden="true">{flag}</span>
+			{/if}
+			<p class="country-name">{countryName}</p>
+			{#if acronym}
+				<p class="country-acronym">{acronym}</p>
+			{/if}
+		</div>
+		{#if details.length > 0}
+			<dl>
+				{#each details as stat (stat.label)}
+					<div class="country-stat">
+						<dt>{stat.label}</dt>
+						<dd>{stat.value}</dd>
+					</div>
+				{/each}
+			</dl>
+		{/if}
+	</div>
 {/if}
 
 <style>
@@ -433,13 +462,57 @@
 	.country-label {
 		position: absolute;
 		z-index: 20;
-		padding: 0.2rem 0.55rem;
+		display: flex;
+		flex-direction: column;
+		gap: 0.35rem;
+		min-width: 10rem;
+		padding: 0.45rem 0.65rem;
 		border: 1px solid var(--border);
-		background: var(--card);
+		background: color-mix(in srgb, var(--card) 95%, transparent);
 		color: var(--fg);
 		font-size: 0.875rem;
 		line-height: 1.2;
 		pointer-events: none;
+	}
+
+	.country-heading {
+		display: flex;
+		align-items: baseline;
+		gap: 0.4rem;
+	}
+
+	.country-flag {
+		font-size: 1rem;
+		line-height: 1;
+	}
+
+	.country-name {
+		margin: 0;
+		font-weight: 600;
 		white-space: nowrap;
+	}
+
+	.country-acronym {
+		margin: 0;
+		color: var(--muted);
+		font-size: 0.7rem;
+		letter-spacing: 0.08em;
+		white-space: nowrap;
+	}
+
+	.country-stat {
+		display: flex;
+		justify-content: space-between;
+		gap: 1rem;
+		font-size: 0.75rem;
+	}
+
+	.country-stat dt {
+		color: var(--muted);
+	}
+
+	.country-stat dd {
+		margin: 0;
+		font-variant-numeric: tabular-nums;
 	}
 </style>

@@ -2,17 +2,28 @@
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import {
+		formatDashboardNumber,
+		formatFetchedAt,
 		type DashboardCountry,
 		type DashboardDevice,
 		type DashboardResponse
 	} from '$lib/dashboard';
 	import EarthGlobe from '$lib/components/earth/EarthGlobe.svelte';
 	import { loadCountries } from '$lib/components/earth/vector-earth';
-	import { countryLookupKey } from './earth-countries';
+	import { countryAcronym, countryCode, countryFlag } from './country-codes';
+	import { countryLookupKey, findCountryStats } from './earth-countries';
 	import AllTimeVisitorsPanel from './AllTimeVisitorsPanel.svelte';
 	import CountriesPanel from './CountriesPanel.svelte';
 	import DevicesPanel from './DevicesPanel.svelte';
 	import GlobeControls from './GlobeControls.svelte';
+	import PanelShell from './PanelShell.svelte';
+	import ResumeDownloadsPanel from './ResumeDownloadsPanel.svelte';
+	import {
+		PANEL_SHELL_MS,
+		PANEL_SHELL_STAGGER_MS,
+		schedulePanelPhases,
+		type PanelPhase
+	} from './panel-motion';
 	import VisitorsPanel from './VisitorsPanel.svelte';
 
 	type LoadStatus = 'loading' | 'ready' | 'error';
@@ -27,14 +38,45 @@
 	let countries = $state<DashboardCountry[]>([]);
 	let devices = $state<DashboardDevice[]>([]);
 	let lifetimeUniqueVisitors = $state<number | null>(null);
+	let resumeDownloads = $state<number | null>(null);
+	let fetchedAt = $state('');
 	let status = $state<LoadStatus>('loading');
 	let errorMessage = $state('');
+	let phases = $state<PanelPhase[]>(['shell', 'shell', 'shell', 'shell', 'shell']);
 
 	onMount(() => {
+		const cancels = phases.map((_, index) =>
+			schedulePanelPhases((next) => {
+				phases[index] = next;
+			}, index)
+		);
 		void load();
+		return () => {
+			for (const cancel of cancels) cancel();
+		};
 	});
 
 	const activeName = $derived(hovered || selected);
+	const lastUpdatedLabel = $derived(fetchedAt ? formatFetchedAt(fetchedAt) : '');
+	const hoveredFlag = $derived(hovered ? countryFlag(hovered) : '');
+	const hoveredAcronym = $derived(hovered ? countryAcronym(hovered) : '');
+	const hoveredStats = $derived(
+		hovered ? findCountryStats(countries, hovered, countryCode(hovered)) : null
+	);
+	const hoverDetails = $derived(
+		hoveredStats
+			? [
+					{
+						label: m.dashboard_tab_pageviews(),
+						value: formatDashboardNumber(hoveredStats.pageViews)
+					},
+					{
+						label: m.dashboard_tab_requests(),
+						value: formatDashboardNumber(hoveredStats.requests)
+					}
+				]
+			: []
+	);
 
 	function setCountry(name: string) {
 		hovered = name;
@@ -73,6 +115,8 @@
 
 			const dashboard = payload as DashboardResponse;
 			lifetimeUniqueVisitors = dashboard.lifetimeUniqueVisitors;
+			resumeDownloads = dashboard.resumeDownloads ?? 0;
+			fetchedAt = dashboard.range.fetchedAt;
 			countries = dashboard.countries.map((entry) => ({
 				country: entry.country,
 				requests: entry.requests,
@@ -94,7 +138,16 @@
 		onpointerenter={showControls}
 		onpointerleave={hideControls}
 	>
-		<EarthGlobe bind:spinning bind:size {focusName} {focusRequest} onCountry={setCountry} />
+		<EarthGlobe
+			bind:spinning
+			bind:size
+			{focusName}
+			{focusRequest}
+			details={hoverDetails}
+			flag={hoveredFlag}
+			acronym={hoveredAcronym}
+			onCountry={setCountry}
+		/>
 		{#if globeHovered}
 			<GlobeControls bind:spinning bind:size />
 		{/if}
@@ -102,56 +155,91 @@
 
 	<div
 		class="absolute inset-0 z-10 overflow-y-auto p-4 md:pointer-events-none md:overflow-visible md:p-0"
+		style:--shell-ms={`${PANEL_SHELL_MS}ms`}
+		style:--shell-stagger={`${PANEL_SHELL_STAGGER_MS}ms`}
 	>
 		<div class="flex flex-col gap-3 md:contents">
 			<div
 				class="flex flex-col gap-3 md:pointer-events-auto md:absolute md:top-4 md:left-4 md:w-88"
 			>
-				<section
+				<PanelShell
 					class="border border-border bg-card/95 text-foreground backdrop-blur-sm"
-					aria-label={m.dashboard_stat_all_time_uniques()}
+					shell={0}
+					label={m.dashboard_stat_all_time_uniques()}
 				>
 					<AllTimeVisitorsPanel
 						value={lifetimeUniqueVisitors}
 						loading={status === 'loading'}
 						errorMessage={status === 'error' ? errorMessage : ''}
 						onRetry={load}
+						phase={phases[0]}
 					/>
-				</section>
+				</PanelShell>
 
-				<section
+				<PanelShell
 					class="border border-border bg-card/95 text-foreground backdrop-blur-sm"
-					aria-label={m.dashboard_chart_uniques()}
+					shell={1}
+					label={m.dashboard_chart_uniques()}
 				>
-					<VisitorsPanel />
-				</section>
+					<VisitorsPanel phase={phases[1]} />
+				</PanelShell>
 
-				<section
+				<PanelShell
 					class="border border-border bg-card/95 text-foreground backdrop-blur-sm"
-					aria-label={m.dashboard_chart_most_used_devices()}
+					shell={2}
+					label={m.dashboard_chart_most_used_devices()}
 				>
 					<DevicesPanel
 						{devices}
 						loading={status === 'loading'}
 						errorMessage={status === 'error' ? errorMessage : ''}
 						onRetry={load}
+						phase={phases[2]}
 					/>
-				</section>
+				</PanelShell>
 			</div>
 
-			<section
-				class="flex max-h-[min(75vh,24rem)] flex-col overflow-hidden border border-border bg-card/95 text-foreground backdrop-blur-sm md:pointer-events-auto md:absolute md:top-4 md:right-4 md:left-auto md:max-h-[calc(100%-2rem)] md:w-88"
-				aria-label={m.dashboard_chart_countries()}
+			<div
+				class="flex flex-col gap-3 md:pointer-events-auto md:absolute md:top-4 md:right-4 md:bottom-4 md:w-88"
 			>
-				<CountriesPanel
-					{countries}
-					loading={status === 'loading'}
-					errorMessage={status === 'error' ? errorMessage : ''}
-					onRetry={load}
-					{activeName}
-					onSelect={selectCountry}
-				/>
-			</section>
+				<PanelShell
+					class="panel-shell-right flex min-h-0 max-h-[min(75vh,24rem)] flex-col border border-border bg-card/95 text-foreground backdrop-blur-sm md:max-h-[calc(100%-6.5rem)]"
+					shell={3}
+					label={m.dashboard_chart_countries()}
+				>
+					<CountriesPanel
+						{countries}
+						loading={status === 'loading'}
+						errorMessage={status === 'error' ? errorMessage : ''}
+						onRetry={load}
+						{activeName}
+						onSelect={selectCountry}
+						phase={phases[3]}
+					/>
+				</PanelShell>
+
+				<PanelShell
+					class="panel-shell-right shrink-0 border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					shell={4}
+					label={m.dashboard_stat_resume_downloads()}
+				>
+					<ResumeDownloadsPanel
+						value={resumeDownloads}
+						loading={status === 'loading'}
+						errorMessage={status === 'error' ? errorMessage : ''}
+						onRetry={load}
+						phase={phases[4]}
+					/>
+				</PanelShell>
+			</div>
 		</div>
 	</div>
+
+	{#if lastUpdatedLabel}
+		<p
+			class="pointer-events-none absolute bottom-4 left-1/2 z-10 -translate-x-1/2 text-center text-xs text-muted rajdhani"
+		>
+			{m.dashboard_last_updated({ time: lastUpdatedLabel })}
+		</p>
+	{/if}
 </div>

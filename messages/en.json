@@ -54,6 +54,7 @@
 	"dashboard_chart_uniques_subtitle": "Showing unique visitors for {range}",
 	"dashboard_chart_page_visits": "Page visits over time",
 	"dashboard_chart_countries": "Top countries",
+	"dashboard_stat_resume_downloads": "Resume downloads",
 	"dashboard_chart_devices": "Devices",
 	"dashboard_chart_most_used_devices": "Most used devices",
 	"dashboard_top_pages": "Top pages",

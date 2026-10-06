@@ -27,7 +27,7 @@
 			? ''
 			: 'is-in'}"
 	>
-		{m.dashboard_stat_all_time_uniques()}
+		{m.dashboard_stat_resume_downloads()}
 	</p>
 	{#if errorMessage}
 		<p class="panel-piece mt-2 text-xs text-muted rajdhani {showBody ? 'is-in' : ''}">

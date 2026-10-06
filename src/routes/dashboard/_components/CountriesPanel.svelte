@@ -1,8 +1,10 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages.js';
 	import { formatDashboardNumber, type DashboardCountry } from '$lib/dashboard';
+	import CountUp from './CountUp.svelte';
 	import { countryAcronym, countryFlag } from './country-codes';
 	import { countryLookupKey } from './earth-countries';
+	import type { PanelPhase } from './panel-motion';
 
 	type CountryMetric = 'pageViews' | 'requests';
 
@@ -12,7 +14,8 @@
 		errorMessage = '',
 		onRetry,
 		activeName = '',
-		onSelect
+		onSelect,
+		phase = 'content'
 	}: {
 		countries: DashboardCountry[];
 		loading?: boolean;
@@ -20,6 +23,7 @@
 		onRetry?: () => void;
 		activeName?: string;
 		onSelect?: (country: string) => void;
+		phase?: PanelPhase;
 	} = $props();
 
 	const METRICS: CountryMetric[] = ['pageViews', 'requests'];
@@ -31,6 +35,7 @@
 	let listEl = $state<HTMLDivElement>();
 
 	const activeKey = $derived(countryLookupKey(activeName));
+	const showBody = $derived(phase === 'content');
 	const listed = $derived(
 		countries
 			.filter((entry) => entry[metric] > 0)
@@ -67,19 +72,29 @@
 </script>
 
 <div class="flex flex-col">
-	<p class="px-3 pt-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted rajdhani">
+	<p
+		class="panel-label px-3 pt-3 text-xs font-semibold uppercase tracking-[0.2em] text-muted rajdhani {phase ===
+		'shell'
+			? ''
+			: 'is-in'}"
+	>
 		{m.dashboard_chart_countries()}
 	</p>
 
 	{#if loading}
-		<p class="px-3 py-4 text-xs text-muted rajdhani">{m.dashboard_loading()}</p>
+		<p class="panel-piece px-3 py-4 text-xs text-muted rajdhani {showBody ? 'is-in' : ''}">
+			{m.dashboard_loading()}
+		</p>
 	{:else if errorMessage}
-		<div class="px-3 py-4">
+		<div class="panel-piece px-3 py-4 {showBody ? 'is-in' : ''}">
 			<p class="text-xs text-muted rajdhani">{errorMessage}</p>
 			{#if onRetry}
 				<button
 					type="button"
-					class="mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent rajdhani"
+					class="panel-piece mt-3 text-xs font-semibold uppercase tracking-[0.2em] text-accent rajdhani {showBody
+						? 'is-in'
+						: ''}"
+					style:--piece="1"
 					onclick={onRetry}
 				>
 					{m.dashboard_retry()}
@@ -92,11 +107,12 @@
 			role="tablist"
 			aria-label={m.dashboard_chart_countries()}
 		>
-			{#each METRICS as target (target)}
+			{#each METRICS as target, index (target)}
 				<button
 					type="button"
 					role="tab"
-					class={tabClass(target)}
+					class="panel-piece {tabClass(target)} {showBody ? 'is-in' : ''}"
+					style:--piece={index}
 					aria-selected={metric === target}
 					onclick={() => (metric = target)}
 				>
@@ -106,7 +122,12 @@
 		</div>
 
 		{#if listed.length === 0}
-			<p class="px-3 py-4 text-xs text-muted rajdhani">{m.dashboard_empty()}</p>
+			<p
+				class="panel-piece px-3 py-4 text-xs text-muted rajdhani {showBody ? 'is-in' : ''}"
+				style:--piece="2"
+			>
+				{m.dashboard_empty()}
+			</p>
 		{:else}
 			<div
 				class="country-list mt-2"
@@ -114,10 +135,10 @@
 				bind:this={listEl}
 			>
 				<ul>
-					{#each listed as entry (entry.country)}
+					{#each listed as entry, index (entry.country)}
 						{@const amount = entry[metric]}
 						{@const active = isActive(entry)}
-						<li>
+						<li class="panel-piece {showBody ? 'is-in' : ''}" style:--piece={index + 2}>
 							<button
 								type="button"
 								data-active={active ? 'true' : undefined}
@@ -136,7 +157,9 @@
 									{countryFlag(entry.country)}
 								</span>
 								<span class="tracking-[0.14em]">{countryAcronym(entry.country)}</span>
-								<span class="ml-auto orbitron">{formatDashboardNumber(amount)}</span>
+								<span class="ml-auto orbitron">
+									<CountUp value={amount} active={showBody} />
+								</span>
 							</button>
 						</li>
 					{/each}

@@ -1,7 +1,13 @@
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import type { IngestFetch, IngestGraphqlPayload } from './ingest-query';
-import { INCREMENTAL_QUERY, TIMESERIES_QUERY, DIMENSIONS_QUERY } from './ingest-query';
-import { backfillChunks, inclusiveWindow, rollupWindowBounds } from './dates';
+import {
+	COUNTRY_PAGEVIEWS_QUERY,
+	DEVICES_QUERY,
+	DIMENSIONS_QUERY,
+	INCREMENTAL_QUERY,
+	TIMESERIES_QUERY
+} from './ingest-query';
+import { backfillChunks, inclusiveWindow, rollupWindowBounds, shiftUtcDay } from './dates';
 
 const mocks = vi.hoisted(() => ({
 	dayCount: 0,
@@ -104,6 +110,18 @@ describe('ingestAnalytics', () => {
 		expect(
 			fetchFn.mock.calls.filter(([, init]) => graphqlRequest(init).query === DIMENSIONS_QUERY)
 		).toHaveLength(1);
+		const pageViewCalls = fetchFn.mock.calls.filter(
+			([, init]) => graphqlRequest(init).query === COUNTRY_PAGEVIEWS_QUERY
+		);
+		const pageViewWindow = rollupWindowBounds('7d', '2026-08-13');
+		expect(pageViewCalls).toHaveLength(1);
+		expect(graphqlRequest(pageViewCalls[0]?.[1]).variables).toMatchObject({
+			start: `${pageViewWindow.start}T00:00:00Z`,
+			end: `${shiftUtcDay(pageViewWindow.end, 1)}T00:00:00Z`
+		});
+		expect(
+			fetchFn.mock.calls.filter(([, init]) => graphqlRequest(init).query === DEVICES_QUERY)
+		).toHaveLength(1);
 		expect(graphqlRequest(incrementalCalls[0]?.[1]).variables).toMatchObject({
 			seriesStart: inclusiveWindow('2026-08-13', 7).start,
 			end: '2026-08-13',
@@ -129,7 +147,7 @@ describe('ingestAnalytics', () => {
 			now: new Date('2026-08-13T06:00:00.000Z')
 		});
 
-		expect(fetchFn).toHaveBeenCalledTimes(2);
+		expect(fetchFn).toHaveBeenCalledTimes(4);
 		expect(result.backfilledDays).toBe(0);
 		expect(result.upsertedDays).toBe(2);
 		expect(result.rollupsStored).toBe(true);

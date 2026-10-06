@@ -1,0 +1,103 @@
+.panel-shell {
+	height: 0;
+	overflow: hidden;
+	animation: panel-from-left var(--shell-ms, 750ms) cubic-bezier(0.33, 1, 0.68, 1) both;
+	animation-delay: calc(var(--shell, 0) * var(--shell-stagger, 100ms));
+}
+
+.panel-shell-right {
+	animation-name: panel-from-right;
+}
+
+.panel-label {
+	opacity: 0;
+}
+
+.panel-label.is-in {
+	animation: panel-rise 280ms cubic-bezier(0.33, 1, 0.68, 1) both;
+}
+
+.panel-piece {
+	opacity: 0;
+	pointer-events: none;
+}
+
+.panel-piece.is-in {
+	animation: panel-rise 280ms cubic-bezier(0.33, 1, 0.68, 1) both;
+	animation-delay: var(--piece-delay, calc(var(--piece, 0) * 70ms));
+	pointer-events: auto;
+}
+
+.panel-meter {
+	transform: scaleX(0);
+	transform-origin: left center;
+}
+
+.panel-meter.is-in {
+	animation: panel-meter 300ms ease both;
+	animation-delay: var(--piece-delay, calc(var(--piece, 0) * 70ms));
+}
+
+@keyframes panel-from-left {
+	from {
+		opacity: 0;
+		transform: translateX(-1rem);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes panel-from-right {
+	from {
+		opacity: 0;
+		transform: translateX(1rem);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes panel-rise {
+	from {
+		opacity: 0;
+		transform: translateY(0.35rem);
+	}
+
+	to {
+		opacity: 1;
+		transform: none;
+	}
+}
+
+@keyframes panel-meter {
+	from {
+		transform: scaleX(0);
+	}
+
+	to {
+		transform: scaleX(1);
+	}
+}
+
+@media (prefers-reduced-motion: reduce) {
+	.panel-shell,
+	.panel-shell-right,
+	.panel-label,
+	.panel-label.is-in,
+	.panel-piece,
+	.panel-piece.is-in,
+	.panel-meter,
+	.panel-meter.is-in {
+		height: auto !important;
+		overflow: visible;
+		animation: none;
+		opacity: 1;
+		transform: none;
+		pointer-events: auto;
+	}
+}

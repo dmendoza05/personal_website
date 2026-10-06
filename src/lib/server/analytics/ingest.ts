@@ -16,6 +16,8 @@ import {
 import {
 	INCREMENTAL_QUERY,
 	TIMESERIES_QUERY,
+	COUNTRY_PAGEVIEWS_QUERY,
+	DEVICES_QUERY,
 	DIMENSIONS_QUERY,
 	filterPointsFrom,
 	parseDailyPoints,
@@ -25,8 +27,10 @@ import {
 	sumDailyUniques,
 	uniquesLookMerged,
 	type DailyPoint,
+	type DimensionKind,
 	type DimensionRow,
-	type IngestFetch
+	type IngestFetch,
+	type IngestGraphqlPayload
 } from './ingest-query';
 
 export type IngestAnalyticsOptions = {
@@ -162,18 +166,19 @@ async function upsertDimensions(
 	db: IngestDb,
 	window: RollupWindow,
 	rows: DimensionRow[],
-	fetchedAt: Date
+	fetchedAt: Date,
+	replacePageViews: boolean,
+	replaceDevices: boolean
 ): Promise<void> {
-	async function clearKind(kind: string) {
+	async function clearKind(kind: DimensionKind) {
 		await db
 			.delete(analyticsDimensions)
 			.where(and(eq(analyticsDimensions.window, window), eq(analyticsDimensions.kind, kind)));
 	}
 
 	await clearKind('country');
-	await clearKind('country_pageview');
-
-	if (rows.some((row) => row.kind === 'device')) {
+	if (replacePageViews) await clearKind('country_pageview');
+	if (replaceDevices || rows.some((row) => row.kind === 'device')) {
 		await clearKind('device');
 	}
 
@@ -216,8 +221,51 @@ async function ingestDimensions(
 			variables: { zoneTag: options.zoneId, start, end },
 			fetchFn: options.fetchFn
 		});
-		const rows = parseDimensionRows(payload);
-		await upsertDimensions(db, '7d', rows, fetchedAt);
+
+		const adaptiveWindow = {
+			zoneTag: options.zoneId,
+			start: `${start}T00:00:00Z`,
+			end: `${shiftUtcDay(end, 1)}T00:00:00Z`
+		};
+
+		let pageViewsPayload: IngestGraphqlPayload = {};
+		let replacePageViews = false;
+		try {
+			pageViewsPayload = await postCloudflareGraphql({
+				token: options.token,
+				query: COUNTRY_PAGEVIEWS_QUERY,
+				variables: adaptiveWindow,
+				fetchFn: options.fetchFn
+			});
+			replacePageViews = true;
+		} catch (error) {
+			console.warn('[analytics-ingest] Skipping country page views', {
+				error: error instanceof Error ? error.message : String(error)
+			});
+		}
+
+		let devicesPayload: IngestGraphqlPayload = {};
+		let replaceDevices = false;
+		try {
+			devicesPayload = await postCloudflareGraphql({
+				token: options.token,
+				query: DEVICES_QUERY,
+				variables: adaptiveWindow,
+				fetchFn: options.fetchFn
+			});
+			replaceDevices = true;
+		} catch (error) {
+			console.warn('[analytics-ingest] Skipping device breakdown', {
+				error: error instanceof Error ? error.message : String(error)
+			});
+		}
+
+		const rows = [
+			...parseDimensionRows(payload),
+			...parseDimensionRows(pageViewsPayload),
+			...parseDimensionRows(devicesPayload)
+		];
+		await upsertDimensions(db, '7d', rows, fetchedAt, replacePageViews, replaceDevices);
 		return rows.length > 0;
 	} catch (error) {
 		console.warn('[analytics-ingest] Skipping country/device dimensions', {

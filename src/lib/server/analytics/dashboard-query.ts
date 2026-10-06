@@ -11,8 +11,7 @@ import { eachUtcDay, isUtcDay } from './dates';
 export const DASHBOARD_RANGES: DashboardRange[] = ['7d', '30d', '90d', 'lifetime'];
 
 export type DashboardQuery =
-	| { kind: 'preset'; window: DashboardRange }
-	| { kind: 'custom'; start: string; end: string };
+	{ kind: 'preset'; window: DashboardRange } | { kind: 'custom'; start: string; end: string };
 
 export class DashboardQueryError extends Error {
 	status = 400;
@@ -46,9 +45,7 @@ export function fillTimeseries(
 	if (days.length === 0) return points;
 
 	const byDate = new Map(points.map((point) => [point.date, point]));
-	return days.map(
-		(date) => byDate.get(date) ?? { date, uniqueVisitors: 0, pageVisits: 0 }
-	);
+	return days.map((date) => byDate.get(date) ?? { date, uniqueVisitors: 0, pageVisits: 0 });
 }
 
 export function assembleDashboardResponse(input: {
@@ -62,6 +59,7 @@ export function assembleDashboardResponse(input: {
 	topPages?: DashboardTopPage[];
 	countries?: DashboardCountry[];
 	devices?: DashboardDevice[];
+	resumeDownloads?: number;
 }): DashboardResponse {
 	const timeseries = fillTimeseries(input.timeseries, input.start, input.end);
 	const pageVisits = timeseries.reduce((total, point) => total + point.pageVisits, 0);
@@ -85,6 +83,7 @@ export function assembleDashboardResponse(input: {
 			{ device: 'desktop', requests: 0 },
 			{ device: 'mobile', requests: 0 },
 			{ device: 'other', requests: 0 }
-		]
+		],
+		resumeDownloads: input.resumeDownloads ?? 0
 	};
 }

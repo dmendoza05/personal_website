@@ -1,5 +1,6 @@
 <script lang="ts">
 	import '$lib/styles/dashboard-grid.css';
+	import './_components/panel-motion.css';
 	import { onMount } from 'svelte';
 	import { m } from '$lib/paraglide/messages.js';
 	import { site } from '$lib/data/site';
