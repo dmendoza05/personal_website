@@ -1,49 +1,87 @@
 <script lang="ts">
-	import type { Project } from '$lib/data/projects';
+	import { m } from '$lib/paraglide/messages.js';
+	import { getProjectType, type Project } from '$lib/data/projects';
 	import { getSkill } from '$lib/data/skills';
-	import Card from '$lib/components/card/Card.svelte';
 	import SkillLogo from '$lib/components/SkillLogo.svelte';
 
 	let { project }: { project: Project } = $props();
+
+	const chip =
+		'inline-flex h-9 items-center gap-1.5 border border-border bg-card/70 text-xs font-semibold uppercase tracking-[0.14em] text-muted rajdhani transition-colors';
+
+	const type = $derived(getProjectType(project.type));
 </script>
 
-<Card class="h-full" notches={['top-right', 'bottom-left', 'bottom-right']}>
-	<article class="flex h-full flex-col">
-		<h3 class="text-base font-semibold text-foreground sm:text-lg">{project.title}</h3>
-		<p class="mt-2 flex-1 text-sm leading-relaxed text-muted">{project.description}</p>
+<article
+	class="flex h-full flex-col overflow-hidden border border-border bg-card/95 text-foreground backdrop-blur-sm"
+>
+	{#if project.thumbnail}
+		<img
+			src={project.thumbnail}
+			alt=""
+			class="aspect-video w-full object-cover"
+		/>
+	{:else}
+		<div
+			class="flex aspect-video w-full items-center justify-center border-b border-border bg-background/40"
+		>
+			<p class="text-xs font-semibold uppercase tracking-[0.2em] text-muted rajdhani">
+				{m.works_thumbnail_placeholder()}
+			</p>
+		</div>
+	{/if}
 
-		<div class="mt-4 flex flex-wrap gap-2">
+	<div class="flex h-full flex-col p-3">
+		<h3 class="text-xs font-semibold uppercase tracking-[0.2em] text-foreground rajdhani">
+			{project.title}
+		</h3>
+		<p class="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-muted rajdhani">
+			<svg
+				class="size-4 shrink-0"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				aria-hidden="true"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" d={type.icon} />
+			</svg>
+			{type.label}
+		</p>
+		<p class="mt-2 flex-1 text-sm leading-relaxed text-muted rajdhani">{project.description}</p>
+
+		<ul class="mt-3 flex flex-wrap gap-1">
 			{#each project.tags as tag (tag)}
-				<span
-					class="inline-flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-0.5 text-xs font-medium text-accent"
-				>
-					<SkillLogo id={tag} class="size-3 shrink-0 text-accent" />
-					{getSkill(tag).label}
-				</span>
+				<li class="{chip} pointer-events-none w-9 justify-center sm:w-auto sm:px-2">
+					<SkillLogo id={tag} class="size-4 shrink-0 sm:size-3" />
+					<span class="hidden sm:inline">{getSkill(tag).label}</span>
+				</li>
 			{/each}
-		</div>
+		</ul>
 
-		<div class="mt-4 flex flex-wrap gap-x-4 gap-y-2">
-			{#if project.href}
-				<a
-					href={project.href}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="text-sm font-medium text-accent hover:underline"
-				>
-					Live demo
-				</a>
-			{/if}
-			{#if project.repo}
-				<a
-					href={project.repo}
-					target="_blank"
-					rel="noopener noreferrer"
-					class="text-sm font-medium text-accent hover:underline"
-				>
-					Source
-				</a>
-			{/if}
-		</div>
-	</article>
-</Card>
+		{#if project.href || project.repo}
+			<div class="mt-3 flex flex-wrap gap-1">
+				{#if project.href}
+					<a
+						href={project.href}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="{chip} px-2 hover:border-accent/60 hover:text-foreground"
+					>
+						Live demo
+					</a>
+				{/if}
+				{#if project.repo}
+					<a
+						href={project.repo}
+						target="_blank"
+						rel="noopener noreferrer"
+						class="{chip} px-2 hover:border-accent/60 hover:text-foreground"
+					>
+						Source
+					</a>
+				{/if}
+			</div>
+		{/if}
+	</div>
+</article>
