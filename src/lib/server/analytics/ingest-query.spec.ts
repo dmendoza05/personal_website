@@ -45,7 +45,7 @@ const payload: IngestGraphqlPayload = {
 };
 
 describe('parseDimensionRows', () => {
-	it('maps countries and buckets device types', () => {
+	it('sums country requests across days and buckets device types', () => {
 		const rows = parseDimensionRows({
 			data: {
 				viewer: {
@@ -53,10 +53,21 @@ describe('parseDimensionRows', () => {
 						{
 							countries: [
 								{
-									sum: { requests: 20 },
-									dimensions: { clientCountryName: 'United States' }
+									sum: {
+										countryMap: [
+											{ clientCountryName: 'United States', requests: 12 },
+											{ clientCountryName: 'Mexico', requests: 0 }
+										]
+									}
 								},
-								{ sum: { requests: 0 }, dimensions: { clientCountryName: 'Mexico' } }
+								{
+									sum: {
+										countryMap: [
+											{ clientCountryName: 'United States', requests: 8 },
+											{ clientCountryName: 'Mexico', requests: 4 }
+										]
+									}
+								}
 							],
 							devices: [
 								{ sum: { requests: 12 }, dimensions: { clientDeviceType: 'desktop' } },
@@ -70,8 +81,42 @@ describe('parseDimensionRows', () => {
 
 		expect(rows).toEqual([
 			{ kind: 'country', key: 'United States', value: 20 },
+			{ kind: 'country', key: 'Mexico', value: 4 },
 			{ kind: 'device', key: 'desktop', value: 12 },
 			{ kind: 'device', key: 'other', value: 5 }
+		]);
+	});
+
+	it('sums page views for each country, including countries with no requests', () => {
+		const rows = parseDimensionRows({
+			data: {
+				viewer: {
+					zones: [
+						{
+							countries: [
+								{
+									dimensions: { clientCountryName: 'United States' },
+									sum: { requests: 12, pageViews: 3 }
+								},
+								{
+									dimensions: { clientCountryName: 'United States' },
+									sum: { requests: 8, pageViews: 2 }
+								},
+								{
+									dimensions: { clientCountryName: 'Mexico' },
+									sum: { requests: 0, pageViews: 4 }
+								}
+							]
+						}
+					]
+				}
+			}
+		});
+
+		expect(rows).toEqual([
+			{ kind: 'country', key: 'United States', value: 20 },
+			{ kind: 'country_pageview', key: 'United States', value: 5 },
+			{ kind: 'country_pageview', key: 'Mexico', value: 4 }
 		]);
 	});
 });
@@ -129,7 +174,7 @@ describe('sumDailyUniques', () => {
 
 describe('GraphQL documents', () => {
 	it('fetches daily uniques and page visits without requests or bandwidth', () => {
-		expect(TIMESERIES_QUERY).toContain('uniq { visitors }');
+		expect(TIMESERIES_QUERY).toContain('uniq { uniques }');
 		expect(TIMESERIES_QUERY).toContain('sum { pageViews }');
 		expect(TIMESERIES_QUERY).toContain('dimensions { date }');
 		expect(TIMESERIES_QUERY).not.toMatch(/\brequests\b/);
@@ -147,8 +192,10 @@ describe('GraphQL documents', () => {
 		expect(uniqueSection).not.toContain('dimensions');
 	});
 
-	it('loads country and device dimensions in a separate document', () => {
+	it('loads country requests and page views by country name', () => {
 		expect(DIMENSIONS_QUERY).toContain('clientCountryName');
-		expect(DIMENSIONS_QUERY).toContain('clientDeviceType');
+		expect(DIMENSIONS_QUERY).toContain('requests');
+		expect(DIMENSIONS_QUERY).toContain('pageViews');
+		expect(DIMENSIONS_QUERY).not.toContain('clientDeviceType');
 	});
 });

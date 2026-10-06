@@ -51,7 +51,7 @@
 					</a>
 				</nav>
 
-				<div class="justify-self-end">
+				<div class="justify-self-end px-3 ">
 					<ResumeDownloadButton />
 				</div>
 			</div>

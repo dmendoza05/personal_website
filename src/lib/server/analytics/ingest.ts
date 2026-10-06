@@ -164,12 +164,18 @@ async function upsertDimensions(
 	rows: DimensionRow[],
 	fetchedAt: Date
 ): Promise<void> {
-	await db
-		.delete(analyticsDimensions)
-		.where(and(eq(analyticsDimensions.window, window), eq(analyticsDimensions.kind, 'country')));
-	await db
-		.delete(analyticsDimensions)
-		.where(and(eq(analyticsDimensions.window, window), eq(analyticsDimensions.kind, 'device')));
+	async function clearKind(kind: string) {
+		await db
+			.delete(analyticsDimensions)
+			.where(and(eq(analyticsDimensions.window, window), eq(analyticsDimensions.kind, kind)));
+	}
+
+	await clearKind('country');
+	await clearKind('country_pageview');
+
+	if (rows.some((row) => row.kind === 'device')) {
+		await clearKind('device');
+	}
 
 	if (rows.length === 0) return;
 
@@ -186,11 +192,7 @@ async function upsertDimensions(
 					fetchedAt
 				})
 				.onConflictDoUpdate({
-					target: [
-						analyticsDimensions.window,
-						analyticsDimensions.kind,
-						analyticsDimensions.key
-					],
+					target: [analyticsDimensions.window, analyticsDimensions.kind, analyticsDimensions.key],
 					set: {
 						value: row.value,
 						fetchedAt

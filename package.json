@@ -42,6 +42,7 @@
 		"@tailwindcss/vite": "^4.3.0",
 		"@types/node": "^24",
 		"@types/pdfkit": "0.17.6",
+		"@types/three": "0.186.0",
 		"@vitest/browser-playwright": "^4.1.8",
 		"dotenv": "17.4.2",
 		"drizzle-kit": "0.31.10",
@@ -70,6 +71,7 @@
 		"@neondatabase/serverless": "1.1.0",
 		"animejs": "4.5.0",
 		"chart.js": "4.5.1",
-		"drizzle-orm": "0.45.2"
+		"drizzle-orm": "0.45.2",
+		"three": "0.186.1"
 	}
 }

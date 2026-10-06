@@ -33,6 +33,7 @@ export type DashboardTopPage = {
 export type DashboardCountry = {
 	country: string;
 	requests: number;
+	pageViews: number;
 };
 
 export type DashboardDevice = {
@@ -75,7 +76,9 @@ export function bucketDevice(value: string): DeviceKey {
 	return 'other';
 }
 
-export function normalizeDevices(rows: Array<{ device: string; requests: number }>): DashboardDevice[] {
+export function normalizeDevices(
+	rows: Array<{ device: string; requests: number }>
+): DashboardDevice[] {
 	const totals: Record<DeviceKey, number> = { desktop: 0, mobile: 0, other: 0 };
 	for (const row of rows) {
 		totals[bucketDevice(row.device)] += row.requests;

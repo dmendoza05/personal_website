@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, gte, lte } from 'drizzle-orm';
+import { and, asc, desc, eq, gte, lte, or } from 'drizzle-orm';
 import type {
 	DashboardCountry,
 	DashboardDevice,
@@ -66,15 +66,36 @@ async function loadCountries(window: RollupWindow = '7d'): Promise<DashboardCoun
 	const db = getDb();
 	const rows = await db
 		.select({
+			kind: analyticsDimensions.kind,
 			country: analyticsDimensions.key,
-			requests: analyticsDimensions.value
+			value: analyticsDimensions.value
 		})
 		.from(analyticsDimensions)
-		.where(and(eq(analyticsDimensions.window, window), eq(analyticsDimensions.kind, 'country')))
-		.orderBy(desc(analyticsDimensions.value))
-		.limit(8);
+		.where(
+			and(
+				eq(analyticsDimensions.window, window),
+				or(
+					eq(analyticsDimensions.kind, 'country'),
+					eq(analyticsDimensions.kind, 'country_pageview')
+				)
+			)
+		);
 
-	return rows.map((row) => ({ country: row.country, requests: row.requests }));
+	const byCountry = new Map<string, DashboardCountry>();
+	for (const row of rows) {
+		const entry = byCountry.get(row.country) ?? {
+			country: row.country,
+			requests: 0,
+			pageViews: 0
+		};
+		if (row.kind === 'country_pageview') entry.pageViews = row.value;
+		else entry.requests = row.value;
+		byCountry.set(row.country, entry);
+	}
+
+	return [...byCountry.values()].sort(
+		(left, right) => right.requests - left.requests || right.pageViews - left.pageViews
+	);
 }
 
 async function loadDevices(window: RollupWindow = '7d'): Promise<DashboardDevice[]> {
@@ -112,7 +133,8 @@ export async function getDashboardPayload(query: DashboardQuery): Promise<Dashbo
 
 	if (query.kind === 'custom') {
 		const timeseries = await loadTimeseries(query.start, query.end);
-		const fetchedAt = (await latestFetchedAt(query.start, query.end)) ?? lifetime?.fetchedAt ?? null;
+		const fetchedAt =
+			(await latestFetchedAt(query.start, query.end)) ?? lifetime?.fetchedAt ?? null;
 		return assembleDashboardResponse({
 			window: 'custom',
 			start: query.start,

@@ -17,12 +17,16 @@
 		type DashboardTopPage
 	} from '$lib/dashboard';
 	import CountriesPanel from './_components/CountriesPanel.svelte';
+	import HudModule from './_components/HudModule.svelte';
 	import DevicesBreakdown from './_components/DevicesBreakdown.svelte';
+	import EarthData from './_components/EarthData.svelte';
 	import StatBox from './_components/StatBox.svelte';
 	import TimeseriesPanel from './_components/TimeseriesPanel.svelte';
 	import TopPagesList from './_components/TopPagesList.svelte';
 
 	type LoadStatus = 'loading' | 'ready' | 'error';
+
+	const showAnalytics = false;
 
 	let uniquesRange = $state<ChartRange>('week');
 	let visitsRange = $state<ChartRange>('week');
@@ -54,6 +58,8 @@
 	);
 
 	onMount(() => {
+		if (!showAnalytics) return;
+
 		void loadUniques(uniquesRange);
 		void loadVisits(visitsRange);
 	});
@@ -119,99 +125,113 @@
 	<meta name="description" content={m.dashboard_description()} />
 </svelte:head>
 
-<div class="dashboard-grid">
-	{#if lastUpdatedLabel}
-		<p
-			class="dashboard-module col-span-12 row-span-2 flex items-center text-xs text-muted rajdhani sm:text-sm"
-			style:--enter-delay="0"
-		>
-			{m.dashboard_last_updated({ time: lastUpdatedLabel })}
-		</p>
+{#if showAnalytics}
+	<div class="dashboard-grid">
+		{#if lastUpdatedLabel}
+			<p
+				class="dashboard-module col-span-12 row-span-2 flex items-center text-xs text-muted rajdhani sm:text-sm"
+				style:--enter-delay="0"
+			>
+				{m.dashboard_last_updated({ time: lastUpdatedLabel })}
+			</p>
+			<div class="col-span-12 row-span-1" aria-hidden="true"></div>
+		{/if}
+
+		<div class="dashboard-module col-span-12 row-span-6 sm:col-span-4" style:--enter-delay="1">
+			<StatBox
+				label={m.dashboard_stat_lifetime_uniques()}
+				value={formatDashboardNumber(lifetimeUniques)}
+			/>
+		</div>
+		<div class="dashboard-module col-span-12 row-span-6 sm:col-span-4" style:--enter-delay="2">
+			<StatBox
+				label={m.dashboard_stat_unique_visitors()}
+				value={formatDashboardNumber(uniqueTotal)}
+			/>
+		</div>
+		<div class="dashboard-module col-span-12 row-span-6 sm:col-span-4" style:--enter-delay="3">
+			<StatBox label={m.dashboard_stat_page_visits()} value={formatDashboardNumber(visitTotal)} />
+		</div>
+
 		<div class="col-span-12 row-span-1" aria-hidden="true"></div>
-	{/if}
 
-	<div class="dashboard-module col-span-12 row-span-6 sm:col-span-4" style:--enter-delay="1">
-		<StatBox label={m.dashboard_stat_lifetime_uniques()} value={formatDashboardNumber(lifetimeUniques)} />
-	</div>
-	<div class="dashboard-module col-span-12 row-span-6 sm:col-span-4" style:--enter-delay="2">
-		<StatBox label={m.dashboard_stat_unique_visitors()} value={formatDashboardNumber(uniqueTotal)} />
-	</div>
-	<div class="dashboard-module col-span-12 row-span-6 sm:col-span-4" style:--enter-delay="3">
-		<StatBox label={m.dashboard_stat_page_visits()} value={formatDashboardNumber(visitTotal)} />
-	</div>
-
-	<div class="col-span-12 row-span-1" aria-hidden="true"></div>
-
-	<div
-		class="dashboard-module col-span-12 row-span-25 sm:row-span-22 md:col-span-6"
-		style:--enter-delay="4"
-	>
-		<TimeseriesPanel
-			title={m.dashboard_stat_unique_visitors()}
-			range={uniquesRange}
-			loading={uniquesStatus === 'loading'}
-			errorMessage={uniquesStatus === 'error' ? uniquesError : ''}
-			onRangeChange={loadUniques}
-			onRetry={() => loadUniques(uniquesRange)}
+		<div
+			class="dashboard-module col-span-12 row-span-25 sm:row-span-22 md:col-span-6"
+			style:--enter-delay="4"
 		>
-			<BarChart
-				labels={uniquesTimeseries.map((point) => point.date)}
-				values={uniquesTimeseries.map((point) => point.uniqueVisitors)}
-				valueLabel={m.dashboard_stat_unique_visitors()}
-			/>
-		</TimeseriesPanel>
-	</div>
+			<TimeseriesPanel
+				title={m.dashboard_stat_unique_visitors()}
+				range={uniquesRange}
+				loading={uniquesStatus === 'loading'}
+				errorMessage={uniquesStatus === 'error' ? uniquesError : ''}
+				onRangeChange={loadUniques}
+				onRetry={() => loadUniques(uniquesRange)}
+			>
+				<BarChart
+					labels={uniquesTimeseries.map((point) => point.date)}
+					values={uniquesTimeseries.map((point) => point.uniqueVisitors)}
+					valueLabel={m.dashboard_stat_unique_visitors()}
+				/>
+			</TimeseriesPanel>
+		</div>
 
-	<div
-		class="dashboard-module col-span-12 row-span-25 sm:row-span-22 md:col-span-6"
-		style:--enter-delay="5"
-	>
-		<TimeseriesPanel
-			title={m.dashboard_stat_page_visits()}
-			range={visitsRange}
-			loading={visitsStatus === 'loading'}
-			errorMessage={visitsStatus === 'error' ? visitsError : ''}
-			onRangeChange={loadVisits}
-			onRetry={() => loadVisits(visitsRange)}
+		<div
+			class="dashboard-module col-span-12 row-span-25 sm:row-span-22 md:col-span-6"
+			style:--enter-delay="5"
 		>
-			<LineChart
-				labels={visitsTimeseries.map((point) => point.date)}
-				values={visitsTimeseries.map((point) => point.pageVisits)}
-				valueLabel={m.dashboard_stat_page_visits()}
+			<TimeseriesPanel
+				title={m.dashboard_stat_page_visits()}
+				range={visitsRange}
+				loading={visitsStatus === 'loading'}
+				errorMessage={visitsStatus === 'error' ? visitsError : ''}
+				onRangeChange={loadVisits}
+				onRetry={() => loadVisits(visitsRange)}
+			>
+				<LineChart
+					labels={visitsTimeseries.map((point) => point.date)}
+					values={visitsTimeseries.map((point) => point.pageVisits)}
+					valueLabel={m.dashboard_stat_page_visits()}
+				/>
+			</TimeseriesPanel>
+		</div>
+
+		<div class="col-span-12 row-span-1" aria-hidden="true"></div>
+
+		<div
+			class="dashboard-module col-span-12 row-span-14 md:col-span-6 lg:col-span-4"
+			style:--enter-delay="6"
+		>
+			<TopPagesList
+				pages={topPages}
+				loading={uniquesStatus === 'loading' && visitsStatus === 'loading'}
+				errorMessage={uniquesStatus === 'error' && visitsStatus === 'error' ? uniquesError : ''}
+				onRetry={retryBreakdowns}
 			/>
-		</TimeseriesPanel>
+		</div>
+		<div
+			class="dashboard-module col-span-12 row-span-14 md:col-span-6 lg:col-span-4"
+			style:--enter-delay="7"
+		>
+			<HudModule loading={uniquesStatus === 'loading' && visitsStatus === 'loading'}>
+				<CountriesPanel
+					{countries}
+					loading={uniquesStatus === 'loading' && visitsStatus === 'loading'}
+					errorMessage={uniquesStatus === 'error' && visitsStatus === 'error' ? uniquesError : ''}
+					onRetry={retryBreakdowns}
+				/>
+			</HudModule>
+		</div>
+		<div class="dashboard-module col-span-12 row-span-14 lg:col-span-4" style:--enter-delay="8">
+			<DevicesBreakdown
+				{devices}
+				loading={uniquesStatus === 'loading' && visitsStatus === 'loading'}
+				errorMessage={uniquesStatus === 'error' && visitsStatus === 'error' ? uniquesError : ''}
+				onRetry={retryBreakdowns}
+			/>
+		</div>
 	</div>
-
-	<div class="col-span-12 row-span-1" aria-hidden="true"></div>
-
-	<div
-		class="dashboard-module col-span-12 row-span-14 md:col-span-6 lg:col-span-4"
-		style:--enter-delay="6"
-	>
-		<TopPagesList
-			pages={topPages}
-			loading={uniquesStatus === 'loading' && visitsStatus === 'loading'}
-			errorMessage={uniquesStatus === 'error' && visitsStatus === 'error' ? uniquesError : ''}
-			onRetry={retryBreakdowns}
-		/>
+{:else}
+	<div class="relative h-[calc(100dvh-5.75rem)] w-full">
+		<EarthData />
 	</div>
-	<div
-		class="dashboard-module col-span-12 row-span-14 md:col-span-6 lg:col-span-4"
-		style:--enter-delay="7"
-	>
-		<CountriesPanel
-			{countries}
-			loading={uniquesStatus === 'loading' && visitsStatus === 'loading'}
-			errorMessage={uniquesStatus === 'error' && visitsStatus === 'error' ? uniquesError : ''}
-			onRetry={retryBreakdowns}
-		/>
-	</div>
-	<div class="dashboard-module col-span-12 row-span-14 lg:col-span-4" style:--enter-delay="8">
-		<DevicesBreakdown
-			{devices}
-			loading={uniquesStatus === 'loading' && visitsStatus === 'loading'}
-			errorMessage={uniquesStatus === 'error' && visitsStatus === 'error' ? uniquesError : ''}
-			onRetry={retryBreakdowns}
-		/>
-	</div>
-</div>
+{/if}
