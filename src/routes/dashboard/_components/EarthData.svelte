@@ -16,6 +16,12 @@
 	import CountriesPanel from './CountriesPanel.svelte';
 	import DevicesPanel from './DevicesPanel.svelte';
 	import GlobeControls from './GlobeControls.svelte';
+	import {
+		PANEL_SHELL_MS,
+		PANEL_SHELL_STAGGER_MS,
+		schedulePanelPhases,
+		type PanelPhase
+	} from './panel-motion';
 	import VisitorsPanel from './VisitorsPanel.svelte';
 
 	type LoadStatus = 'loading' | 'ready' | 'error';
@@ -33,9 +39,18 @@
 	let fetchedAt = $state('');
 	let status = $state<LoadStatus>('loading');
 	let errorMessage = $state('');
+	let phases = $state<PanelPhase[]>(['shell', 'shell', 'shell', 'shell']);
 
 	onMount(() => {
+		const cancels = phases.map((_, index) =>
+			schedulePanelPhases((next) => {
+				phases[index] = next;
+			}, index)
+		);
 		void load();
+		return () => {
+			for (const cancel of cancels) cancel();
+		};
 	});
 
 	const activeName = $derived(hovered || selected);
@@ -136,13 +151,16 @@
 
 	<div
 		class="absolute inset-0 z-10 overflow-y-auto p-4 md:pointer-events-none md:overflow-visible md:p-0"
+		style:--shell-ms={`${PANEL_SHELL_MS}ms`}
+		style:--shell-stagger={`${PANEL_SHELL_STAGGER_MS}ms`}
 	>
 		<div class="flex flex-col gap-3 md:contents">
 			<div
 				class="flex flex-col gap-3 md:pointer-events-auto md:absolute md:top-4 md:left-4 md:w-88"
 			>
 				<section
-					class="border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					class="panel-shell border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					style:--shell="0"
 					aria-label={m.dashboard_stat_all_time_uniques()}
 				>
 					<AllTimeVisitorsPanel
@@ -150,18 +168,21 @@
 						loading={status === 'loading'}
 						errorMessage={status === 'error' ? errorMessage : ''}
 						onRetry={load}
+						phase={phases[0]}
 					/>
 				</section>
 
 				<section
-					class="border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					class="panel-shell border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					style:--shell="1"
 					aria-label={m.dashboard_chart_uniques()}
 				>
-					<VisitorsPanel />
+					<VisitorsPanel phase={phases[1]} />
 				</section>
 
 				<section
-					class="border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					class="panel-shell border border-border bg-card/95 text-foreground backdrop-blur-sm"
+					style:--shell="2"
 					aria-label={m.dashboard_chart_most_used_devices()}
 				>
 					<DevicesPanel
@@ -169,12 +190,14 @@
 						loading={status === 'loading'}
 						errorMessage={status === 'error' ? errorMessage : ''}
 						onRetry={load}
+						phase={phases[2]}
 					/>
 				</section>
 			</div>
 
 			<section
-				class="flex max-h-[min(75vh,24rem)] flex-col overflow-hidden border border-border bg-card/95 text-foreground backdrop-blur-sm md:pointer-events-auto md:absolute md:top-4 md:right-4 md:left-auto md:max-h-[calc(100%-2rem)] md:w-88"
+				class="panel-shell panel-shell-right flex max-h-[min(75vh,24rem)] flex-col overflow-hidden border border-border bg-card/95 text-foreground backdrop-blur-sm md:pointer-events-auto md:absolute md:top-4 md:right-4 md:left-auto md:max-h-[calc(100%-2rem)] md:w-88"
+				style:--shell="3"
 				aria-label={m.dashboard_chart_countries()}
 			>
 				<CountriesPanel
@@ -184,6 +207,7 @@
 					onRetry={load}
 					{activeName}
 					onSelect={selectCountry}
+					phase={phases[3]}
 				/>
 			</section>
 		</div>

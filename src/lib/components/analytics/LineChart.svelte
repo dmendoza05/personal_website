@@ -22,7 +22,15 @@
 		valueLabel: string;
 	} = $props();
 
-	Chart.register(LineController, LineElement, PointElement, LinearScale, CategoryScale, Filler, Tooltip);
+	Chart.register(
+		LineController,
+		LineElement,
+		PointElement,
+		LinearScale,
+		CategoryScale,
+		Filler,
+		Tooltip
+	);
 
 	let canvas: HTMLCanvasElement | undefined = $state();
 	let chart: Chart<'line'> | undefined;
@@ -67,6 +75,7 @@
 				options: {
 					responsive: true,
 					maintainAspectRatio: false,
+					animation: { duration: 400, easing: 'easeOutCubic' },
 					interaction: { mode: 'index', intersect: false },
 					plugins: {
 						legend: { display: false },

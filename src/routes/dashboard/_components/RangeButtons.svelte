@@ -1,15 +1,20 @@
 <script lang="ts">
 	import { m } from '$lib/paraglide/messages.js';
 	import { CHART_RANGES, type ChartRange } from '$lib/dashboard';
+	import { PANEL_STAGGER_MS } from './panel-motion';
 
 	let {
 		range,
 		onRangeChange,
-		compact = false
+		compact = false,
+		animateIn = false,
+		enterDelay = 0
 	}: {
 		range: ChartRange;
 		onRangeChange: (range: ChartRange) => void;
 		compact?: boolean;
+		animateIn?: boolean;
+		enterDelay?: number;
 	} = $props();
 
 	function rangeLabel(target: ChartRange): string {
@@ -37,8 +42,13 @@
 		? 'grid shrink-0 grid-cols-4 gap-1'
 		: 'grid h-24 shrink-0 grid-cols-2 gap-2 sm:h-12 sm:grid-cols-4'}
 >
-	{#each CHART_RANGES as targetRange (targetRange)}
-		<button type="button" class={rangeButtonClass(targetRange)} onclick={() => onRangeChange(targetRange)}>
+	{#each CHART_RANGES as targetRange, index (targetRange)}
+		<button
+			type="button"
+			class="{rangeButtonClass(targetRange)} {animateIn ? 'panel-piece is-in' : ''}"
+			style:--piece-delay={animateIn ? `${enterDelay + index * PANEL_STAGGER_MS}ms` : undefined}
+			onclick={() => onRangeChange(targetRange)}
+		>
 			{rangeLabel(targetRange)}
 		</button>
 	{/each}
