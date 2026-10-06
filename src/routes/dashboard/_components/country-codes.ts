@@ -3,6 +3,7 @@ import { countryLookupKey } from './earth-countries';
 const CODES = new Map<string, string>();
 
 function add(code: string, ...names: string[]) {
+	CODES.set(code.toLowerCase(), code);
 	for (const name of names) CODES.set(countryLookupKey(name), code);
 }
 
@@ -237,6 +238,28 @@ const SMALL_WORDS = new Set(['and', 'of', 'the', 'da', 'de', 'do']);
 
 export function countryCode(name: string): string {
 	return CODES.get(countryLookupKey(name)) ?? '';
+}
+
+/** True when two labels are the same country, including an ISO code and its globe name. */
+export function countriesMatch(left: string, right: string): boolean {
+	if (!left || !right) return false;
+	if (countryLookupKey(left) === countryLookupKey(right)) return true;
+
+	const code = countryCode(left);
+	return code !== '' && code === countryCode(right);
+}
+
+export function findGlobeCountry<T extends { name: string }>(
+	globeCountries: T[],
+	name: string
+): T | null {
+	const key = countryLookupKey(name);
+	const byName = globeCountries.find((entry) => countryLookupKey(entry.name) === key);
+	if (byName) return byName;
+
+	const code = countryCode(name);
+	if (!code) return null;
+	return globeCountries.find((entry) => countryCode(entry.name) === code) ?? null;
 }
 
 export function countryFlag(name: string): string {

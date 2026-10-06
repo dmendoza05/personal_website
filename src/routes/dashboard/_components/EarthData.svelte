@@ -10,8 +10,8 @@
 	} from '$lib/dashboard';
 	import EarthGlobe from '$lib/components/earth/EarthGlobe.svelte';
 	import { loadCountries } from '$lib/components/earth/vector-earth';
-	import { countryAcronym, countryCode, countryFlag } from './country-codes';
-	import { countryLookupKey, findCountryStats } from './earth-countries';
+	import { countryAcronym, countryCode, countryFlag, findGlobeCountry } from './country-codes';
+	import { findCountryStats } from './earth-countries';
 	import AllTimeVisitorsPanel from './AllTimeVisitorsPanel.svelte';
 	import CountriesPanel from './CountriesPanel.svelte';
 	import DevicesPanel from './DevicesPanel.svelte';
@@ -85,9 +85,7 @@
 	function selectCountry(name: string) {
 		selected = name;
 		spinning = false;
-		const match = loadCountries().find(
-			(country) => countryLookupKey(country.name) === countryLookupKey(name)
-		);
+		const match = findGlobeCountry(loadCountries(), name);
 		if (!match) return;
 		focusName = match.name;
 		focusRequest += 1;
