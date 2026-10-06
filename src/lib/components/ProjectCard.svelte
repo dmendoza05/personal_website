@@ -1,5 +1,6 @@
 <script lang="ts">
-	import type { Project } from '$lib/data/projects';
+	import { m } from '$lib/paraglide/messages.js';
+	import { getProjectType, type Project } from '$lib/data/projects';
 	import { getSkill } from '$lib/data/skills';
 	import SkillLogo from '$lib/components/SkillLogo.svelte';
 
@@ -7,15 +8,46 @@
 
 	const chip =
 		'inline-flex h-9 items-center gap-1.5 border border-border bg-card/70 px-2 text-xs font-semibold uppercase tracking-[0.14em] text-muted rajdhani transition-colors';
+
+	const type = $derived(getProjectType(project.type));
 </script>
 
 <article
-	class="flex h-full flex-col border border-border bg-card/95 text-foreground backdrop-blur-sm"
+	class="flex h-full flex-col overflow-hidden border border-border bg-card/95 text-foreground backdrop-blur-sm"
 >
+	{#if project.thumbnail}
+		<img
+			src={project.thumbnail}
+			alt=""
+			class="aspect-video w-full object-cover"
+		/>
+	{:else}
+		<div
+			class="flex aspect-video w-full items-center justify-center border-b border-border bg-background/40"
+		>
+			<p class="text-xs font-semibold uppercase tracking-[0.2em] text-muted rajdhani">
+				{m.works_thumbnail_placeholder()}
+			</p>
+		</div>
+	{/if}
+
 	<div class="flex h-full flex-col p-3">
 		<h3 class="text-xs font-semibold uppercase tracking-[0.2em] text-foreground rajdhani">
 			{project.title}
 		</h3>
+		<p class="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-muted rajdhani">
+			<svg
+				class="size-4 shrink-0"
+				viewBox="0 0 24 24"
+				fill="none"
+				stroke="currentColor"
+				stroke-width="2"
+				aria-hidden="true"
+			>
+				<path stroke-linecap="round" stroke-linejoin="round" d={type.icon} />
+			</svg>
+			{type.label}
+		</p>
 		<p class="mt-2 flex-1 text-sm leading-relaxed text-muted rajdhani">{project.description}</p>
 
 		<ul class="mt-3 flex flex-wrap gap-1">
