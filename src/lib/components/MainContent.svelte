@@ -1,9 +1,9 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
 	import { page } from '$app/state';
-	import AdSpaces from '$lib/components/AdSpaces.svelte';
-	import DashboardBanner from '$lib/components/DashboardBanner.svelte';
-	import VerticalBannerAds from '$lib/components/VerticalBannerAds.svelte';
+	import AdSpaces from '$lib/components/fake-ads/AdSpaces.svelte';
+	import DashboardBanner from '$lib/components/fake-ads/DashboardBanner.svelte';
+	import VerticalBannerAds from '$lib/components/fake-ads/VerticalBannerAds.svelte';
 
 	let { children }: { children: Snippet } = $props();
 
