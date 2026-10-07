@@ -6,21 +6,46 @@
 </script>
 
 <script lang="ts">
-	import { onMount } from 'svelte';
+	import { onDestroy, onMount } from 'svelte';
 	import { page } from '$app/state';
-	import { sendAdReaction, type AdVote } from '$lib/ad-reaction';
+	import {
+		readStoredAdVote,
+		sendAdReaction,
+		writeStoredAdVote,
+		type AdVote
+	} from '$lib/ad-reaction';
 	import { fakeAds } from '$lib/data/fake-ads';
+
+	interface ConfettiPiece {
+		id: number;
+		left: number;
+		delay: number;
+		duration: number;
+		size: number;
+		drift: number;
+		emoji: string;
+	}
 
 	let { side }: { side: 'left' | 'right' } = $props();
 
 	const LOAD_MS = 750;
+	const CONFETTI_COUNT = 32;
+	const LAUGH_EMOJIS = ['😂', '🤣', '😆'];
+	const SAD_EMOJIS = ['😢', '😞', '😭', '😔'];
 	const verticalBanner = fakeAds.find((ad) => ad.type === 'vertical-banner');
 
 	let dialogEl = $state<HTMLDialogElement>();
 	let imageEl = $state<HTMLImageElement>();
 	let ready = $state(false);
+	let editing = $state(false);
+	let confetti = $state<ConfettiPiece[] | null>(null);
+	let confettiTimer = 0;
 
 	onMount(() => {
+		if (vote === null && verticalBanner) {
+			vote = readStoredAdVote(verticalBanner.type);
+		}
+
 		let cancelled = false;
 		let timeout = 0;
 		let removeAssetListeners = () => {};
@@ -68,16 +93,52 @@
 		};
 	});
 
+	onDestroy(() => {
+		clearTimeout(confettiTimer);
+	});
+
+	function rain(next: AdVote) {
+		if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+
+		clearTimeout(confettiTimer);
+		confetti = Array.from({ length: CONFETTI_COUNT }, (_, id) => ({
+			id,
+			left: 4 + Math.random() * 92,
+			delay: Math.random() * 180,
+			duration: 1800 + Math.random() * 500,
+			size: 0.8 + Math.random() * 0.55,
+			drift: (Math.random() - 0.5) * 24,
+			emoji:
+				next === 'up'
+					? LAUGH_EMOJIS[id % LAUGH_EMOJIS.length]
+					: SAD_EMOJIS[id % SAD_EMOJIS.length]
+		}));
+		confettiTimer = window.setTimeout(() => {
+			confetti = null;
+		}, 2600);
+	}
+
 	async function react(next: AdVote) {
-		if (saving || vote === next) return;
+		if (saving) return;
+		if (vote === next) {
+			editing = false;
+			return;
+		}
 
 		const previous = vote;
 		vote = next;
 		saving = true;
 
 		const ok = await sendAdReaction(next, page.url.pathname);
-		if (!ok) vote = previous;
 		saving = false;
+		if (!ok) {
+			vote = previous;
+			return;
+		}
+
+		if (verticalBanner) writeStoredAdVote(verticalBanner.type, next);
+		editing = false;
+		rain(next);
 	}
 
 	function openJobPopup() {
@@ -138,29 +199,51 @@
 		</button>
 		{#if ready}
 			<div class="vertical-banner-ads__footer">
-				<p class="vertical-banner-ads__prompt">did you like this?</p>
-				<div class="vertical-banner-ads__votes">
-					<button
-						type="button"
-						class="vertical-banner-ads__vote"
-						aria-label="Thumbs up"
-						aria-pressed={vote === 'up'}
-						disabled={saving}
-						onclick={() => react('up')}
+				{#if vote && !editing}
+					<p class="vertical-banner-ads__prompt">
+						You {vote === 'up' ? 'liked' : 'disliked'} this fake ad.
+						<button type="button" class="vertical-banner-ads__change" onclick={() => (editing = true)}>
+							Changed your mind?
+						</button>
+					</p>
+				{:else}
+					<p class="vertical-banner-ads__prompt">did you like this?</p>
+					<div class="vertical-banner-ads__votes">
+						<button
+							type="button"
+							class="vertical-banner-ads__vote vertical-banner-ads__vote--up"
+							aria-label="Thumbs up"
+							aria-pressed={vote === 'up'}
+							disabled={saving}
+							onclick={() => react('up')}
+						>
+							{@render thumb('up')}
+						</button>
+						<button
+							type="button"
+							class="vertical-banner-ads__vote vertical-banner-ads__vote--down"
+							aria-label="Thumbs down"
+							aria-pressed={vote === 'down'}
+							disabled={saving}
+							onclick={() => react('down')}
+						>
+							{@render thumb('down')}
+						</button>
+					</div>
+				{/if}
+			</div>
+		{/if}
+		{#if confetti}
+			<div class="vertical-banner-ads__confetti" aria-hidden="true">
+				{#each confetti as piece (piece.id)}
+					<span
+						style:left="{piece.left}%"
+						style:animation-delay="{piece.delay}ms"
+						style:animation-duration="{piece.duration}ms"
+						style:font-size="{piece.size}rem"
+						style:--drift="{piece.drift}px">{piece.emoji}</span
 					>
-						{@render thumb('up')}
-					</button>
-					<button
-						type="button"
-						class="vertical-banner-ads__vote"
-						aria-label="Thumbs down"
-						aria-pressed={vote === 'down'}
-						disabled={saving}
-						onclick={() => react('down')}
-					>
-						{@render thumb('down')}
-					</button>
-				</div>
+				{/each}
 			</div>
 		{/if}
 	</div>
@@ -322,13 +405,49 @@
 		height: 1rem;
 	}
 
-	.vertical-banner-ads__vote[aria-pressed='true'] {
-		border-color: var(--accent);
-		background: color-mix(in srgb, var(--accent) 40%, transparent);
+	.vertical-banner-ads__vote--up[aria-pressed='true'] {
+		border-color: #4ade80;
+		background: rgb(34 197 94 / 55%);
+		color: #ecfdf5;
+	}
+
+	.vertical-banner-ads__vote--down[aria-pressed='true'] {
+		border-color: #f87171;
+		background: rgb(239 68 68 / 55%);
+		color: #fef2f2;
 	}
 
 	.vertical-banner-ads__vote:disabled {
 		cursor: default;
+	}
+
+	.vertical-banner-ads__change {
+		display: inline;
+		padding: 0;
+		border: 0;
+		background: none;
+		color: inherit;
+		font: inherit;
+		text-decoration: underline;
+		text-underline-offset: 0.12em;
+		cursor: pointer;
+	}
+
+	.vertical-banner-ads__confetti {
+		position: absolute;
+		z-index: 2;
+		inset: 0;
+		overflow: hidden;
+		pointer-events: none;
+	}
+
+	.vertical-banner-ads__confetti span {
+		position: absolute;
+		top: -15%;
+		line-height: 1;
+		animation-name: vertical-banner-ads-rain;
+		animation-timing-function: ease-in;
+		animation-fill-mode: forwards;
 	}
 
 	.vertical-banner-ads__popup {
@@ -375,9 +494,21 @@
 		}
 	}
 
+	@keyframes vertical-banner-ads-rain {
+		to {
+			top: 110%;
+			opacity: 0;
+			transform: translateX(var(--drift, 0px)) rotate(18deg);
+		}
+	}
+
 	@media (prefers-reduced-motion: reduce) {
 		.vertical-banner-ads__spinner::after {
 			border-color: var(--accent);
+			animation: none;
+		}
+
+		.vertical-banner-ads__confetti span {
 			animation: none;
 		}
 	}

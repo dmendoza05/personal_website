@@ -82,6 +82,7 @@ describe('assembleDashboardResponse', () => {
 			{ device: 'other', requests: 0 }
 		]);
 		expect(result.resumeDownloads).toBe(0);
+		expect(result.adVotes).toEqual({ likes: 0, dislikes: 0 });
 	});
 
 	it('leaves custom unique visitors null', () => {

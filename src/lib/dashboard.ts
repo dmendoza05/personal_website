@@ -56,6 +56,10 @@ export type DashboardResponse = {
 	countries: DashboardCountry[];
 	devices: DashboardDevice[];
 	resumeDownloads: number;
+	adVotes: {
+		likes: number;
+		dislikes: number;
+	};
 };
 
 export function formatDashboardNumber(value: number | null | undefined): string {

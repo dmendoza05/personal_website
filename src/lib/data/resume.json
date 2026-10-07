@@ -10,7 +10,8 @@
 		{
 			"company": "Age of Learning",
 			"role": "Software Engineer III",
-			"period": "May 2022 – Present",
+			"period": "May 2022 – September 2026",
+			"employment": "Full-time, Hybrid",
 			"location": "Glendale, CA",
 			"bullets": [
 				"Build and maintain in-house tooling for educational content creation and organization",
@@ -22,6 +23,7 @@
 			"company": "Age of Learning",
 			"role": "Software Engineer II",
 			"period": "Oct 2018 – May 2022",
+			"employment": "Full-time, Remote",
 			"location": "Glendale, CA",
 			"bullets": [
 				"Maintained, published, and released the ReadingIQ web and mobile platforms (iOS and Android)",
@@ -33,6 +35,7 @@
 			"company": "Age of Learning",
 			"role": "Software Engineer I",
 			"period": "Jun 2017 – Oct 2018",
+			"employment": "Full-time, On-site",
 			"location": "Glendale, CA",
 			"bullets": [
 				"Supported front-end development for ABCmouse and ReadingIQ product initiatives",
@@ -44,6 +47,7 @@
 			"company": "Age of Learning",
 			"role": "Associate Software Engineer",
 			"period": "Oct 2015 – Jun 2017",
+			"employment": "Full-time, On-site",
 			"location": "Glendale, CA",
 			"bullets": [
 				"Fixed and shipped production bugs for the ABCmouse 1.0 product",

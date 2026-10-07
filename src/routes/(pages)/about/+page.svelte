@@ -14,9 +14,11 @@
 	<meta name="description" content={m.about_description()} />
 </svelte:head>
 
-<div class="space-y-8 px-4 sm:px-6 relative z-10">
-	<div>
-		<AnimatedWords class="text-xs leading-relaxed sm:text-sm text-white">
+<div
+	class="relative z-10 h-[calc(100dvh-64px)] space-y-8 overflow-y-auto px-4 py-6 scrollbar-none [-ms-overflow-style:none] md:h-[calc(100dvh-80px)] sm:px-6 sm:py-8 [&::-webkit-scrollbar]:hidden"
+>
+	<div class="border border-border bg-card/95 p-4 text-foreground backdrop-blur-sm sm:p-5">
+		<AnimatedWords class="text-sm leading-relaxed text-foreground">
 			{resume.summary}
 		</AnimatedWords>
 	</div>

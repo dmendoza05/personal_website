@@ -59,7 +59,7 @@
 		},
 		{
 			id: 'learn',
-			label: 'Would love to learn ',
+			label: 'Would love to learn',
 			color: '#7fbfff',
 			skills: ['rust', 'go', 'haskell', 'graphql']
 		}
@@ -67,33 +67,31 @@
 </script>
 
 <TabContent id="proficiency" onenter={scene.enter} onexit={scene.exit}>
-	<div
-		class="overflow-hidden rounded-sm border border-neutral-700 bg-neutral-900"
-		role="list"
-		aria-label="Proficiency tiers"
-	>
+	<div class="grid gap-3" role="list" aria-label="Proficiency tiers">
 		{#each tiers as tier (tier.id)}
-			<div
-				class="flex min-h-16 border-b border-neutral-700 last:border-b-0"
-				role="listitem"
-				aria-label={tier.label}
-			>
-				<div
-					class="flex w-32 shrink-0 items-center justify-center px-2 text-center text-[0.65rem] font-bold leading-snug text-neutral-900 sm:w-40 sm:text-sm"
-					style:background-color={tier.color}
-				>
-					{tier.label}
-				</div>
-				<ul class="m-0 flex flex-1 list-none flex-wrap content-center gap-2 p-2">
-					{#each tier.skills as skillId (skillId)}
-						<li
-							class="inline-flex items-center gap-1.5 rounded-sm bg-neutral-800 px-2.5 py-1 text-sm text-neutral-100"
-						>
-							<SkillLogo id={skillId} class="size-3.5 shrink-0 text-neutral-100" />
-							{getSkill(skillId).label}
-						</li>
-					{/each}
-				</ul>
+			<div role="listitem">
+				<article class="border border-border bg-card/95 p-4 text-foreground backdrop-blur-sm sm:p-5">
+					<div class="flex items-center gap-2">
+						<span
+							class="size-2.5 shrink-0"
+							style:background-color={tier.color}
+							aria-hidden="true"
+						></span>
+						<h3 class="text-xs font-bold uppercase leading-snug text-foreground sm:text-sm">
+							{tier.label}
+						</h3>
+					</div>
+					<ul class="mt-3 flex list-none flex-wrap gap-2">
+						{#each tier.skills as skillId (skillId)}
+							<li
+								class="inline-flex items-center gap-1.5 border border-border bg-background/50 px-2.5 py-1 text-sm text-foreground"
+							>
+								<SkillLogo id={skillId} class="size-3.5 shrink-0" />
+								{getSkill(skillId).label}
+							</li>
+						{/each}
+					</ul>
+				</article>
 			</div>
 		{/each}
 	</div>
