@@ -14,10 +14,8 @@
 		HEADER_TRANSITION,
 		HEADER_TRANSITION_MS,
 		LOGO_FADE_IN,
-		LOGO_FADE_OUT,
 		NAV_ICON_PATHS,
 		NAV_ITEMS,
-		ROUTE_FADE_DOWN,
 		ROUTE_FADE_UP,
 		resolveHeaderState,
 		SM_VIEWPORT_QUERY
@@ -40,7 +38,6 @@
 	let timeline: Timeline | undefined;
 	let routeItems: NodeListOf<HTMLElement> | undefined;
 	let entered = false;
-	let exiting = false;
 
 	onMount(() => {
 		const mediaQuery = window.matchMedia(SM_VIEWPORT_QUERY);
@@ -141,40 +138,13 @@
 			.add(routeItems, ROUTE_FADE_UP);
 	}
 
-	function playExitThenNavigate(href: Pathname) {
-		if (exiting) return;
-		exiting = true;
-
-		const path = resolve(href);
-
-		if (prefersReducedMotion() || !logoEl || !routeItems) {
-			void goto(path);
-			return;
-		}
-
-		timeline?.pause();
-
-		timeline = createTimeline({
-			onComplete: () => {
-				void goto(path);
-			}
-		});
-
-		timeline
-			.add(routeItems, ROUTE_FADE_DOWN)
-			.call(() => {
-				logo.toInitials();
-			})
-			.add(logoEl, LOGO_FADE_OUT, `+=${HEADER_TRANSITION_MS}`);
-	}
-
 	function onHomeClick(event: MouseEvent) {
 		if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey || event.button !== 0) {
 			return;
 		}
 
 		event.preventDefault();
-		void playExitThenNavigate('/');
+		void goto(resolve('/'));
 	}
 </script>
 

@@ -49,26 +49,11 @@ export const ROUTE_FADE_UP = {
 	ease: 'outCubic'
 };
 
-export const ROUTE_FADE_DOWN = {
-	opacity: [1, 0],
-	translateY: [0, -12],
-	delay: stagger(ROUTES_STAGGER_MS),
-	duration: HEADER_TRANSITION_MS,
-	ease: 'inCubic'
-};
-
 export const LOGO_FADE_IN = {
 	opacity: [0, 1],
 	translateY: [-12, 0],
 	duration: FADE_MS,
 	ease: 'outCubic'
-};
-
-export const LOGO_FADE_OUT = {
-	opacity: [1, 0],
-	translateY: [0, -12],
-	duration: FADE_MS,
-	ease: 'inCubic'
 };
 
 export function resolveHeaderState(isSmViewport: boolean): HeaderState {

@@ -8,6 +8,7 @@
 	import NewsBanner from '$lib/components/NewsBanner.svelte';
 	import { HEADER_TRANSITION_MS } from '$lib/components/header/constants';
 	import { site } from '$lib/data/site';
+	import { getNavigatingFrom } from '$lib/navigating-from';
 	import { m } from '$lib/paraglide/messages.js';
 
 	const FADE_MS = 600;
@@ -32,6 +33,9 @@
 		}
 	] as const;
 
+	const returnPath = getNavigatingFrom().replace(/\/$/, '') || '/';
+	const skipIntro = returnPath === '/about' || returnPath === '/works';
+
 	const fadeUp = {
 		opacity: [0, 1],
 		translateY: [-12, 0],
@@ -48,7 +52,7 @@
 		ease: 'inCubic'
 	};
 
-	let newsReady = $state(false);
+	let newsReady = $state(skipIntro);
 	let logo: Logo;
 	let sectionEl: HTMLElement | undefined = $state();
 	let navList: HTMLUListElement | undefined = $state();
@@ -67,13 +71,13 @@
 		socialItems = socialList.querySelectorAll<HTMLElement>(':scope > li');
 		if (!logoSvg || !routeItems.length || !socialItems.length) return;
 
-		if (prefersReducedMotion()) {
+		if (prefersReducedMotion() || skipIntro) {
 			logoSvg.style.opacity = '1';
 			for (const item of [...routeItems, ...socialItems]) {
 				item.style.opacity = '1';
 				item.style.transform = 'none';
 			}
-			logo.toFullname();
+			if (!skipIntro) logo.toFullname();
 			newsReady = true;
 			return;
 		}
@@ -164,10 +168,10 @@
 	>
 		<Logo
 			bind:this={logo}
-			initial="initials"
+			initial={skipIntro ? 'fullname' : 'initials'}
 			duration={HEADER_TRANSITION_MS}
 			height={99}
-			class="opacity-0 motion-reduce:opacity-100 text-foreground"
+			class="{skipIntro ? '' : 'opacity-0 motion-reduce:opacity-100'} text-foreground"
 		/>
 
 		<nav aria-label="Primary">
@@ -176,7 +180,7 @@
 				class="flex flex-col items-center gap-5 md:flex-row md:gap-8"
 			>
 				{#each routes as route (route.href)}
-					<li class="opacity-0 motion-reduce:opacity-100">
+					<li class={skipIntro ? undefined : 'opacity-0 motion-reduce:opacity-100'}>
 						<a
 							href={resolve(route.href)}
 							class="bartle text-md font-medium tracking-wide text-muted transition-colors hover:text-foreground"
@@ -190,7 +194,7 @@
 		</nav>
 		<ul bind:this={socialList} class="flex flex-row items-center gap-10">
 			{#each socials as social (social.href)}
-				<li class="opacity-0 motion-reduce:opacity-100">
+				<li class={skipIntro ? undefined : 'opacity-0 motion-reduce:opacity-100'}>
 					<a
 						href={social.href}
 						target="_blank"
@@ -208,6 +212,9 @@
 	</section>
 
 	{#if newsReady}
-		<NewsBanner onRouteClick={(event) => onRouteClick(event, '/dashboard')} />
+		<NewsBanner
+			instant={skipIntro}
+			onRouteClick={(event) => onRouteClick(event, '/dashboard')}
+		/>
 	{/if}
 </div>

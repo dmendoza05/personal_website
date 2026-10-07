@@ -5,12 +5,14 @@
 	import { m } from '$lib/paraglide/messages.js';
 
 	let {
+		instant = false,
 		onEnterStart,
 		onEnterCompletes,
 		onExitStart,
 		onExitComplete,
 		onRouteClick
 	}: {
+		instant?: boolean;
 		onEnterStart?: () => void;
 		onEnterCompletes?: () => void;
 		onExitStart?: () => void;
@@ -24,10 +26,11 @@
 
 	let labelEl: HTMLElement | undefined = $state();
 	let trackEl: HTMLElement | undefined = $state();
-	let entered = $state(false);
+	let entered = $state(instant);
 	let timeline: Timeline | undefined;
 
 	onMount(() => {
+		if (instant) return;
 		void playEnter();
 	});
 
