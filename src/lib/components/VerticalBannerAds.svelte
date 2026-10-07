@@ -6,13 +6,67 @@
 </script>
 
 <script lang="ts">
+	import { onMount } from 'svelte';
 	import { page } from '$app/state';
 	import { sendAdReaction, type AdVote } from '$lib/ad-reaction';
 	import { fakeAds } from '$lib/data/fake-ads';
 
 	let { side }: { side: 'left' | 'right' } = $props();
 
+	const LOAD_MS = 750;
 	const verticalBanner = fakeAds.find((ad) => ad.type === 'vertical-banner');
+
+	let dialogEl = $state<HTMLDialogElement>();
+	let imageEl = $state<HTMLImageElement>();
+	let ready = $state(false);
+
+	onMount(() => {
+		let cancelled = false;
+		let timeout = 0;
+		let removeAssetListeners = () => {};
+		const img = imageEl;
+
+		const minDelay = new Promise<void>((resolve) => {
+			timeout = window.setTimeout(resolve, LOAD_MS);
+		});
+
+		const assetReady = new Promise<void>((resolve) => {
+			if (!img) {
+				resolve();
+				return;
+			}
+
+			const settle = () => {
+				removeAssetListeners();
+				resolve();
+			};
+
+			removeAssetListeners = () => {
+				img.removeEventListener('load', settle);
+				img.removeEventListener('error', settle);
+			};
+
+			if (img.complete) {
+				resolve();
+				return;
+			}
+
+			img.addEventListener('load', settle);
+			img.addEventListener('error', settle);
+
+			if (img.complete) settle();
+		});
+
+		void Promise.all([minDelay, assetReady]).then(() => {
+			if (!cancelled) ready = true;
+		});
+
+		return () => {
+			cancelled = true;
+			clearTimeout(timeout);
+			removeAssetListeners();
+		};
+	});
 
 	async function react(next: AdVote) {
 		if (saving || vote === next) return;
@@ -24,6 +78,15 @@
 		const ok = await sendAdReaction(next, page.url.pathname);
 		if (!ok) vote = previous;
 		saving = false;
+	}
+
+	function openJobPopup() {
+		if (!dialogEl || dialogEl.open) return;
+		dialogEl.showModal();
+	}
+
+	function onDialogClick(event: MouseEvent) {
+		if (event.target === dialogEl) dialogEl?.close();
 	}
 </script>
 
@@ -49,45 +112,73 @@
 
 {#snippet banner(side: 'left' | 'right')}
 	<div class="vertical-banner-ads__banner vertical-banner-ads__banner--{side}">
-		<img
-			class="vertical-banner-ads__image"
-			src={verticalBanner?.asset}
-			alt=""
-			width="426"
-			height="1079"
-		/>
-		<span class="vertical-banner-ads__label">Fake Ad</span>
-		<span class="vertical-banner-ads__mark">DM</span>
-		<div class="vertical-banner-ads__footer">
-			<p class="vertical-banner-ads__prompt">did you like this?</p>
-			<div class="vertical-banner-ads__votes">
-				<button
-					type="button"
-					class="vertical-banner-ads__vote"
-					aria-label="Thumbs up"
-					aria-pressed={vote === 'up'}
-					disabled={saving}
-					onclick={() => react('up')}
-				>
-					{@render thumb('up')}
-				</button>
-				<button
-					type="button"
-					class="vertical-banner-ads__vote"
-					aria-label="Thumbs down"
-					aria-pressed={vote === 'down'}
-					disabled={saving}
-					onclick={() => react('down')}
-				>
-					{@render thumb('down')}
-				</button>
+		<button
+			type="button"
+			class="vertical-banner-ads__hit"
+			aria-label={ready ? (verticalBanner?.name ?? 'Advertisement') : 'Loading advertisement'}
+			aria-busy={!ready}
+			disabled={!ready}
+			onclick={openJobPopup}
+		>
+			<img
+				bind:this={imageEl}
+				class="vertical-banner-ads__image"
+				class:vertical-banner-ads__image--pending={!ready}
+				src={verticalBanner?.asset}
+				alt=""
+				width="426"
+				height="1079"
+			/>
+			{#if ready}
+				<span class="vertical-banner-ads__label">Fake Ad</span>
+				<span class="vertical-banner-ads__mark">DM</span>
+			{:else}
+				<span class="vertical-banner-ads__spinner" aria-hidden="true"></span>
+			{/if}
+		</button>
+		{#if ready}
+			<div class="vertical-banner-ads__footer">
+				<p class="vertical-banner-ads__prompt">did you like this?</p>
+				<div class="vertical-banner-ads__votes">
+					<button
+						type="button"
+						class="vertical-banner-ads__vote"
+						aria-label="Thumbs up"
+						aria-pressed={vote === 'up'}
+						disabled={saving}
+						onclick={() => react('up')}
+					>
+						{@render thumb('up')}
+					</button>
+					<button
+						type="button"
+						class="vertical-banner-ads__vote"
+						aria-label="Thumbs down"
+						aria-pressed={vote === 'down'}
+						disabled={saving}
+						onclick={() => react('down')}
+					>
+						{@render thumb('down')}
+					</button>
+				</div>
 			</div>
-		</div>
+		{/if}
 	</div>
 {/snippet}
 
 <div class="vertical-banner-ads">
 	{@render banner(side)}
+	<dialog
+		bind:this={dialogEl}
+		class="vertical-banner-ads__popup"
+		aria-label="404: No Job Found"
+		onclick={onDialogClick}
+	>
+		<p class="vertical-banner-ads__popup-message">404: No Job Found</p>
+		<form method="dialog">
+			<button type="submit" class="vertical-banner-ads__popup-close">Close</button>
+		</form>
+	</dialog>
 </div>
 
 <style>
@@ -107,14 +198,57 @@
 		height: fit-content;
 	}
 
+	.vertical-banner-ads__hit {
+		position: relative;
+		display: block;
+		width: fit-content;
+		max-width: 100%;
+		padding: 0;
+		border: 0;
+		background: none;
+		line-height: 0;
+		cursor: pointer;
+		pointer-events: auto;
+	}
+
 	.vertical-banner-ads__image {
 		display: block;
 		width: auto;
 		min-width: 0;
 		max-width: 100%;
 		height: auto;
-		max-height: min(70dvh, 42rem);
+		/* Leave room above this image for the dashboard banner on the left. */
+		max-height: min(42rem, calc((100dvh - 9rem) * 1079 / 1541));
 		border: 1px solid var(--border);
+	}
+
+	.vertical-banner-ads__image--pending {
+		visibility: hidden;
+	}
+
+	.vertical-banner-ads__spinner {
+		position: absolute;
+		inset: 0;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		border: 1px solid var(--border);
+		background: var(--card);
+	}
+
+	.vertical-banner-ads__spinner::after {
+		display: block;
+		width: 1.75rem;
+		height: 1.75rem;
+		border: 2px solid color-mix(in srgb, var(--fg) 22%, transparent);
+		border-top-color: var(--accent);
+		border-radius: 50%;
+		content: '';
+		animation: vertical-banner-ads-spin 0.7s linear infinite;
+	}
+
+	.vertical-banner-ads__hit:disabled {
+		cursor: default;
 	}
 
 	.vertical-banner-ads__label {
@@ -197,15 +331,61 @@
 		cursor: default;
 	}
 
+	.vertical-banner-ads__popup {
+		width: min(20rem, calc(100vw - 2rem));
+		padding: 1.5rem 1.25rem 1.15rem;
+		margin: auto;
+		border: 1px solid var(--border);
+		background: var(--card);
+		color: var(--fg);
+		pointer-events: auto;
+	}
+
+	.vertical-banner-ads__popup::backdrop {
+		background: rgb(0 0 0 / 60%);
+	}
+
+	.vertical-banner-ads__popup-message {
+		margin: 0;
+		font-family: 'Orbitron', ui-sans-serif, system-ui, sans-serif;
+		font-size: 1rem;
+		font-weight: 600;
+		letter-spacing: 0.03em;
+		text-align: center;
+	}
+
+	.vertical-banner-ads__popup-close {
+		display: block;
+		width: 100%;
+		margin-top: 1.15rem;
+		padding: 0.4rem 0.75rem;
+		border: 1px solid var(--border);
+		background: transparent;
+		color: var(--fg);
+		font-family: 'Rajdhani', ui-sans-serif, system-ui, sans-serif;
+		font-size: 1rem;
+		font-weight: 600;
+		letter-spacing: 0.04em;
+		cursor: pointer;
+	}
+
+	@keyframes vertical-banner-ads-spin {
+		to {
+			transform: rotate(360deg);
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.vertical-banner-ads__spinner::after {
+			border-color: var(--accent);
+			animation: none;
+		}
+	}
+
 	@container (min-width: 8rem) {
 		.vertical-banner-ads {
 			display: block;
 		}
 	}
 
-	@container (min-width: 18rem) {
-		.vertical-banner-ads__image {
-			max-height: min(42rem, calc(100dvh - 22rem));
-		}
-	}
 </style>

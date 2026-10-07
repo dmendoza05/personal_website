@@ -13,5 +13,10 @@ export const fakeAds = [
 		type: 'vertical-banner',
 		name: 'I Need a Job',
 		asset: '/ads/ineedajob.gif'
+	},
+	{
+		type: 'thumbnail',
+		name: 'Data and Analytics',
+		asset: '/ads/data-and-analytics.png'
 	}
 ] as const satisfies readonly FakeAd[];

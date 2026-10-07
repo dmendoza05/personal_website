@@ -1,9 +1,13 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
+	import { page } from '$app/state';
 	import AdSpaces from '$lib/components/AdSpaces.svelte';
+	import DashboardBanner from '$lib/components/DashboardBanner.svelte';
 	import VerticalBannerAds from '$lib/components/VerticalBannerAds.svelte';
 
 	let { children }: { children: Snippet } = $props();
+
+	const showDashboardBanner = $derived(!page.url.pathname.startsWith('/dashboard'));
 </script>
 
 <main class="main-content">
@@ -12,6 +16,9 @@
 	</div>
 	<AdSpaces>
 		{#snippet left()}
+			{#if showDashboardBanner}
+				<DashboardBanner />
+			{/if}
 			<VerticalBannerAds side="left" />
 		{/snippet}
 		{#snippet right()}
