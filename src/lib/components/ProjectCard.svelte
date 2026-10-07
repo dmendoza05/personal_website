@@ -13,14 +13,16 @@
 </script>
 
 <article
-	class="flex h-full flex-col overflow-hidden border border-border bg-card/95 text-foreground backdrop-blur-sm"
+	class="group flex h-full flex-col overflow-hidden border border-border bg-card/95 text-foreground backdrop-blur-sm"
 >
 	{#if project.thumbnail}
-		<img
-			src={project.thumbnail}
-			alt=""
-			class="aspect-video w-full object-cover"
-		/>
+		<div class="overflow-hidden">
+			<img
+				src={project.thumbnail}
+				alt=""
+				class="aspect-video w-full object-cover transition-transform duration-300 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
+			/>
+		</div>
 	{:else}
 		<div
 			class="flex aspect-video w-full items-center justify-center border-b border-border bg-background/40"

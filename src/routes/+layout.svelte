@@ -1,11 +1,14 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { afterNavigate } from '$app/navigation';
+	import { page } from '$app/state';
 	import { onMount } from 'svelte';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.png';
+	import { deLocalizeUrl } from '$lib/paraglide/runtime';
 	import { initPreferences } from '$lib/preferences';
 	import DotsBackground from '$lib/components/DotsBackground.svelte';
+	import VerticalBannerAds from '$lib/components/VerticalBannerAds.svelte';
 
 	let { children } = $props();
 
@@ -37,5 +40,8 @@
 
 <div class="relative z-10 h-dvh w-dvw overflow-hidden">
 	{@render children()}
+	{#if deLocalizeUrl(page.url).pathname !== '/'}
+		<VerticalBannerAds />
+	{/if}
 	<DotsBackground />
 </div>

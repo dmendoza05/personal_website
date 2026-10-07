@@ -9,6 +9,14 @@ import {
 	timestamp
 } from 'drizzle-orm/pg-core';
 
+/** One row per thumbs-up or thumbs-down on the fake side ads. */
+export const adReactions = pgTable('ad_reactions', {
+	id: serial('id').primaryKey(),
+	vote: text('vote').notNull(),
+	path: text('path').notNull(),
+	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()
+});
+
 export const comments = pgTable('comments', {
 	id: serial('id').primaryKey(),
 	postSlug: text('post_slug').notNull(),
@@ -66,6 +74,8 @@ export const analyticsDimensions = pgTable(
 	(table) => [primaryKey({ columns: [table.window, table.kind, table.key] })]
 );
 
+export type AdReaction = typeof adReactions.$inferSelect;
+export type NewAdReaction = typeof adReactions.$inferInsert;
 export type Comment = typeof comments.$inferSelect;
 export type NewComment = typeof comments.$inferInsert;
 export type PageViewCount = typeof pageViewCounts.$inferSelect;
