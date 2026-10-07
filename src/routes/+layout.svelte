@@ -7,10 +7,11 @@
 	import favicon from '$lib/assets/favicon.png';
 	import { deLocalizeUrl } from '$lib/paraglide/runtime';
 	import { initPreferences } from '$lib/preferences';
+	import InYourAreaAd from '$lib/components/InYourAreaAd.svelte';
 	import DotsBackground from '$lib/components/DotsBackground.svelte';
 	import VerticalBannerAds from '$lib/components/VerticalBannerAds.svelte';
 
-	let { children } = $props();
+	let { children, data } = $props();
 
 	onMount(() => {
 		const stopPreferences = initPreferences();
@@ -40,6 +41,7 @@
 
 <div class="relative z-10 h-dvh w-dvw overflow-hidden">
 	{@render children()}
+	<InYourAreaAd milesFromLa={data.milesFromLa} />
 	{#if deLocalizeUrl(page.url).pathname !== '/'}
 		<VerticalBannerAds />
 	{/if}

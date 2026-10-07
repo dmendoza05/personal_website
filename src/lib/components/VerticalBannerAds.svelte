@@ -1,36 +1,25 @@
 <script lang="ts">
 	import { page } from '$app/state';
+	import { sendAdReaction, type AdVote } from '$lib/ad-reaction';
 	import { fakeAds } from '$lib/data/fake-ads';
 
-	type Vote = 'up' | 'down';
 	type Side = 'left' | 'right';
 
 	const verticalBanner = fakeAds.find((ad) => ad.type === 'vertical-banner');
 
-	let vote = $state<Vote | null>(null);
+	let vote = $state<AdVote | null>(null);
 	let saving = $state(false);
 
-	async function react(next: Vote) {
+	async function react(next: AdVote) {
 		if (saving || vote === next) return;
 
 		const previous = vote;
 		vote = next;
 		saving = true;
 
-		try {
-			const response = await fetch('/api/ad-reaction', {
-				method: 'POST',
-				headers: { 'content-type': 'application/json' },
-				body: JSON.stringify({ vote: next, path: page.url.pathname }),
-				keepalive: true
-			});
-
-			if (!response.ok) vote = previous;
-		} catch {
-			vote = previous;
-		} finally {
-			saving = false;
-		}
+		const ok = await sendAdReaction(next, page.url.pathname);
+		if (!ok) vote = previous;
+		saving = false;
 	}
 </script>
 
