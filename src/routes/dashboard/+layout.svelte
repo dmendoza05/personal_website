@@ -1,8 +1,15 @@
 <script lang="ts">
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
+	import { onMount } from 'svelte';
+	import Logo from '$lib/components/Logo.svelte';
 	import Header from '$lib/components/header/Header.svelte';
 	import ResumeDownloadButton from '$lib/components/header/ResumeDownloadButton.svelte';
+	import {
+		HEADER_LOGO_HEIGHT,
+		HEADER_TRANSITION_MS,
+		SM_VIEWPORT_QUERY
+	} from '$lib/components/header/constants';
 	import MainContent from '$lib/components/MainContent.svelte';
 	import { m } from '$lib/paraglide/messages.js';
 
@@ -11,27 +18,49 @@
 	const hudControl =
 		'inline-flex items-center gap-2 px-3 py-2 text-sm font-medium transition-colors bartle';
 
+	let isSmViewport = $state(false);
+	let logo: Logo | undefined = $state();
+
+	onMount(() => {
+		const mediaQuery = window.matchMedia(SM_VIEWPORT_QUERY);
+		isSmViewport = mediaQuery.matches;
+
+		function onViewportChange() {
+			isSmViewport = mediaQuery.matches;
+		}
+
+		mediaQuery.addEventListener('change', onViewportChange);
+
+		return () => {
+			mediaQuery.removeEventListener('change', onViewportChange);
+		};
+	});
+
 	const dashboardActive = $derived(page.url.pathname.startsWith('/dashboard'));
+	const logoHeight = $derived(isSmViewport ? HEADER_LOGO_HEIGHT.compact : HEADER_LOGO_HEIGHT.nav);
+
+	$effect(() => {
+		if (!logo) return;
+
+		if (isSmViewport) {
+			logo.toInitials();
+			return;
+		}
+
+		logo.toFullname();
+	});
 </script>
 
 <Header>
 	{#snippet left()}
-		<a
-			href={resolve('/')}
-			class="{hudControl} text-muted hover:border-accent hover:text-accent hover:bg-accent/25"
-			aria-label={m.nav_home()}
-		>
-			<svg
-				class="h-4 w-4 shrink-0"
-				viewBox="0 0 24 24"
-				fill="none"
-				stroke="currentColor"
-				stroke-width="2"
-				aria-hidden="true"
-			>
-				<path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
-			</svg>
-			<span class="hidden sm:inline">{m.nav_home()}</span>
+		<a href={resolve('/')} aria-label={m.nav_home()} class="inline-block shrink-0">
+			<Logo
+				bind:this={logo}
+				initial="initials"
+				duration={HEADER_TRANSITION_MS}
+				height={logoHeight}
+				class="text-foreground"
+			/>
 		</a>
 	{/snippet}
 	{#snippet center()}

@@ -6,6 +6,7 @@
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { createTimeline, type Timeline } from 'animejs';
 	import Logo from '$lib/components/Logo.svelte';
+	import HeaderMenu from './HeaderMenu.svelte';
 	import ResumeDownloadButton from './ResumeDownloadButton.svelte';
 	import {
 		HEADER_HEIGHT,
@@ -255,8 +256,9 @@
 		<div class="justify-self-center">
 			{@render center?.()}
 		</div>
-		<div class="min-w-0 justify-self-end">
+		<div class="flex min-w-0 items-center justify-self-end gap-2">
 			{@render (right ?? siteNav)()}
+			<HeaderMenu />
 		</div>
 	</div>
 </header>
