@@ -2,7 +2,6 @@
 	let open = $state(false);
 	let matched = $state(false);
 	let saving = $state(false);
-	let booted = false;
 </script>
 
 <script lang="ts">
@@ -12,34 +11,13 @@
 	import { awayPhrase } from '$lib/distance-from-la';
 	import { deLocalizeUrl } from '$lib/paraglide/runtime';
 
-	let {
-		milesFromLa = null,
-		side = 'center'
-	}: { milesFromLa?: number | null; side?: 'left' | 'right' | 'center' } = $props();
+	let { milesFromLa = null }: { milesFromLa?: number | null } = $props();
 
 	const DISMISS_KEY = 'dee-bugg-dismissed';
 
 	onMount(() => {
-		if (booted) return;
-		booted = true;
 		if (sessionStorage.getItem(DISMISS_KEY) === '1') return;
-
-		const timer = window.setTimeout(() => {
-			open = true;
-		}, 700);
-
-		return () => window.clearTimeout(timer);
-	});
-
-	$effect(() => {
-		if (!open || side !== 'center') return;
-
-		function onKey(event: KeyboardEvent) {
-			if (event.key === 'Escape') ignore();
-		}
-
-		window.addEventListener('keydown', onKey);
-		return () => window.removeEventListener('keydown', onKey);
+		open = true;
 	});
 
 	const onHome = $derived(deLocalizeUrl(page.url).pathname === '/');
@@ -71,14 +49,10 @@
 	}
 </script>
 
-{#snippet card(side: 'left' | 'right' | 'center')}
-	<form
-		class="in-your-area-ad__card in-your-area-ad__card--{side}"
-		aria-labelledby="in-your-area-ad-title-{side}"
-		onsubmit={confirm}
-	>
+{#if open && !onHome}
+	<form class="in-your-area-ad" aria-labelledby="in-your-area-ad-title" onsubmit={confirm}>
 		<div class="in-your-area-ad__header">
-			<p id="in-your-area-ad-title-{side}" class="in-your-area-ad__title">
+			<p id="in-your-area-ad-title" class="in-your-area-ad__title">
 				(1) New Unemployed Dude In Your Area
 			</p>
 			<svg class="in-your-area-ad__icon" viewBox="0 0 28 20" aria-hidden="true">
@@ -121,33 +95,14 @@
 			</div>
 		</div>
 	</form>
-{/snippet}
-
-{#if open && !onHome}
-	{#if side === 'center'}
-		<div class="in-your-area-ad">
-			{@render card('center')}
-		</div>
-	{:else}
-		{@render card(side)}
-	{/if}
 {/if}
 
 <style>
 	.in-your-area-ad {
-		position: fixed;
-		z-index: 40;
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		inset: 0;
-		padding: 1rem;
-		pointer-events: none;
-	}
-
-	.in-your-area-ad__card {
+		display: none;
+		width: min(28rem, calc(100% - 0.75rem));
+		flex-shrink: 0;
 		container-type: inline-size;
-		width: min(28rem, 100%);
 		pointer-events: auto;
 		border: 1px solid #d5d5d5;
 		border-radius: 10px;
@@ -164,7 +119,7 @@
 	.in-your-area-ad__header {
 		display: flex;
 		align-items: center;
-		justify-content: center;
+		justify-content: flex-start;
 		gap: 0.45rem;
 		padding: 0.55rem 0.75rem;
 		background: #3b5998;
@@ -176,6 +131,7 @@
 		font-size: 1.2rem;
 		font-weight: 400;
 		line-height: 1.2;
+		text-align: left;
 	}
 
 	.in-your-area-ad__icon {
@@ -207,7 +163,7 @@
 		display: flex;
 		flex: 1;
 		flex-direction: column;
-		align-items: center;
+		align-items: flex-start;
 	}
 
 	.in-your-area-ad__message {
@@ -216,12 +172,12 @@
 		font-size: 1.28rem;
 		font-weight: 700;
 		line-height: 1.25;
-		text-align: center;
+		text-align: left;
 	}
 
 	.in-your-area-ad__actions {
 		display: flex;
-		justify-content: center;
+		justify-content: flex-start;
 		gap: 0.65rem;
 		width: 100%;
 		margin-top: 0.85rem;
@@ -252,52 +208,8 @@
 		opacity: 0.7;
 	}
 
-	.in-your-area-ad__card--left,
-	.in-your-area-ad__card--right {
-		display: none;
-		width: min(28rem, calc(100% - 0.75rem));
-		flex-shrink: 0;
-	}
-
-	.in-your-area-ad__card--left .in-your-area-ad__header {
-		justify-content: flex-end;
-	}
-
-	.in-your-area-ad__card--right .in-your-area-ad__header {
-		justify-content: flex-start;
-	}
-
-	.in-your-area-ad__card--right .in-your-area-ad__body {
-		flex-direction: row-reverse;
-	}
-
-	.in-your-area-ad__card--left .in-your-area-ad__copy {
-		align-items: flex-end;
-	}
-
-	.in-your-area-ad__card--right .in-your-area-ad__copy {
-		align-items: flex-start;
-	}
-
-	.in-your-area-ad__card--left .in-your-area-ad__message {
-		text-align: right;
-	}
-
-	.in-your-area-ad__card--right .in-your-area-ad__message {
-		text-align: left;
-	}
-
-	.in-your-area-ad__card--left .in-your-area-ad__actions {
-		justify-content: flex-end;
-	}
-
-	.in-your-area-ad__card--right .in-your-area-ad__actions {
-		justify-content: flex-start;
-	}
-
 	@container (min-width: 18rem) {
-		.in-your-area-ad__card--left,
-		.in-your-area-ad__card--right {
+		.in-your-area-ad {
 			display: block;
 		}
 	}
@@ -314,43 +226,9 @@
 		}
 	}
 
-	@media (max-width: 420px) {
-		.in-your-area-ad__title {
-			font-size: 1rem;
-		}
-
-		.in-your-area-ad__photo {
-			width: 6.1rem;
-			height: 7.4rem;
-		}
-
-		.in-your-area-ad__message {
-			font-size: 1.05rem;
-		}
-
-		.in-your-area-ad__button {
-			min-width: 0;
-			flex: 1;
-			font-size: 0.95rem;
-		}
-	}
-
 	@media (prefers-reduced-motion: reduce) {
-		.in-your-area-ad__card {
+		.in-your-area-ad {
 			animation: none;
-		}
-	}
-
-	@media (max-height: 719px) {
-		.in-your-area-ad__card--left,
-		.in-your-area-ad__card--right {
-			display: none;
-		}
-	}
-
-	@media (min-width: 116rem) and (min-height: 720px) {
-		.in-your-area-ad__card--center {
-			display: none;
 		}
 	}
 

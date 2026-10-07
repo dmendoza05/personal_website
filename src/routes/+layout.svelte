@@ -5,10 +5,9 @@
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.png';
 	import { initPreferences } from '$lib/preferences';
-	import InYourAreaAd from '$lib/components/InYourAreaAd.svelte';
 	import DotsBackground from '$lib/components/DotsBackground.svelte';
 
-	let { children, data } = $props();
+	let { children } = $props();
 
 	onMount(() => {
 		const stopPreferences = initPreferences();
@@ -38,6 +37,5 @@
 
 <div class="relative z-10 h-dvh w-dvw overflow-hidden">
 	{@render children()}
-	<InYourAreaAd milesFromLa={data.milesFromLa} />
 	<DotsBackground />
 </div>

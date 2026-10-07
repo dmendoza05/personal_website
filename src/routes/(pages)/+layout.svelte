@@ -35,11 +35,10 @@
 	</div>
 	<AdSpaces>
 		{#snippet left()}
-			<InYourAreaAd side="left" milesFromLa={milesFromLa} />
 			<VerticalBannerAds side="left" />
 		{/snippet}
 		{#snippet right()}
-			<InYourAreaAd side="right" milesFromLa={milesFromLa} />
+			<InYourAreaAd milesFromLa={milesFromLa} />
 			<VerticalBannerAds side="right" />
 		{/snippet}
 	</AdSpaces>
