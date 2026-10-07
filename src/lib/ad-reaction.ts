@@ -44,12 +44,12 @@ export function writeStoredAdVote(adId: string, vote: AdVote): void {
 	}
 }
 
-export async function sendAdReaction(vote: AdVote, path: string): Promise<boolean> {
+export async function sendAdReaction(vote: AdVote, path: string, ad: string): Promise<boolean> {
 	try {
 		const response = await fetch('/api/ad-reaction', {
 			method: 'POST',
 			headers: { 'content-type': 'application/json' },
-			body: JSON.stringify({ vote, path }),
+			body: JSON.stringify({ vote, path, ad }),
 			keepalive: true
 		});
 

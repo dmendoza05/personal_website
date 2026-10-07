@@ -43,7 +43,7 @@
 
 	onMount(() => {
 		if (vote === null && verticalBanner) {
-			vote = readStoredAdVote(verticalBanner.type);
+			vote = readStoredAdVote(verticalBanner.id) ?? readStoredAdVote(verticalBanner.type);
 		}
 
 		let cancelled = false;
@@ -106,12 +106,10 @@
 			left: 4 + Math.random() * 92,
 			delay: Math.random() * 180,
 			duration: 1800 + Math.random() * 500,
-			size: 0.8 + Math.random() * 0.55,
+			size: 1.45 + Math.random() * 0.9,
 			drift: (Math.random() - 0.5) * 24,
 			emoji:
-				next === 'up'
-					? LAUGH_EMOJIS[id % LAUGH_EMOJIS.length]
-					: SAD_EMOJIS[id % SAD_EMOJIS.length]
+				next === 'up' ? LAUGH_EMOJIS[id % LAUGH_EMOJIS.length] : SAD_EMOJIS[id % SAD_EMOJIS.length]
 		}));
 		confettiTimer = window.setTimeout(() => {
 			confetti = null;
@@ -119,7 +117,7 @@
 	}
 
 	async function react(next: AdVote) {
-		if (saving) return;
+		if (saving || !verticalBanner) return;
 		if (vote === next) {
 			editing = false;
 			return;
@@ -129,14 +127,14 @@
 		vote = next;
 		saving = true;
 
-		const ok = await sendAdReaction(next, page.url.pathname);
+		const ok = await sendAdReaction(next, page.url.pathname, verticalBanner.id);
 		saving = false;
 		if (!ok) {
 			vote = previous;
 			return;
 		}
 
-		if (verticalBanner) writeStoredAdVote(verticalBanner.type, next);
+		writeStoredAdVote(verticalBanner.id, next);
 		editing = false;
 		rain(next);
 	}
@@ -159,14 +157,22 @@
 				stroke-linejoin="round"
 				d="M14 9V5a3 3 0 0 0-3-3l-4 9v11h11.28a2 2 0 0 0 2-1.7l1.38-9a2 2 0 0 0-2-2.3H14z"
 			/>
-			<path stroke-linecap="round" stroke-linejoin="round" d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3" />
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				d="M7 22H4a2 2 0 0 1-2-2v-7a2 2 0 0 1 2-2h3"
+			/>
 		{:else}
 			<path
 				stroke-linecap="round"
 				stroke-linejoin="round"
 				d="M10 15v4a3 3 0 0 0 3 3l4-9V2H5.72a2 2 0 0 0-2 1.7l-1.38 9a2 2 0 0 0 2 2.3H10z"
 			/>
-			<path stroke-linecap="round" stroke-linejoin="round" d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3" />
+			<path
+				stroke-linecap="round"
+				stroke-linejoin="round"
+				d="M17 2h3a2 2 0 0 1 2 2v7a2 2 0 0 1-2 2h-3"
+			/>
 		{/if}
 	</svg>
 {/snippet}
@@ -202,7 +208,11 @@
 				{#if vote && !editing}
 					<p class="vertical-banner-ads__prompt">
 						You {vote === 'up' ? 'liked' : 'disliked'} this fake ad.
-						<button type="button" class="vertical-banner-ads__change" onclick={() => (editing = true)}>
+						<button
+							type="button"
+							class="vertical-banner-ads__change"
+							onclick={() => (editing = true)}
+						>
 							Changed your mind?
 						</button>
 					</p>
@@ -518,5 +528,4 @@
 			display: block;
 		}
 	}
-
 </style>

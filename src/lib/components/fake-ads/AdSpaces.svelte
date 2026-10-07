@@ -31,6 +31,23 @@
 		container-type: inline-size;
 		overflow: hidden;
 		pointer-events: none;
+		animation: ad-space-in 300ms ease 400ms both;
+	}
+
+	@keyframes ad-space-in {
+		from {
+			opacity: 0;
+		}
+
+		to {
+			opacity: 1;
+		}
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.ad-space {
+			animation: none;
+		}
 	}
 
 	.ad-space--left {

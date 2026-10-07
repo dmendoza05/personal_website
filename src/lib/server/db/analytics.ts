@@ -122,7 +122,7 @@ async function loadBreakdowns(): Promise<{
 	const [topPages, resumeDownloads, adVotes] = await Promise.all([
 		getTopPages(8).catch(() => [] as DashboardTopPage[]),
 		getPageViewCount(RESUME_DOWNLOAD_PATH).catch(() => 0),
-		getAdVoteTotals().catch(() => ({ likes: 0, dislikes: 0 }))
+		getAdVoteTotals().catch(() => ({ likes: 0, dislikes: 0, ads: [] }))
 	]);
 
 	try {

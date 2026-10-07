@@ -9,9 +9,10 @@ import {
 	timestamp
 } from 'drizzle-orm/pg-core';
 
-/** One row per thumbs-up or thumbs-down on the fake side ads. */
+/** One row per thumbs-up or thumbs-down on a specific fake ad. */
 export const adReactions = pgTable('ad_reactions', {
 	id: serial('id').primaryKey(),
+	ad: text('ad').notNull(),
 	vote: text('vote').notNull(),
 	path: text('path').notNull(),
 	createdAt: timestamp('created_at', { withTimezone: true }).defaultNow().notNull()

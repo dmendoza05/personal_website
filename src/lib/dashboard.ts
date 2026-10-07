@@ -41,6 +41,13 @@ export type DashboardDevice = {
 	requests: number;
 };
 
+export type DashboardAdVote = {
+	id: string;
+	name: string;
+	likes: number;
+	dislikes: number;
+};
+
 export type DashboardResponse = {
 	lifetimeUniqueVisitors: number | null;
 	range: {
@@ -59,6 +66,7 @@ export type DashboardResponse = {
 	adVotes: {
 		likes: number;
 		dislikes: number;
+		ads: DashboardAdVote[];
 	};
 };
 

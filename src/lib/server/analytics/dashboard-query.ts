@@ -86,6 +86,6 @@ export function assembleDashboardResponse(input: {
 			{ device: 'other', requests: 0 }
 		],
 		resumeDownloads: input.resumeDownloads ?? 0,
-		adVotes: input.adVotes ?? { likes: 0, dislikes: 0 }
+		adVotes: input.adVotes ?? { likes: 0, dislikes: 0, ads: [] }
 	};
 }

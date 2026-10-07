@@ -4,6 +4,7 @@
 	import {
 		formatDashboardNumber,
 		formatFetchedAt,
+		type DashboardAdVote,
 		type DashboardCountry,
 		type DashboardDevice,
 		type DashboardResponse
@@ -42,6 +43,7 @@
 	let resumeDownloads = $state<number | null>(null);
 	let adLikes = $state<number | null>(null);
 	let adDislikes = $state<number | null>(null);
+	let adVoteAds = $state<DashboardAdVote[]>([]);
 	let fetchedAt = $state('');
 	let status = $state<LoadStatus>('loading');
 	let errorMessage = $state('');
@@ -119,6 +121,7 @@
 			resumeDownloads = dashboard.resumeDownloads ?? 0;
 			adLikes = dashboard.adVotes?.likes ?? 0;
 			adDislikes = dashboard.adVotes?.dislikes ?? 0;
+			adVoteAds = dashboard.adVotes?.ads ?? [];
 			fetchedAt = dashboard.range.fetchedAt;
 			countries = dashboard.countries.map((entry) => ({
 				country: entry.country,
@@ -243,6 +246,7 @@
 					<AdVotesPanel
 						likes={adLikes}
 						dislikes={adDislikes}
+						ads={adVoteAds}
 						loading={status === 'loading'}
 						errorMessage={status === 'error' ? errorMessage : ''}
 						onRetry={load}

@@ -63,19 +63,6 @@
 			/>
 		</a>
 	{/snippet}
-	{#snippet center()}
-		<nav aria-label={m.dashboard_title()}>
-			<a
-				href={resolve('/dashboard')}
-				class="{hudControl} {dashboardActive
-					? 'text-accent'
-					: 'text-muted hover:border-accent hover:text-accent'}"
-				aria-current={dashboardActive ? 'page' : undefined}
-			>
-				{m.dashboard_title()}
-			</a>
-		</nav>
-	{/snippet}
 	{#snippet right()}
 		<ResumeDownloadButton />
 	{/snippet}

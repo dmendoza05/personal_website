@@ -1,5 +1,6 @@
 import { env } from '$env/dynamic/private';
 import { json } from '@sveltejs/kit';
+import { isFakeAdId } from '$lib/data/fake-ads';
 import { recordAdReaction, type AdVote } from '$lib/server/db/ad-reactions';
 import type { RequestHandler } from './$types';
 
@@ -30,8 +31,10 @@ export const POST: RequestHandler = async ({ request }) => {
 		typeof body === 'object' && body !== null && 'path' in body
 			? String((body as { path: unknown }).path)
 			: '';
+	const ad =
+		typeof body === 'object' && body !== null && 'ad' in body ? (body as { ad: unknown }).ad : null;
 
-	if (!isVote(vote) || !path || path.length > 512 || !PATH_PATTERN.test(path)) {
+	if (!isVote(vote) || !isFakeAdId(ad) || !path || path.length > 512 || !PATH_PATTERN.test(path)) {
 		return json({ ok: false }, { status: 400 });
 	}
 
@@ -40,7 +43,7 @@ export const POST: RequestHandler = async ({ request }) => {
 	}
 
 	try {
-		await recordAdReaction({ vote, path });
+		await recordAdReaction({ ad, vote, path });
 		return json({ ok: true });
 	} catch {
 		return json({ ok: false }, { status: 500 });
