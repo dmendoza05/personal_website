@@ -1,3 +1,10 @@
+<script lang="ts" module>
+	let open = $state(false);
+	let matched = $state(false);
+	let saving = $state(false);
+	let booted = false;
+</script>
+
 <script lang="ts">
 	import { page } from '$app/state';
 	import { onMount } from 'svelte';
@@ -5,15 +12,16 @@
 	import { awayPhrase } from '$lib/distance-from-la';
 	import { deLocalizeUrl } from '$lib/paraglide/runtime';
 
-	let { milesFromLa = null }: { milesFromLa?: number | null } = $props();
+	let {
+		milesFromLa = null,
+		side = 'center'
+	}: { milesFromLa?: number | null; side?: 'left' | 'right' | 'center' } = $props();
 
 	const DISMISS_KEY = 'dee-bugg-dismissed';
 
-	let open = $state(false);
-	let matched = $state(false);
-	let saving = $state(false);
-
 	onMount(() => {
+		if (booted) return;
+		booted = true;
 		if (sessionStorage.getItem(DISMISS_KEY) === '1') return;
 
 		const timer = window.setTimeout(() => {
@@ -24,7 +32,7 @@
 	});
 
 	$effect(() => {
-		if (!open) return;
+		if (!open || side !== 'center') return;
 
 		function onKey(event: KeyboardEvent) {
 			if (event.key === 'Escape') ignore();
@@ -63,54 +71,66 @@
 	}
 </script>
 
-{#if open && !onHome}
-	<div class="in-your-area-ad">
-		<form class="in-your-area-ad__card" aria-labelledby="in-your-area-ad-title" onsubmit={confirm}>
-			<div class="in-your-area-ad__header">
-				<p id="in-your-area-ad-title" class="in-your-area-ad__title">
-					(1) New Unemployed Dude In Your Area
-				</p>
-				<svg class="in-your-area-ad__icon" viewBox="0 0 28 20" aria-hidden="true">
-					<circle cx="17.2" cy="5.2" r="2.5" fill="currentColor" />
-					<path
-						fill="currentColor"
-						d="M12.4 16.2v-.8c0-1.9 1.7-3.2 4.8-3.2s4.8 1.3 4.8 3.2v.8z"
-					/>
-					<circle cx="9.2" cy="6.4" r="3.1" fill="currentColor" />
-					<path fill="currentColor" d="M2.2 17.4v-1.1C2.2 13.6 5 11.6 9.2 11.6s7 2 7 4.7v1.1z" />
-				</svg>
-			</div>
-
-			<div class="in-your-area-ad__body">
-				<img
-					class="in-your-area-ad__photo"
-					src="/ads/danielmendoza.JPG"
-					alt="Daniel Mendoza"
-					width="1242"
-					height="1622"
+{#snippet card(side: 'left' | 'right' | 'center')}
+	<form
+		class="in-your-area-ad__card in-your-area-ad__card--{side}"
+		aria-labelledby="in-your-area-ad-title-{side}"
+		onsubmit={confirm}
+	>
+		<div class="in-your-area-ad__header">
+			<p id="in-your-area-ad-title-{side}" class="in-your-area-ad__title">
+				(1) New Unemployed Dude In Your Area
+			</p>
+			<svg class="in-your-area-ad__icon" viewBox="0 0 28 20" aria-hidden="true">
+				<circle cx="17.2" cy="5.2" r="2.5" fill="currentColor" />
+				<path
+					fill="currentColor"
+					d="M12.4 16.2v-.8c0-1.9 1.7-3.2 4.8-3.2s4.8 1.3 4.8 3.2v.8z"
 				/>
-				<div class="in-your-area-ad__copy">
-					<p class="in-your-area-ad__message" aria-live="polite">
-						{#if matched}
-							It's a match!<br />Daniel is... 0 miles away!
-						{:else}
-							Daniel is... {away}<br />away!
-						{/if}
-					</p>
-					<div class="in-your-area-ad__actions">
-						{#if matched}
-							<button type="button" class="in-your-area-ad__button" onclick={dismiss}>Close</button>
-						{:else}
-							<button type="submit" class="in-your-area-ad__button" disabled={saving}>Confirm</button>
-							<button type="button" class="in-your-area-ad__button" disabled={saving} onclick={ignore}>
-								Ignore
-							</button>
-						{/if}
-					</div>
+				<circle cx="9.2" cy="6.4" r="3.1" fill="currentColor" />
+				<path fill="currentColor" d="M2.2 17.4v-1.1C2.2 13.6 5 11.6 9.2 11.6s7 2 7 4.7v1.1z" />
+			</svg>
+		</div>
+
+		<div class="in-your-area-ad__body">
+			<img
+				class="in-your-area-ad__photo"
+				src="/ads/danielmendoza.JPG"
+				alt="Daniel Mendoza"
+				width="1242"
+				height="1622"
+			/>
+			<div class="in-your-area-ad__copy">
+				<p class="in-your-area-ad__message" aria-live="polite">
+					{#if matched}
+						It's a match!<br />Daniel is... 0 miles away!
+					{:else}
+						Daniel is... {away}<br />away!
+					{/if}
+				</p>
+				<div class="in-your-area-ad__actions">
+					{#if matched}
+						<button type="button" class="in-your-area-ad__button" onclick={dismiss}>Close</button>
+					{:else}
+						<button type="submit" class="in-your-area-ad__button" disabled={saving}>Confirm</button>
+						<button type="button" class="in-your-area-ad__button" disabled={saving} onclick={ignore}>
+							Ignore
+						</button>
+					{/if}
 				</div>
 			</div>
-		</form>
-	</div>
+		</div>
+	</form>
+{/snippet}
+
+{#if open && !onHome}
+	{#if side === 'center'}
+		<div class="in-your-area-ad">
+			{@render card('center')}
+		</div>
+	{:else}
+		{@render card(side)}
+	{/if}
 {/if}
 
 <style>
@@ -126,6 +146,7 @@
 	}
 
 	.in-your-area-ad__card {
+		container-type: inline-size;
 		width: min(28rem, 100%);
 		pointer-events: auto;
 		border: 1px solid #d5d5d5;
@@ -231,6 +252,56 @@
 		opacity: 0.7;
 	}
 
+	.in-your-area-ad__card--left,
+	.in-your-area-ad__card--right {
+		display: none;
+		width: min(28rem, calc(100% - 0.75rem));
+		flex-shrink: 0;
+	}
+
+	.in-your-area-ad__card--left .in-your-area-ad__header {
+		justify-content: flex-end;
+	}
+
+	.in-your-area-ad__card--right .in-your-area-ad__header {
+		justify-content: flex-start;
+	}
+
+	.in-your-area-ad__card--right .in-your-area-ad__body {
+		flex-direction: row-reverse;
+	}
+
+	.in-your-area-ad__card--left .in-your-area-ad__copy {
+		align-items: flex-end;
+	}
+
+	.in-your-area-ad__card--right .in-your-area-ad__copy {
+		align-items: flex-start;
+	}
+
+	.in-your-area-ad__card--left .in-your-area-ad__message {
+		text-align: right;
+	}
+
+	.in-your-area-ad__card--right .in-your-area-ad__message {
+		text-align: left;
+	}
+
+	.in-your-area-ad__card--left .in-your-area-ad__actions {
+		justify-content: flex-end;
+	}
+
+	.in-your-area-ad__card--right .in-your-area-ad__actions {
+		justify-content: flex-start;
+	}
+
+	@container (min-width: 18rem) {
+		.in-your-area-ad__card--left,
+		.in-your-area-ad__card--right {
+			display: block;
+		}
+	}
+
 	@keyframes in-your-area-ad-in {
 		from {
 			opacity: 0;
@@ -267,6 +338,40 @@
 	@media (prefers-reduced-motion: reduce) {
 		.in-your-area-ad__card {
 			animation: none;
+		}
+	}
+
+	@media (max-height: 719px) {
+		.in-your-area-ad__card--left,
+		.in-your-area-ad__card--right {
+			display: none;
+		}
+	}
+
+	@media (min-width: 116rem) and (min-height: 720px) {
+		.in-your-area-ad__card--center {
+			display: none;
+		}
+	}
+
+	@container (max-width: 24rem) {
+		.in-your-area-ad__title {
+			font-size: 0.95rem;
+		}
+
+		.in-your-area-ad__photo {
+			width: 5.25rem;
+			height: 6.4rem;
+		}
+
+		.in-your-area-ad__message {
+			font-size: 1rem;
+		}
+
+		.in-your-area-ad__button {
+			min-width: 0;
+			padding: 0.35rem 0.55rem;
+			font-size: 0.9rem;
 		}
 	}
 </style>

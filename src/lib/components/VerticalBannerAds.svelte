@@ -1,14 +1,18 @@
+<script lang="ts" module>
+	import type { AdVote } from '$lib/ad-reaction';
+
+	let vote = $state<AdVote | null>(null);
+	let saving = $state(false);
+</script>
+
 <script lang="ts">
 	import { page } from '$app/state';
 	import { sendAdReaction, type AdVote } from '$lib/ad-reaction';
 	import { fakeAds } from '$lib/data/fake-ads';
 
-	type Side = 'left' | 'right';
+	let { side }: { side: 'left' | 'right' } = $props();
 
 	const verticalBanner = fakeAds.find((ad) => ad.type === 'vertical-banner');
-
-	let vote = $state<AdVote | null>(null);
-	let saving = $state(false);
 
 	async function react(next: AdVote) {
 		if (saving || vote === next) return;
@@ -23,7 +27,7 @@
 	}
 </script>
 
-{#snippet thumb(direction: Vote)}
+{#snippet thumb(direction: AdVote)}
 	<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
 		{#if direction === 'up'}
 			<path
@@ -43,7 +47,7 @@
 	</svg>
 {/snippet}
 
-{#snippet banner(side: Side)}
+{#snippet banner(side: 'left' | 'right')}
 	<div class="vertical-banner-ads__banner vertical-banner-ads__banner--{side}">
 		<img
 			class="vertical-banner-ads__image"
@@ -83,126 +87,125 @@
 {/snippet}
 
 <div class="vertical-banner-ads">
-	{@render banner('left')}
-	{@render banner('right')}
+	{@render banner(side)}
 </div>
 
 <style>
 	.vertical-banner-ads {
 		display: none;
+		width: fit-content;
+		min-width: 0;
+		max-width: calc(100% - 0.75rem);
+		pointer-events: none;
 	}
 
-	@media (min-width: 1680px) and (min-height: 720px) {
+	.vertical-banner-ads__banner {
+		position: relative;
+		width: fit-content;
+		min-width: 0;
+		max-width: 100%;
+		height: fit-content;
+	}
+
+	.vertical-banner-ads__image {
+		display: block;
+		width: auto;
+		min-width: 0;
+		max-width: 100%;
+		height: auto;
+		max-height: min(70dvh, 42rem);
+		border: 1px solid var(--border);
+	}
+
+	.vertical-banner-ads__label {
+		position: absolute;
+		top: 0.35rem;
+		left: 0.35rem;
+		padding: 0.12rem 0.35rem;
+		background: #6e6e6e;
+		color: #f4f4f4;
+		font-family: 'Rajdhani', ui-sans-serif, system-ui, sans-serif;
+		font-size: 0.7rem;
+		font-weight: 600;
+		line-height: 1.2;
+	}
+
+	.vertical-banner-ads__mark {
+		position: absolute;
+		top: 0.28rem;
+		right: 0.4rem;
+		color: #fff;
+		font-family: 'BBH Bartle', ui-sans-serif, system-ui, sans-serif;
+		font-size: 0.95rem;
+		line-height: 1;
+		letter-spacing: 0.04em;
+		text-shadow: 0 1px 2px rgb(0 0 0 / 75%);
+	}
+
+	.vertical-banner-ads__footer {
+		position: absolute;
+		right: 0;
+		bottom: 0;
+		left: 0;
+		display: flex;
+		flex-direction: column;
+		align-items: center;
+		gap: 0.3rem;
+		padding: 0.4rem 0.35rem 0.45rem;
+		background: rgb(0 0 0 / 62%);
+		pointer-events: auto;
+	}
+
+	.vertical-banner-ads__prompt {
+		margin: 0;
+		color: #f4f4f4;
+		font-family: 'Rajdhani', ui-sans-serif, system-ui, sans-serif;
+		font-size: 0.75rem;
+		line-height: 1.1;
+		text-align: center;
+	}
+
+	.vertical-banner-ads__votes {
+		display: flex;
+		gap: 0.35rem;
+	}
+
+	.vertical-banner-ads__vote {
+		display: inline-flex;
+		align-items: center;
+		justify-content: center;
+		width: 1.75rem;
+		height: 1.75rem;
+		padding: 0;
+		border: 1px solid rgb(255 255 255 / 35%);
+		background: rgb(255 255 255 / 10%);
+		color: #fff;
+		cursor: pointer;
+	}
+
+	.vertical-banner-ads__vote svg {
+		width: 1rem;
+		height: 1rem;
+	}
+
+	.vertical-banner-ads__vote[aria-pressed='true'] {
+		border-color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 40%, transparent);
+	}
+
+	.vertical-banner-ads__vote:disabled {
+		cursor: default;
+	}
+
+	@container (min-width: 8rem) {
 		.vertical-banner-ads {
 			display: block;
-			--content-half: 720px;
 		}
+	}
 
-		.vertical-banner-ads__banner {
-			position: fixed;
-			z-index: 20;
-			top: 50%;
-			width: fit-content;
-			height: fit-content;
-			pointer-events: none;
-			transform: translateY(-50%);
-		}
-
-		.vertical-banner-ads__banner--left {
-			right: calc(50vw + var(--content-half) + 1rem);
-		}
-
-		.vertical-banner-ads__banner--right {
-			left: calc(50vw + var(--content-half) + 1rem);
-		}
-
+	@container (min-width: 18rem) {
 		.vertical-banner-ads__image {
-			display: block;
-			width: auto;
-			max-width: calc(50vw - var(--content-half) - 2rem);
-			height: auto;
-			max-height: min(70dvh, 42rem);
-			border: 1px solid var(--border);
-		}
-
-		.vertical-banner-ads__label {
-			position: absolute;
-			top: 0.35rem;
-			left: 0.35rem;
-			padding: 0.12rem 0.35rem;
-			background: #6e6e6e;
-			color: #f4f4f4;
-			font-family: 'Rajdhani', ui-sans-serif, system-ui, sans-serif;
-			font-size: 0.7rem;
-			font-weight: 600;
-			line-height: 1.2;
-		}
-
-		.vertical-banner-ads__mark {
-			position: absolute;
-			top: 0.28rem;
-			right: 0.4rem;
-			color: #fff;
-			font-family: 'BBH Bartle', ui-sans-serif, system-ui, sans-serif;
-			font-size: 0.95rem;
-			line-height: 1;
-			letter-spacing: 0.04em;
-			text-shadow: 0 1px 2px rgb(0 0 0 / 75%);
-		}
-
-		.vertical-banner-ads__footer {
-			position: absolute;
-			right: 0;
-			bottom: 0;
-			left: 0;
-			display: flex;
-			flex-direction: column;
-			align-items: center;
-			gap: 0.3rem;
-			padding: 0.4rem 0.35rem 0.45rem;
-			background: rgb(0 0 0 / 62%);
-			pointer-events: auto;
-		}
-
-		.vertical-banner-ads__prompt {
-			margin: 0;
-			color: #f4f4f4;
-			font-family: 'Rajdhani', ui-sans-serif, system-ui, sans-serif;
-			font-size: 0.75rem;
-			line-height: 1.1;
-			text-align: center;
-		}
-
-		.vertical-banner-ads__votes {
-			display: flex;
-			gap: 0.35rem;
-		}
-
-		.vertical-banner-ads__vote {
-			display: inline-flex;
-			align-items: center;
-			justify-content: center;
-			width: 1.75rem;
-			height: 1.75rem;
-			padding: 0;
-			border: 1px solid rgb(255 255 255 / 35%);
-			background: rgb(255 255 255 / 10%);
-			color: #fff;
-			cursor: pointer;
-		}
-
-		.vertical-banner-ads__vote svg {
-			width: 1rem;
-			height: 1rem;
-		}
-
-		.vertical-banner-ads__vote[aria-pressed='true'] {
-			border-color: var(--accent);
-			background: color-mix(in srgb, var(--accent) 40%, transparent);
-		}
-
-		.vertical-banner-ads__vote:disabled {
-			cursor: default;
+			max-height: min(42rem, calc(100dvh - 22rem));
 		}
 	}
 </style>
