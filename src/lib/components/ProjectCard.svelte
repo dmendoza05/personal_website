@@ -16,7 +16,7 @@
 	class="group flex h-full flex-col overflow-hidden border border-border bg-card/95 text-foreground backdrop-blur-sm"
 >
 	{#if project.thumbnail}
-		<div class="overflow-hidden">
+		<div class="shrink-0 overflow-hidden">
 			<img
 				src={project.thumbnail}
 				alt=""
@@ -25,7 +25,7 @@
 		</div>
 	{:else}
 		<div
-			class="flex aspect-video w-full items-center justify-center border-b border-border bg-background/40"
+			class="flex aspect-video w-full shrink-0 items-center justify-center border-b border-border bg-background/40"
 		>
 			<p class="text-xs font-semibold uppercase tracking-[0.2em] text-muted rajdhani">
 				{m.works_thumbnail_placeholder()}
@@ -33,8 +33,8 @@
 		</div>
 	{/if}
 
-	<div class="flex h-full flex-col p-3">
-		<h3 class="text-xs font-semibold uppercase tracking-[0.2em] text-foreground rajdhani">
+	<div class="flex min-h-0 flex-1 flex-col p-3">
+		<h3 class="text-sm font-semibold uppercase tracking-[0.2em] text-foreground rajdhani">
 			{project.title}
 		</h3>
 		<p class="mt-2 inline-flex items-center gap-1.5 text-xs font-semibold uppercase tracking-[0.2em] text-muted rajdhani">
