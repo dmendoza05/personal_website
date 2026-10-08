@@ -94,7 +94,9 @@
 
 <div
 	bind:this={pageEl}
-	class="relative z-10 space-y-8 px-4 py-8 sm:px-6 {animateIntro ? 'works-intro' : ''}"
+	class="relative z-10 h-[calc(100dvh-64px)] space-y-8 overflow-y-auto px-4 py-8 scrollbar-none [-ms-overflow-style:none] md:h-[calc(100dvh-80px)] sm:px-6 [&::-webkit-scrollbar]:hidden {animateIntro
+		? 'works-intro'
+		: ''}"
 	style:--works-enter-ms="{ENTER_MS}ms"
 	style:--works-stagger-ms="{STAGGER_MS}ms"
 >

@@ -178,50 +178,50 @@
 {/snippet}
 
 {#snippet banner(side: 'left' | 'right')}
-	<div class="vertical-banner-ads__banner vertical-banner-ads__banner--{side}">
+	<div class="rail-poster__frame rail-poster__frame--{side}">
 		<button
 			type="button"
-			class="vertical-banner-ads__hit"
-			aria-label={ready ? (verticalBanner?.name ?? 'Advertisement') : 'Loading advertisement'}
+			class="rail-poster__hit"
+			aria-label={ready ? (verticalBanner?.name ?? 'Poster') : 'Loading'}
 			aria-busy={!ready}
 			disabled={!ready}
 			onclick={openJobPopup}
 		>
 			<img
 				bind:this={imageEl}
-				class="vertical-banner-ads__image"
-				class:vertical-banner-ads__image--pending={!ready}
+				class="rail-poster__image"
+				class:rail-poster__image--pending={!ready}
 				src={verticalBanner?.asset}
 				alt=""
 				width="426"
 				height="1079"
 			/>
 			{#if ready}
-				<span class="vertical-banner-ads__label">Fake Ad</span>
-				<span class="vertical-banner-ads__mark">DM</span>
+				<span class="rail-poster__label">Fake Ad</span>
+				<span class="rail-poster__mark">DM</span>
 			{:else}
-				<span class="vertical-banner-ads__spinner" aria-hidden="true"></span>
+				<span class="rail-poster__spinner" aria-hidden="true"></span>
 			{/if}
 		</button>
 		{#if ready}
-			<div class="vertical-banner-ads__footer">
+			<div class="rail-poster__footer">
 				{#if vote && !editing}
-					<p class="vertical-banner-ads__prompt">
+					<p class="rail-poster__prompt">
 						You {vote === 'up' ? 'liked' : 'disliked'} this fake ad.
 						<button
 							type="button"
-							class="vertical-banner-ads__change"
+							class="rail-poster__change"
 							onclick={() => (editing = true)}
 						>
 							Changed your mind?
 						</button>
 					</p>
 				{:else}
-					<p class="vertical-banner-ads__prompt">did you like this?</p>
-					<div class="vertical-banner-ads__votes">
+					<p class="rail-poster__prompt">did you like this?</p>
+					<div class="rail-poster__votes">
 						<button
 							type="button"
-							class="vertical-banner-ads__vote vertical-banner-ads__vote--up"
+							class="rail-poster__vote rail-poster__vote--up"
 							aria-label="Thumbs up"
 							aria-pressed={vote === 'up'}
 							disabled={saving}
@@ -231,7 +231,7 @@
 						</button>
 						<button
 							type="button"
-							class="vertical-banner-ads__vote vertical-banner-ads__vote--down"
+							class="rail-poster__vote rail-poster__vote--down"
 							aria-label="Thumbs down"
 							aria-pressed={vote === 'down'}
 							disabled={saving}
@@ -244,7 +244,7 @@
 			</div>
 		{/if}
 		{#if confetti}
-			<div class="vertical-banner-ads__confetti" aria-hidden="true">
+			<div class="rail-poster__confetti" aria-hidden="true">
 				{#each confetti as piece (piece.id)}
 					<span
 						style:left="{piece.left}%"
@@ -259,23 +259,23 @@
 	</div>
 {/snippet}
 
-<div class="vertical-banner-ads">
+<div class="rail-poster">
 	{@render banner(side)}
 	<dialog
 		bind:this={dialogEl}
-		class="vertical-banner-ads__popup"
+		class="rail-poster__dialog"
 		aria-label="404: No Job Found"
 		onclick={onDialogClick}
 	>
-		<p class="vertical-banner-ads__popup-message">404: No Job Found</p>
+		<p class="rail-poster__dialog-message">404: No Job Found</p>
 		<form method="dialog">
-			<button type="submit" class="vertical-banner-ads__popup-close">Close</button>
+			<button type="submit" class="rail-poster__dialog-close">Close</button>
 		</form>
 	</dialog>
 </div>
 
 <style>
-	.vertical-banner-ads {
+	.rail-poster {
 		display: none;
 		width: fit-content;
 		min-width: 0;
@@ -283,7 +283,7 @@
 		pointer-events: none;
 	}
 
-	.vertical-banner-ads__banner {
+	.rail-poster__frame {
 		position: relative;
 		width: fit-content;
 		min-width: 0;
@@ -291,7 +291,7 @@
 		height: fit-content;
 	}
 
-	.vertical-banner-ads__hit {
+	.rail-poster__hit {
 		position: relative;
 		display: block;
 		width: fit-content;
@@ -304,7 +304,7 @@
 		pointer-events: auto;
 	}
 
-	.vertical-banner-ads__image {
+	.rail-poster__image {
 		display: block;
 		width: auto;
 		min-width: 0;
@@ -315,11 +315,11 @@
 		border: 1px solid var(--border);
 	}
 
-	.vertical-banner-ads__image--pending {
+	.rail-poster__image--pending {
 		visibility: hidden;
 	}
 
-	.vertical-banner-ads__spinner {
+	.rail-poster__spinner {
 		position: absolute;
 		inset: 0;
 		display: flex;
@@ -329,7 +329,7 @@
 		background: var(--card);
 	}
 
-	.vertical-banner-ads__spinner::after {
+	.rail-poster__spinner::after {
 		display: block;
 		width: 1.75rem;
 		height: 1.75rem;
@@ -337,14 +337,14 @@
 		border-top-color: var(--accent);
 		border-radius: 50%;
 		content: '';
-		animation: vertical-banner-ads-spin 0.7s linear infinite;
+		animation: rail-poster-spin 0.7s linear infinite;
 	}
 
-	.vertical-banner-ads__hit:disabled {
+	.rail-poster__hit:disabled {
 		cursor: default;
 	}
 
-	.vertical-banner-ads__label {
+	.rail-poster__label {
 		position: absolute;
 		top: 0.35rem;
 		left: 0.35rem;
@@ -357,7 +357,7 @@
 		line-height: 1.2;
 	}
 
-	.vertical-banner-ads__mark {
+	.rail-poster__mark {
 		position: absolute;
 		top: 0.28rem;
 		right: 0.4rem;
@@ -369,7 +369,7 @@
 		text-shadow: 0 1px 2px rgb(0 0 0 / 75%);
 	}
 
-	.vertical-banner-ads__footer {
+	.rail-poster__footer {
 		position: absolute;
 		right: 0;
 		bottom: 0;
@@ -383,7 +383,7 @@
 		pointer-events: auto;
 	}
 
-	.vertical-banner-ads__prompt {
+	.rail-poster__prompt {
 		margin: 0;
 		color: #f4f4f4;
 		font-family: 'Rajdhani', ui-sans-serif, system-ui, sans-serif;
@@ -392,12 +392,12 @@
 		text-align: center;
 	}
 
-	.vertical-banner-ads__votes {
+	.rail-poster__votes {
 		display: flex;
 		gap: 0.35rem;
 	}
 
-	.vertical-banner-ads__vote {
+	.rail-poster__vote {
 		display: inline-flex;
 		align-items: center;
 		justify-content: center;
@@ -410,28 +410,28 @@
 		cursor: pointer;
 	}
 
-	.vertical-banner-ads__vote svg {
+	.rail-poster__vote svg {
 		width: 1rem;
 		height: 1rem;
 	}
 
-	.vertical-banner-ads__vote--up[aria-pressed='true'] {
+	.rail-poster__vote--up[aria-pressed='true'] {
 		border-color: #4ade80;
 		background: rgb(34 197 94 / 55%);
 		color: #ecfdf5;
 	}
 
-	.vertical-banner-ads__vote--down[aria-pressed='true'] {
+	.rail-poster__vote--down[aria-pressed='true'] {
 		border-color: #f87171;
 		background: rgb(239 68 68 / 55%);
 		color: #fef2f2;
 	}
 
-	.vertical-banner-ads__vote:disabled {
+	.rail-poster__vote:disabled {
 		cursor: default;
 	}
 
-	.vertical-banner-ads__change {
+	.rail-poster__change {
 		display: inline;
 		padding: 0;
 		border: 0;
@@ -443,7 +443,7 @@
 		cursor: pointer;
 	}
 
-	.vertical-banner-ads__confetti {
+	.rail-poster__confetti {
 		position: absolute;
 		z-index: 2;
 		inset: 0;
@@ -451,16 +451,16 @@
 		pointer-events: none;
 	}
 
-	.vertical-banner-ads__confetti span {
+	.rail-poster__confetti span {
 		position: absolute;
 		top: -15%;
 		line-height: 1;
-		animation-name: vertical-banner-ads-rain;
+		animation-name: rail-poster-rain;
 		animation-timing-function: ease-in;
 		animation-fill-mode: forwards;
 	}
 
-	.vertical-banner-ads__popup {
+	.rail-poster__dialog {
 		width: min(20rem, calc(100vw - 2rem));
 		padding: 1.5rem 1.25rem 1.15rem;
 		margin: auto;
@@ -470,11 +470,11 @@
 		pointer-events: auto;
 	}
 
-	.vertical-banner-ads__popup::backdrop {
+	.rail-poster__dialog::backdrop {
 		background: rgb(0 0 0 / 60%);
 	}
 
-	.vertical-banner-ads__popup-message {
+	.rail-poster__dialog-message {
 		margin: 0;
 		font-family: 'Orbitron', ui-sans-serif, system-ui, sans-serif;
 		font-size: 1rem;
@@ -483,7 +483,7 @@
 		text-align: center;
 	}
 
-	.vertical-banner-ads__popup-close {
+	.rail-poster__dialog-close {
 		display: block;
 		width: 100%;
 		margin-top: 1.15rem;
@@ -498,13 +498,13 @@
 		cursor: pointer;
 	}
 
-	@keyframes vertical-banner-ads-spin {
+	@keyframes rail-poster-spin {
 		to {
 			transform: rotate(360deg);
 		}
 	}
 
-	@keyframes vertical-banner-ads-rain {
+	@keyframes rail-poster-rain {
 		to {
 			top: 110%;
 			opacity: 0;
@@ -513,18 +513,18 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.vertical-banner-ads__spinner::after {
+		.rail-poster__spinner::after {
 			border-color: var(--accent);
 			animation: none;
 		}
 
-		.vertical-banner-ads__confetti span {
+		.rail-poster__confetti span {
 			animation: none;
 		}
 	}
 
 	@container (min-width: 8rem) {
-		.vertical-banner-ads {
+		.rail-poster {
 			display: block;
 		}
 	}

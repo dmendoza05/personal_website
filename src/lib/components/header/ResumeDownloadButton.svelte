@@ -2,16 +2,28 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { NAV_ICON_PATHS } from './constants';
 
+	let {
+		class: className = '',
+		menuItem = false,
+		onSelect
+	}: {
+		class?: string;
+		menuItem?: boolean;
+		onSelect?: () => void;
+	} = $props();
+
 	function logDownload() {
 		void fetch('/api/resume-download', { method: 'POST', keepalive: true }).catch(() => {});
+		onSelect?.();
 	}
 </script>
 
 <a
 	href="/resume.pdf"
 	download="Daniel_Mendoza_Resume.pdf"
-	class="inline-flex items-center gap-2 rounded-sm border border-accent bg-accent px-3 py-1.5 text-accent-foreground transition-colors hover:bg-accent/90"
+	class="inline-flex items-center gap-2 rounded-sm border border-accent bg-accent px-3 py-1.5 text-accent-foreground transition-colors hover:bg-accent/90 {className}"
 	aria-label={m.resume_download_pdf()}
+	role={menuItem ? 'menuitem' : undefined}
 	onclick={logDownload}
 >
 	<svg

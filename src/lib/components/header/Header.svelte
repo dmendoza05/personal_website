@@ -182,7 +182,7 @@
 {/snippet}
 
 {#snippet siteNav()}
-	<nav id="site-nav" class="shrink-0">
+	<nav id="site-nav" class="shrink-0 max-md:hidden">
 		<ul
 			bind:this={navList}
 			class="flex items-center bartle {isCompact
