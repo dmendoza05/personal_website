@@ -62,12 +62,12 @@
 	}
 </script>
 
-<div class="dashboard-banner">
+<div class="rail-link">
 	<a
-		class="dashboard-banner__hit"
-		class:dashboard-banner__hit--pending={!ready}
+		class="rail-link__hit"
+		class:rail-link__hit--pending={!ready}
 		href={resolve('/dashboard')}
-		aria-label={ready ? (banner?.name ?? 'Dashboard') : 'Loading advertisement'}
+		aria-label={ready ? (banner?.name ?? 'Dashboard') : 'Loading'}
 		aria-busy={!ready}
 		aria-disabled={!ready}
 		tabindex={ready ? undefined : -1}
@@ -75,30 +75,30 @@
 	>
 		<img
 			bind:this={imageEl}
-			class="dashboard-banner__image"
-			class:dashboard-banner__image--pending={!ready}
+			class="rail-link__image"
+			class:rail-link__image--pending={!ready}
 			src={banner?.asset}
 			alt=""
 			width="426"
 			height="462"
 		/>
 		{#if ready}
-			<span class="dashboard-banner__mark">DM</span>
+			<span class="rail-link__mark">DM</span>
 		{:else}
-			<span class="dashboard-banner__spinner" aria-hidden="true"></span>
+			<span class="rail-link__spinner" aria-hidden="true"></span>
 		{/if}
 	</a>
 </div>
 
 <style>
-	.dashboard-banner {
+	.rail-link {
 		display: none;
 		width: min(100%, calc(min(42rem, (100dvh - 9rem) * 1079 / 1541) * 426 / 1079));
 		max-width: calc(100% - 0.75rem);
 		pointer-events: none;
 	}
 
-	.dashboard-banner__hit {
+	.rail-link__hit {
 		position: relative;
 		display: block;
 		width: 100%;
@@ -111,12 +111,12 @@
 		pointer-events: auto;
 	}
 
-	.dashboard-banner__hit--pending {
+	.rail-link__hit--pending {
 		cursor: default;
 		pointer-events: none;
 	}
 
-	.dashboard-banner__image {
+	.rail-link__image {
 		display: block;
 		width: 100%;
 		min-width: 0;
@@ -126,11 +126,11 @@
 		border: 1px solid var(--border);
 	}
 
-	.dashboard-banner__image--pending {
+	.rail-link__image--pending {
 		visibility: hidden;
 	}
 
-	.dashboard-banner__spinner {
+	.rail-link__spinner {
 		position: absolute;
 		inset: 0;
 		display: flex;
@@ -140,7 +140,7 @@
 		background: var(--card);
 	}
 
-	.dashboard-banner__spinner::after {
+	.rail-link__spinner::after {
 		display: block;
 		width: 1.75rem;
 		height: 1.75rem;
@@ -148,10 +148,10 @@
 		border-top-color: var(--accent);
 		border-radius: 50%;
 		content: '';
-		animation: dashboard-banner-spin 0.7s linear infinite;
+		animation: rail-link-spin 0.7s linear infinite;
 	}
 
-	.dashboard-banner__mark {
+	.rail-link__mark {
 		position: absolute;
 		top: 0.28rem;
 		right: 0.4rem;
@@ -163,21 +163,21 @@
 		text-shadow: 0 1px 2px rgb(0 0 0 / 75%);
 	}
 
-	@keyframes dashboard-banner-spin {
+	@keyframes rail-link-spin {
 		to {
 			transform: rotate(360deg);
 		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.dashboard-banner__spinner::after {
+		.rail-link__spinner::after {
 			border-color: var(--accent);
 			animation: none;
 		}
 	}
 
 	@container (min-width: 8rem) {
-		.dashboard-banner {
+		.rail-link {
 			display: block;
 		}
 	}

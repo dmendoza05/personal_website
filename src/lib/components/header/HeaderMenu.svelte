@@ -3,6 +3,7 @@
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
 	import { m } from '$lib/paraglide/messages.js';
+	import ResumeDownloadButton from './ResumeDownloadButton.svelte';
 
 	type MenuLink = {
 		href: Pathname;
@@ -124,6 +125,11 @@
 						</li>
 					{/each}
 				</ul>
+			</div>
+
+			<hr class="my-2 border-border md:hidden" />
+			<div class="px-3 md:hidden">
+				<ResumeDownloadButton class="w-full" menuItem onSelect={close} />
 			</div>
 		</div>
 	{/if}

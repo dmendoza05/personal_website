@@ -14,13 +14,13 @@ export const fakeAds = [
 		id: 'i-need-a-job',
 		type: 'vertical-banner',
 		name: 'I Need a Job',
-		asset: '/ads/ineedajob.gif'
+		asset: '/posters/ineedajob.gif'
 	},
 	{
 		id: 'data-and-analytics',
 		type: 'thumbnail',
 		name: 'Data and Analytics',
-		asset: '/ads/data-and-analytics.png'
+		asset: '/posters/data-and-analytics.png'
 	}
 ] as const satisfies readonly FakeAd[];
 

@@ -4,21 +4,21 @@
 	let { left, right }: { left: Snippet; right: Snippet } = $props();
 </script>
 
-<div class="ad-spaces">
-	<aside class="ad-space ad-space--left" aria-label="Left advertisement">
+<div class="side-rails">
+	<aside class="side-rail side-rail--left" aria-label="Left column">
 		{@render left()}
 	</aside>
-	<aside class="ad-space ad-space--right" aria-label="Right advertisement">
+	<aside class="side-rail side-rail--right" aria-label="Right column">
 		{@render right()}
 	</aside>
 </div>
 
 <style>
-	.ad-spaces {
+	.side-rails {
 		display: contents;
 	}
 
-	.ad-space {
+	.side-rail {
 		display: flex;
 		flex-direction: column;
 		justify-content: flex-start;
@@ -31,10 +31,10 @@
 		container-type: inline-size;
 		overflow: hidden;
 		pointer-events: none;
-		animation: ad-space-in 300ms ease 400ms both;
+		animation: side-rail-in 300ms ease 400ms both;
 	}
 
-	@keyframes ad-space-in {
+	@keyframes side-rail-in {
 		from {
 			opacity: 0;
 		}
@@ -45,28 +45,28 @@
 	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.ad-space {
+		.side-rail {
 			animation: none;
 		}
 	}
 
-	.ad-space--left {
+	.side-rail--left {
 		grid-column: 1;
 		grid-row: 1;
 		align-items: flex-end;
 	}
 
-	.ad-space--right {
+	.side-rail--right {
 		grid-column: 3;
 		grid-row: 1;
 		align-items: flex-start;
 	}
 
-	.ad-space--left > :global(*) {
+	.side-rail--left > :global(*) {
 		margin-right: 0.75rem;
 	}
 
-	.ad-space--right > :global(*) {
+	.side-rail--right > :global(*) {
 		margin-left: 0.75rem;
 	}
 </style>

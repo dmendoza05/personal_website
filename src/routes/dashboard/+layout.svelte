@@ -64,7 +64,7 @@
 		</a>
 	{/snippet}
 	{#snippet right()}
-		<ResumeDownloadButton />
+		<ResumeDownloadButton class="max-md:hidden" />
 	{/snippet}
 </Header>
 
