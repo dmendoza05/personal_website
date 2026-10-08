@@ -60,6 +60,7 @@ export function assembleDashboardResponse(input: {
 	countries?: DashboardCountry[];
 	devices?: DashboardDevice[];
 	resumeDownloads?: number;
+	adVotes?: DashboardResponse['adVotes'];
 }): DashboardResponse {
 	const timeseries = fillTimeseries(input.timeseries, input.start, input.end);
 	const pageVisits = timeseries.reduce((total, point) => total + point.pageVisits, 0);
@@ -84,6 +85,7 @@ export function assembleDashboardResponse(input: {
 			{ device: 'mobile', requests: 0 },
 			{ device: 'other', requests: 0 }
 		],
-		resumeDownloads: input.resumeDownloads ?? 0
+		resumeDownloads: input.resumeDownloads ?? 0,
+		adVotes: input.adVotes ?? { likes: 0, dislikes: 0, ads: [] }
 	};
 }

@@ -1,6 +1,5 @@
 <script lang="ts">
-	import TabContent from '$lib/components/tabs/TabContent.svelte';
-	import { createSceneController } from '$lib/scene';
+	import { m } from '$lib/paraglide/messages.js';
 	import { getSkill, type SkillId } from '$lib/data/skills';
 	import SkillLogo from '$lib/components/SkillLogo.svelte';
 
@@ -11,7 +10,7 @@
 		skills: SkillId[];
 	};
 
-	const scene = createSceneController();
+	let { fadeOffset = 0 }: { fadeOffset?: number } = $props();
 
 	const tiers: SkillTier[] = [
 		{
@@ -66,9 +65,16 @@
 	];
 </script>
 
-<TabContent id="proficiency" onenter={scene.enter} onexit={scene.exit}>
+<section style:--about-base="calc(var(--about-stagger-ms) * {fadeOffset})">
+	<h3
+		class="about-block mb-4 text-lg font-semibold text-foreground"
+		style:--about-index={0}
+	>
+		{m.resume_proficiency()}
+	</h3>
 	<div
-		class="overflow-hidden rounded-sm border border-neutral-700 bg-neutral-900"
+		class="about-block overflow-hidden rounded-sm border border-neutral-700 bg-neutral-900"
+		style:--about-index={1}
 		role="list"
 		aria-label="Proficiency tiers"
 	>
@@ -97,4 +103,4 @@
 			</div>
 		{/each}
 	</div>
-</TabContent>
+</section>

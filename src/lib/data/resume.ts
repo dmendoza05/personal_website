@@ -6,6 +6,7 @@ export type Experience = {
 	role: string;
 	period: string;
 	location?: string;
+	employment?: string;
 	bullets: string[];
 };
 

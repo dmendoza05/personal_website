@@ -36,8 +36,8 @@ export const NAV_ICON_PATHS: Record<NavIcon | 'resume', string> = {
 };
 
 export const NAV_ITEMS: { href: Pathname; label: () => string; icon: NavIcon }[] = [
-	{ href: '/works', label: () => m.nav_works(), icon: 'works' },
 	{ href: '/about', label: () => m.nav_about(), icon: 'about' },
+	{ href: '/works', label: () => m.nav_works(), icon: 'works' },
 	// hide this for now: { href: '/blog', label: () => m.nav_blog(), icon: 'blog' }
 ];
 
@@ -49,26 +49,11 @@ export const ROUTE_FADE_UP = {
 	ease: 'outCubic'
 };
 
-export const ROUTE_FADE_DOWN = {
-	opacity: [1, 0],
-	translateY: [0, -12],
-	delay: stagger(ROUTES_STAGGER_MS),
-	duration: HEADER_TRANSITION_MS,
-	ease: 'inCubic'
-};
-
 export const LOGO_FADE_IN = {
 	opacity: [0, 1],
 	translateY: [-12, 0],
 	duration: FADE_MS,
 	ease: 'outCubic'
-};
-
-export const LOGO_FADE_OUT = {
-	opacity: [1, 0],
-	translateY: [0, -12],
-	duration: FADE_MS,
-	ease: 'inCubic'
 };
 
 export function resolveHeaderState(isSmViewport: boolean): HeaderState {

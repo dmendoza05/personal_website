@@ -2,7 +2,7 @@
 	import { m } from '$lib/paraglide/messages.js';
 	import { formatDashboardNumber, type DashboardCountry } from '$lib/dashboard';
 	import CountUp from './CountUp.svelte';
-	import { countryAcronym, countryFlag } from './country-codes';
+	import { countriesMatch, countryAcronym, countryFlag } from './country-codes';
 	import { countryLookupKey } from './earth-countries';
 	import type { PanelPhase } from './panel-motion';
 
@@ -63,7 +63,7 @@
 	}
 
 	function isActive(entry: DashboardCountry): boolean {
-		return activeKey !== '' && countryLookupKey(entry.country) === activeKey;
+		return countriesMatch(entry.country, activeName);
 	}
 
 	function choose(entry: DashboardCountry) {

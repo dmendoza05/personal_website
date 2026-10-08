@@ -1,9 +1,10 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
-	import { afterNavigate } from '$app/navigation';
+	import { afterNavigate, beforeNavigate } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import './layout.css';
 	import favicon from '$lib/assets/favicon.png';
+	import { setNavigatingFrom } from '$lib/navigating-from';
 	import { initPreferences } from '$lib/preferences';
 	import DotsBackground from '$lib/components/DotsBackground.svelte';
 
@@ -15,6 +16,10 @@
 		return () => {
 			stopPreferences();
 		};
+	});
+
+	beforeNavigate(({ from }) => {
+		setNavigatingFrom(from?.url.pathname ?? '');
 	});
 
 	afterNavigate(({ to }) => {

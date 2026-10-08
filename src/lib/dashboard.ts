@@ -41,6 +41,13 @@ export type DashboardDevice = {
 	requests: number;
 };
 
+export type DashboardAdVote = {
+	id: string;
+	name: string;
+	likes: number;
+	dislikes: number;
+};
+
 export type DashboardResponse = {
 	lifetimeUniqueVisitors: number | null;
 	range: {
@@ -56,6 +63,11 @@ export type DashboardResponse = {
 	countries: DashboardCountry[];
 	devices: DashboardDevice[];
 	resumeDownloads: number;
+	adVotes: {
+		likes: number;
+		dislikes: number;
+		ads: DashboardAdVote[];
+	};
 };
 
 export function formatDashboardNumber(value: number | null | undefined): string {

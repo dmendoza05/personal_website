@@ -2,8 +2,9 @@
 	import type { Pathname } from '$app/types';
 	import { resolve } from '$app/paths';
 	import { page } from '$app/state';
-	import { locales, localizeHref } from '$lib/paraglide/runtime';
 	import Header from '$lib/components/header/Header.svelte';
+	import MainContent from '$lib/components/MainContent.svelte';
+	import { locales, localizeHref } from '$lib/paraglide/runtime';
 
 	let { children } = $props();
 </script>
@@ -22,11 +23,9 @@
 	</div>
 </main> -->
 
-<main class="mx-auto z-10 w-full max-w-full">
-	<div class="mx-auto max-w-full md:max-w-4xl lg:max-w-7xl">
-		{@render children()}
-	</div>
-</main>
+<MainContent>
+	{@render children()}
+</MainContent>
 
 <div style="display:none">
 	{#each locales as locale (locale)}
