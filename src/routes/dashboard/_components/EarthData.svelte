@@ -61,7 +61,7 @@
 		};
 	});
 
-	const activeName = $derived(hovered || selected);
+	const activeName = $derived(selected);
 	const lastUpdatedLabel = $derived(fetchedAt ? formatFetchedAt(fetchedAt) : '');
 	const hoveredFlag = $derived(hovered ? countryFlag(hovered) : '');
 	const hoveredAcronym = $derived(hovered ? countryAcronym(hovered) : '');
@@ -153,6 +153,7 @@
 			flag={hoveredFlag}
 			acronym={hoveredAcronym}
 			onCountry={setCountry}
+			onPick={selectCountry}
 		/>
 		{#if globeHovered}
 			<GlobeControls bind:spinning bind:size />

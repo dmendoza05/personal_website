@@ -73,11 +73,6 @@
 	$effect(() => {
 		if (!entered || left) return;
 
-		if (isCompact) {
-			logo.toInitials();
-			return;
-		}
-
 		logo.toFullname();
 	});
 
@@ -117,7 +112,7 @@
 
 		if (prefersReducedMotion()) {
 			revealInstant();
-			if (!isCompact) logo.toFullname();
+			logo.toFullname();
 			entered = true;
 			return;
 		}
@@ -133,7 +128,7 @@
 		timeline
 			.add(logoEl, LOGO_FADE_IN)
 			.call(() => {
-				if (!isCompact) logo.toFullname();
+				logo.toFullname();
 			})
 			.add(routeItems, ROUTE_FADE_UP);
 	}
@@ -166,7 +161,7 @@
 		bind:this={logoEl}
 		href={resolve('/')}
 		aria-label="Home"
-		class="inline-block shrink-0 opacity-0 motion-reduce:opacity-100"
+		class="flex w-fit max-w-full items-center opacity-0 motion-reduce:opacity-100"
 		style:height="{logoHeight}px"
 		style:transition={HEADER_TRANSITION}
 		onclick={onHomeClick}
@@ -218,9 +213,9 @@
 	style:transition={HEADER_TRANSITION}
 >
 	<div
-		class="mx-auto grid h-full w-full max-w-full grid-cols-[1fr_auto_1fr] items-center gap-4 px-4 sm:px-6 md:max-w-4xl lg:max-w-7xl"
+		class="mx-auto grid h-full w-full max-w-full grid-cols-[minmax(0,1fr)_auto_auto] items-center gap-4 px-4 sm:px-6 md:max-w-4xl md:grid-cols-[1fr_auto_1fr] lg:max-w-7xl"
 	>
-		<div class="min-w-0 justify-self-start">
+		<div class="flex w-full min-w-0 justify-self-start">
 			{@render (left ?? siteLogo)()}
 		</div>
 		<div class="justify-self-center">

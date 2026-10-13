@@ -10,6 +10,7 @@
 
 	let {
 		onCountry,
+		onPick,
 		spinning = $bindable(true),
 		size = $bindable(1 / 1.2),
 		focusName = '',
@@ -19,6 +20,8 @@
 		acronym = ''
 	}: {
 		onCountry?: (name: string) => void;
+		/** GeoJSON country name when the pointer clicks a country. */
+		onPick?: (name: string) => void;
 		/** When false, auto-spin stops. Drag and country hover still work. */
 		spinning?: boolean;
 		/** Fraction of the view the globe fills. `1` fills the shorter side. */
@@ -114,11 +117,17 @@
 				duration: number;
 			} | null = null;
 			let hovering = false;
+			let pressing = false;
 			let dragging = false;
+			let pressCountry: string | null = null;
+			let pressX = 0;
+			let pressY = 0;
 			let dragX = 0;
 			let dragY = 0;
 			let pitch = 0;
 			const maxPitch = Math.PI / 2 - 0.08;
+			/** Movement below this, in pixels, stays a click. */
+			const clickSlop = 6;
 
 			function paint(name: string | null) {
 				drawVectorEarthMap(mapContext, globe, countries, name);
@@ -229,15 +238,25 @@
 				if (reduceMotion) renderer.render(scene, camera);
 			}
 
-			function onPointerDown(event: PointerEvent) {
-				if (event.button !== 0) return;
+			function countryAt(event: PointerEvent): string | null {
+				const rect = canvas.getBoundingClientRect();
+				if (rect.width === 0 || rect.height === 0) return null;
 
+				pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
+				pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
+				raycaster.setFromCamera(pointer, camera);
+
+				const hit = raycaster.intersectObject(earth, false)[0];
+				const uv = hit?.uv;
+				return uv ? findCountry(countries, uv.x * 360 - 180, uv.y * 180 - 90) : null;
+			}
+
+			function beginDrag(event: PointerEvent) {
 				dragging = true;
 				focusAnimation = null;
 				dragX = event.clientX;
 				dragY = event.clientY;
 				hovering = true;
-				canvas.setPointerCapture(event.pointerId);
 				canvas.style.cursor = 'grabbing';
 				showCountry('');
 				if (activeCountry) {
@@ -246,18 +265,38 @@
 				}
 			}
 
-			function onPointerUp(event: PointerEvent) {
-				if (!dragging) return;
+			function onPointerDown(event: PointerEvent) {
+				if (event.button !== 0) return;
 
+				pressing = true;
+				pressCountry = countryAt(event);
+				pressX = event.clientX;
+				pressY = event.clientY;
+				canvas.setPointerCapture(event.pointerId);
+			}
+
+			function onPointerUp(event: PointerEvent) {
+				if (!pressing && !dragging) return;
+
+				const picked = pressCountry;
+				const wasDrag = dragging;
+				pressing = false;
 				dragging = false;
+				pressCountry = null;
 				canvas.style.cursor = '';
 				if (canvas.hasPointerCapture(event.pointerId)) {
 					canvas.releasePointerCapture(event.pointerId);
 				}
 				onPointerMove(event);
+				if (!wasDrag && event.type === 'pointerup' && picked) onPick?.(picked);
 			}
 
 			function onPointerMove(event: PointerEvent) {
+				if (pressing && !dragging) {
+					const moved = Math.hypot(event.clientX - pressX, event.clientY - pressY);
+					if (moved >= clickSlop) beginDrag(event);
+				}
+
 				if (dragging) {
 					turnFromDrag(event.clientX - dragX, event.clientY - dragY);
 					dragX = event.clientX;
@@ -266,14 +305,7 @@
 				}
 
 				hovering = true;
-				const rect = canvas.getBoundingClientRect();
-				pointer.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
-				pointer.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
-				raycaster.setFromCamera(pointer, camera);
-
-				const hit = raycaster.intersectObject(earth, false)[0];
-				const uv = hit?.uv;
-				const name = uv ? findCountry(countries, uv.x * 360 - 180, uv.y * 180 - 90) : null;
+				const name = countryAt(event);
 
 				if (name !== activeCountry) {
 					activeCountry = name;

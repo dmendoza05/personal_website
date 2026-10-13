@@ -42,18 +42,13 @@
 	$effect(() => {
 		if (!logo) return;
 
-		if (isSmViewport) {
-			logo.toInitials();
-			return;
-		}
-
 		logo.toFullname();
 	});
 </script>
 
 <Header>
 	{#snippet left()}
-		<a href={resolve('/')} aria-label={m.nav_home()} class="inline-block shrink-0">
+		<a href={resolve('/')} aria-label={m.nav_home()} class="flex w-fit max-w-full items-center">
 			<Logo
 				bind:this={logo}
 				initial="initials"
