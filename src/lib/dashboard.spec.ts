@@ -1,20 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-	bucketDevice,
-	formatDashboardNumber,
-	normalizeDevices,
-	truncateMiddle
-} from './dashboard';
-
-describe('truncateMiddle', () => {
-	it('leaves short paths unchanged', () => {
-		expect(truncateMiddle('/about', 28)).toBe('/about');
-	});
-
-	it('ellipsizes the middle of long paths', () => {
-		expect(truncateMiddle('/blog/a-very-long-slug-name', 16)).toBe('/blog/a-…ug-name');
-	});
-});
+import { bucketDevice, formatDashboardNumber, normalizeDevices } from './dashboard';
 
 describe('bucketDevice', () => {
 	it('maps known device classes and folds the rest into other', () => {

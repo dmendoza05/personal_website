@@ -62,14 +62,6 @@ export function formatDashboardNumber(value: number | null | undefined): string 
 	return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value ?? 0);
 }
 
-export function truncateMiddle(value: string, max = 28): string {
-	if (value.length <= max) return value;
-	const inner = Math.max(max - 1, 1);
-	const head = Math.ceil(inner / 2);
-	const tail = Math.floor(inner / 2);
-	return `${value.slice(0, head)}…${value.slice(-tail)}`;
-}
-
 export function bucketDevice(value: string): DeviceKey {
 	const normalized = value.trim().toLowerCase();
 	if (normalized === 'desktop') return 'desktop';
