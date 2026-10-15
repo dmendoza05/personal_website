@@ -4,7 +4,6 @@
 	import {
 		formatDashboardNumber,
 		formatFetchedAt,
-		type DashboardAdVote,
 		type DashboardCountry,
 		type DashboardDevice,
 		type DashboardResponse
@@ -13,7 +12,6 @@
 	import { loadCountries } from '$lib/components/earth/vector-earth';
 	import { countryAcronym, countryCode, countryFlag, findGlobeCountry } from './country-codes';
 	import { findCountryStats } from './earth-countries';
-	import AdVotesPanel from './AdVotesPanel.svelte';
 	import AllTimeVisitorsPanel from './AllTimeVisitorsPanel.svelte';
 	import CountriesPanel from './CountriesPanel.svelte';
 	import DevicesPanel from './DevicesPanel.svelte';
@@ -41,13 +39,10 @@
 	let devices = $state<DashboardDevice[]>([]);
 	let lifetimeUniqueVisitors = $state<number | null>(null);
 	let resumeDownloads = $state<number | null>(null);
-	let adLikes = $state<number | null>(null);
-	let adDislikes = $state<number | null>(null);
-	let adVoteAds = $state<DashboardAdVote[]>([]);
 	let fetchedAt = $state('');
 	let status = $state<LoadStatus>('loading');
 	let errorMessage = $state('');
-	let phases = $state<PanelPhase[]>(['shell', 'shell', 'shell', 'shell', 'shell', 'shell']);
+	let phases = $state<PanelPhase[]>(['shell', 'shell', 'shell', 'shell', 'shell']);
 
 	onMount(() => {
 		const cancels = phases.map((_, index) =>
@@ -61,7 +56,7 @@
 		};
 	});
 
-	const activeName = $derived(hovered || selected);
+	const activeName = $derived(selected);
 	const lastUpdatedLabel = $derived(fetchedAt ? formatFetchedAt(fetchedAt) : '');
 	const hoveredFlag = $derived(hovered ? countryFlag(hovered) : '');
 	const hoveredAcronym = $derived(hovered ? countryAcronym(hovered) : '');
@@ -119,9 +114,6 @@
 			const dashboard = payload as DashboardResponse;
 			lifetimeUniqueVisitors = dashboard.lifetimeUniqueVisitors;
 			resumeDownloads = dashboard.resumeDownloads ?? 0;
-			adLikes = dashboard.adVotes?.likes ?? 0;
-			adDislikes = dashboard.adVotes?.dislikes ?? 0;
-			adVoteAds = dashboard.adVotes?.ads ?? [];
 			fetchedAt = dashboard.range.fetchedAt;
 			countries = dashboard.countries.map((entry) => ({
 				country: entry.country,
@@ -153,6 +145,7 @@
 			flag={hoveredFlag}
 			acronym={hoveredAcronym}
 			onCountry={setCountry}
+			onPick={selectCountry}
 		/>
 		{#if globeHovered}
 			<GlobeControls bind:spinning bind:size />
@@ -209,7 +202,7 @@
 				class="flex flex-col gap-3 md:pointer-events-auto md:absolute md:top-4 md:right-4 md:bottom-4 md:w-88"
 			>
 				<PanelShell
-					class="panel-shell-right flex min-h-0 max-h-[min(75vh,24rem)] flex-col border border-border bg-card/95 text-foreground backdrop-blur-sm md:max-h-[calc(100%-13.5rem)]"
+					class="panel-shell-right flex min-h-0 max-h-[min(75vh,24rem)] flex-col border border-border bg-card/95 text-foreground backdrop-blur-sm md:max-h-[calc(100%-7.5rem)]"
 					shell={3}
 					label={m.dashboard_chart_countries()}
 				>
@@ -235,22 +228,6 @@
 						errorMessage={status === 'error' ? errorMessage : ''}
 						onRetry={load}
 						phase={phases[4]}
-					/>
-				</PanelShell>
-
-				<PanelShell
-					class="panel-shell-right shrink-0 border border-border bg-card/95 text-foreground backdrop-blur-sm"
-					shell={5}
-					label={m.dashboard_stat_ad_votes()}
-				>
-					<AdVotesPanel
-						likes={adLikes}
-						dislikes={adDislikes}
-						ads={adVoteAds}
-						loading={status === 'loading'}
-						errorMessage={status === 'error' ? errorMessage : ''}
-						onRetry={load}
-						phase={phases[5]}
 					/>
 				</PanelShell>
 			</div>

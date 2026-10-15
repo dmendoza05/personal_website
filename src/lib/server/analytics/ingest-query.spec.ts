@@ -125,6 +125,39 @@ describe('parseDimensionRows', () => {
 		]);
 	});
 
+	it('sums country requests from each daily country map', () => {
+		const rows = parseDimensionRows({
+			data: {
+				viewer: {
+					zones: [
+						{
+							countries: [
+								{
+									sum: {
+										countryMap: [
+											{ clientCountryName: 'US', requests: 10 },
+											{ clientCountryName: 'MX', requests: 4 }
+										]
+									}
+								},
+								{
+									sum: {
+										countryMap: [{ clientCountryName: 'US', requests: 3 }]
+									}
+								}
+							]
+						}
+					]
+				}
+			}
+		});
+
+		expect(rows).toEqual([
+			{ kind: 'country', key: 'US', value: 13 },
+			{ kind: 'country', key: 'MX', value: 4 }
+		]);
+	});
+
 	it('sums page views for each country, including countries with no requests', () => {
 		const rows = parseDimensionRows({
 			data: {
@@ -268,8 +301,10 @@ describe('GraphQL documents', () => {
 	});
 
 	it('loads country requests from daily groups and page views from html responses', () => {
+		expect(DIMENSIONS_QUERY).toContain('countryMap');
 		expect(DIMENSIONS_QUERY).toContain('clientCountryName');
 		expect(DIMENSIONS_QUERY).toContain('requests');
+		expect(DIMENSIONS_QUERY).toContain('dimensions { date }');
 		expect(DIMENSIONS_QUERY).not.toContain('pageViews');
 		expect(DIMENSIONS_QUERY).not.toContain('clientDeviceType');
 

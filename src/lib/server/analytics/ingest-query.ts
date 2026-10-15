@@ -117,20 +117,22 @@ query (
 }
 `;
 
+/** Daily groups have no country dimension. `countryMap` is the per-country request total. */
 export const DIMENSIONS_QUERY = `
 query ($zoneTag: String!, $start: Date!, $end: Date!) {
   viewer {
     zones(filter: { zoneTag: $zoneTag }) {
       countries: httpRequests1dGroups(
-        limit: 1000
+        limit: 100
         filter: { date_geq: $start, date_leq: $end }
-        orderBy: [sum_requests_DESC]
+        orderBy: [date_ASC]
       ) {
+        dimensions { date }
         sum {
-          requests
-        }
-        dimensions {
-          clientCountryName
+          countryMap {
+            clientCountryName
+            requests
+          }
         }
       }
     }

@@ -5,7 +5,6 @@
 	import { onDestroy, onMount } from 'svelte';
 	import { createTimeline, stagger, type Timeline } from 'animejs';
 	import Logo from '$lib/components/Logo.svelte';
-	import NewsBanner from '$lib/components/NewsBanner.svelte';
 	import { HEADER_TRANSITION_MS } from '$lib/components/header/constants';
 	import { site } from '$lib/data/site';
 	import { getNavigatingFrom } from '$lib/navigating-from';
@@ -52,7 +51,6 @@
 		ease: 'inCubic'
 	};
 
-	let newsReady = $state(skipIntro);
 	let logo: Logo;
 	let sectionEl: HTMLElement | undefined = $state();
 	let navList: HTMLUListElement | undefined = $state();
@@ -78,7 +76,6 @@
 				item.style.transform = 'none';
 			}
 			if (!skipIntro) logo.toFullname();
-			newsReady = true;
 			return;
 		}
 
@@ -92,10 +89,7 @@
 				ease: 'outCubic'
 			})
 			.call(() => logo.toFullname())
-			.call(() => {
-				newsReady = true;
-			}, `+=${HEADER_TRANSITION_MS}`)
-			.add(routeItems, fadeUp, '<')
+			.add(routeItems, fadeUp, `+=${HEADER_TRANSITION_MS}`)
 			.add(socialItems, fadeUp);
 	});
 
@@ -123,7 +117,6 @@
 		const path = resolve(href);
 
 		if (prefersReducedMotion() || !logoSvg || !routeItems || !socialItems) {
-			newsReady = false;
 			void goto(path);
 			return;
 		}
@@ -140,7 +133,6 @@
 			.add(socialItems, fadeDown)
 			.add(routeItems, fadeDown)
 			.call(() => {
-				newsReady = false;
 				logo.toInitials();
 			})
 			.add(
@@ -210,11 +202,4 @@
 			{/each}
 		</ul>
 	</section>
-
-	{#if newsReady}
-		<NewsBanner
-			instant={skipIntro}
-			onRouteClick={(event) => onRouteClick(event, '/dashboard')}
-		/>
-	{/if}
 </div>

@@ -41,13 +41,6 @@ export type DashboardDevice = {
 	requests: number;
 };
 
-export type DashboardAdVote = {
-	id: string;
-	name: string;
-	likes: number;
-	dislikes: number;
-};
-
 export type DashboardResponse = {
 	lifetimeUniqueVisitors: number | null;
 	range: {
@@ -63,23 +56,10 @@ export type DashboardResponse = {
 	countries: DashboardCountry[];
 	devices: DashboardDevice[];
 	resumeDownloads: number;
-	adVotes: {
-		likes: number;
-		dislikes: number;
-		ads: DashboardAdVote[];
-	};
 };
 
 export function formatDashboardNumber(value: number | null | undefined): string {
 	return new Intl.NumberFormat(undefined, { maximumFractionDigits: 0 }).format(value ?? 0);
-}
-
-export function truncateMiddle(value: string, max = 28): string {
-	if (value.length <= max) return value;
-	const inner = Math.max(max - 1, 1);
-	const head = Math.ceil(inner / 2);
-	const tail = Math.floor(inner / 2);
-	return `${value.slice(0, head)}…${value.slice(-tail)}`;
 }
 
 export function bucketDevice(value: string): DeviceKey {
