@@ -9,7 +9,6 @@ import type {
 import { normalizeDevices } from '$lib/dashboard';
 import { getDb } from './index';
 import { analyticsDaily, analyticsDimensions, analyticsRollups } from './schema';
-import { getAdVoteTotals } from './ad-reactions';
 import { RESUME_DOWNLOAD_PATH, getPageViewCount, getTopPages } from './pageviews';
 import { rollupWindowBounds, utcToday, type RollupWindow } from '../analytics/dates';
 import { assembleDashboardResponse, type DashboardQuery } from '../analytics/dashboard-query';
@@ -117,19 +116,17 @@ async function loadBreakdowns(): Promise<{
 	countries: DashboardCountry[];
 	devices: DashboardDevice[];
 	resumeDownloads: number;
-	adVotes: DashboardResponse['adVotes'];
 }> {
-	const [topPages, resumeDownloads, adVotes] = await Promise.all([
+	const [topPages, resumeDownloads] = await Promise.all([
 		getTopPages(8).catch(() => [] as DashboardTopPage[]),
-		getPageViewCount(RESUME_DOWNLOAD_PATH).catch(() => 0),
-		getAdVoteTotals().catch(() => ({ likes: 0, dislikes: 0, ads: [] }))
+		getPageViewCount(RESUME_DOWNLOAD_PATH).catch(() => 0)
 	]);
 
 	try {
 		const [countries, devices] = await Promise.all([loadCountries(), loadDevices()]);
-		return { topPages, countries, devices, resumeDownloads, adVotes };
+		return { topPages, countries, devices, resumeDownloads };
 	} catch {
-		return { topPages, countries: [], devices: normalizeDevices([]), resumeDownloads, adVotes };
+		return { topPages, countries: [], devices: normalizeDevices([]), resumeDownloads };
 	}
 }
 
