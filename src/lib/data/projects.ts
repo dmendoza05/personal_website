@@ -30,16 +30,25 @@ export const projectTypes = [
 
 export type ProjectType = (typeof projectTypes)[number]['id'];
 
+export const projectLinkKinds = ['source', 'store', 'live'] as const;
+
+export type ProjectLinkKind = (typeof projectLinkKinds)[number];
+
+export type ProjectLink = {
+	kind: ProjectLinkKind;
+	href: string;
+};
+
 export type Project = {
 	slug: string;
 	title: string;
 	description: string;
+	date: string;
 	type: ProjectType;
 	tags: SkillId[];
 	keywords: string[];
 	thumbnail?: string;
-	href?: string;
-	repo?: string;
+	links: ProjectLink[];
 	featured?: boolean;
 };
 
@@ -57,10 +66,14 @@ export const projects: Project[] = [
 		description:
 			'A SvelteKit portfolio site with projects, an about page, and a markdown-powered blog. Built with Tailwind CSS and i18n support.',
 		type: 'website',
+		date: '2026-07-13',
 		tags: ['sveltekit', 'typescript', 'tailwindcss'],
 		keywords: ['portfolio', 'i18n'],
 		thumbnail: '/projects/danielmendoza-website.jpg',
-		repo: 'https://github.com/dmendoza05/personal-website',
+		links: [
+			{ kind: 'source', href: 'https://github.com/dmendoza05/personal_website' },
+			{ kind: 'live', href: 'https://danielmendoza.io' }
+		],
 		featured: true
 	},
 	{
@@ -69,10 +82,17 @@ export const projects: Project[] = [
 		description:
 			'A Chrome extension that applies a dark theme to any website, with controls for brightness, contrast, and warmth.',
 		type: 'chrome-extension',
+		date: '2026-09-13',
 		tags: ['javascript', 'html', 'css'],
 		keywords: ['dark mode', 'eye care'],
 		thumbnail: '/projects/darkside.jpg',
-		repo: 'https://chromewebstore.google.com/detail/darkside/kkddlokgbhgmebbfngdapjkaloifdbbb'
+		links: [
+			{ kind: 'source', href: 'https://github.com/dmendoza05/darkside' },
+			{
+				kind: 'store',
+				href: 'https://chromewebstore.google.com/detail/darkside/kkddlokgbhgmebbfngdapjkaloifdbbb'
+			}
+		]
 	}
 ];
 
@@ -95,8 +115,16 @@ export function projectSkillIds(list: Project[]): SkillId[] {
 	return ids;
 }
 
+export function getProject(slug: string): Project | undefined {
+	return projects.find((project) => project.slug === slug);
+}
+
+export function getProjectSlugs(): string[] {
+	return projects.map((project) => project.slug);
+}
+
 export function projectHasSource(project: Project): boolean {
-	return Boolean(project.repo);
+	return project.links.some((link) => link.kind === 'source' && link.href.trim().length > 0);
 }
 
 export function getProjectType(id: ProjectType) {

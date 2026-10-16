@@ -1,28 +1,26 @@
 import { describe, expect, it } from 'vitest';
-import {
-	filterProjects,
-	projectHasSource,
-	projectSkillIds,
-	type Project
-} from './projects';
+import { filterProjects, projectHasSource, projectSkillIds, type Project } from './projects';
 
 const sample: Project[] = [
 	{
 		slug: 'site',
 		title: 'Personal Website',
 		description: 'A portfolio with a blog.',
+		date: '2026-07-13',
 		type: 'website',
 		tags: ['sveltekit', 'typescript'],
 		keywords: ['portfolio', 'i18n'],
-		repo: 'https://github.com/example/site'
+		links: [{ kind: 'source', href: 'https://github.com/example/site' }]
 	},
 	{
 		slug: 'notes',
 		title: 'Notes',
 		description: 'Something else entirely.',
+		date: '2026-09-13',
 		type: 'chrome-extension',
 		tags: ['python'],
-		keywords: ['notes']
+		keywords: ['notes'],
+		links: [{ kind: 'store', href: 'https://example.com/store' }]
 	}
 ];
 
@@ -54,7 +52,7 @@ describe('filterProjects', () => {
 	it('keeps only entries that have a source when that filter is on', () => {
 		expect(projectHasSource(sample[0])).toBe(true);
 		expect(projectHasSource(sample[1])).toBe(false);
-		expect(projectHasSource({ ...sample[1], repo: '' })).toBe(false);
+		expect(projectHasSource({ ...sample[1], links: [{ kind: 'source', href: '  ' }] })).toBe(false);
 		expect(slugs({ hasSource: true })).toEqual(['site']);
 	});
 
@@ -62,17 +60,19 @@ describe('filterProjects', () => {
 		expect(
 			slugs({ query: 'portfolio', skills: ['typescript'], types: ['website'], hasSource: true })
 		).toEqual(['site']);
-		expect(slugs({ query: 'notes', skills: ['typescript'], types: ['website'], hasSource: true })).toEqual(
-			[]
-		);
+		expect(
+			slugs({ query: 'notes', skills: ['typescript'], types: ['website'], hasSource: true })
+		).toEqual([]);
 	});
 });
 
 describe('projectSkillIds', () => {
 	it('lists skills in first-seen order without duplicates', () => {
-		expect(
-			projectSkillIds([sample[0], { ...sample[1], tags: ['typescript', 'python'] }])
-		).toEqual(['sveltekit', 'typescript', 'python']);
+		expect(projectSkillIds([sample[0], { ...sample[1], tags: ['typescript', 'python'] }])).toEqual([
+			'sveltekit',
+			'typescript',
+			'python'
+		]);
 	});
 });
 
