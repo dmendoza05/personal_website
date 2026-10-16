@@ -1,12 +1,15 @@
 import { site } from '$lib/data/site';
 import { getPostSlugs } from '$lib/blog/posts';
+import { getProjectSlugs } from '$lib/data/projects';
 
 const staticRoutes = ['', '/works', '/about', '/blog'];
 const blogSlugs = getPostSlugs();
+const projectSlugs = getProjectSlugs();
 
 export function GET() {
 	const urls = [
 		...staticRoutes.map((path) => `${site.url}${path}`),
+		...projectSlugs.map((slug) => `${site.url}/works/${slug}`),
 		...blogSlugs.map((slug) => `${site.url}/blog/${slug}`)
 	];
 

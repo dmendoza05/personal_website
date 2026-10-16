@@ -69,3 +69,20 @@ body {
 	background-color: color-mix(in srgb, var(--accent) 25%, transparent);
 	color: var(--fg);
 }
+
+::view-transition-group(work-hero) {
+	animation-duration: 500ms;
+	animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+::view-transition-old(work-hero) {
+	display: none;
+}
+
+::view-transition-new(work-hero) {
+	height: 100%;
+	overflow: clip;
+	object-fit: cover;
+	animation: none;
+	mix-blend-mode: normal;
+}
