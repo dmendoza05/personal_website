@@ -4,6 +4,7 @@
 	import { resolve } from '$app/paths';
 	import { onDestroy, onMount } from 'svelte';
 	import { createTimeline, stagger, type Timeline } from 'animejs';
+	import HomeCarouselCard from '$lib/components/HomeCarouselCard.svelte';
 	import Logo from '$lib/components/Logo.svelte';
 	import { HEADER_TRANSITION_MS } from '$lib/components/header/constants';
 	import { site } from '$lib/data/site';
@@ -55,6 +56,7 @@
 	let sectionEl: HTMLElement | undefined = $state();
 	let navList: HTMLUListElement | undefined = $state();
 	let socialList: HTMLUListElement | undefined = $state();
+	let carouselEl: HTMLElement | undefined = $state();
 	let timeline: Timeline | undefined;
 	let logoSvg: SVGSVGElement | undefined;
 	let routeItems: NodeListOf<HTMLElement> | undefined;
@@ -75,6 +77,10 @@
 				item.style.opacity = '1';
 				item.style.transform = 'none';
 			}
+			if (carouselEl) {
+				carouselEl.style.opacity = '1';
+				carouselEl.style.transform = 'none';
+			}
 			if (!skipIntro) logo.toFullname();
 			return;
 		}
@@ -91,6 +97,8 @@
 			.call(() => logo.toFullname())
 			.add(routeItems, fadeUp, `+=${HEADER_TRANSITION_MS}`)
 			.add(socialItems, fadeUp);
+
+		if (carouselEl) timeline.add(carouselEl, fadeUp);
 	});
 
 	onDestroy(() => {
@@ -129,6 +137,8 @@
 			}
 		});
 
+		if (carouselEl) timeline.add(carouselEl, fadeDown);
+
 		timeline
 			.add(socialItems, fadeDown)
 			.add(routeItems, fadeDown)
@@ -152,7 +162,7 @@
 	<meta name="description" content={site.description} />
 </svelte:head>
 
-<div class="flex h-full min-h-0 flex-1 flex-col">
+<div class="relative flex h-full min-h-0 flex-1 flex-col">
 	<section
 		bind:this={sectionEl}
 		class="flex flex-1 flex-col items-center justify-center gap-12 px-4"
@@ -202,4 +212,11 @@
 			{/each}
 		</ul>
 	</section>
+	<div class="flex items-center justify-center pb-5">
+		<HomeCarouselCard
+			bind:element={carouselEl}
+			class={skipIntro ? '' : 'opacity-0 motion-reduce:opacity-100'}
+			onNavigate={onRouteClick}
+		/>
+	</div>
 </div>
