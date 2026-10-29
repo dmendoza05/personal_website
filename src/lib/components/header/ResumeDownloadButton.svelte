@@ -19,7 +19,7 @@
 </script>
 
 <a
-	href="/resume.pdf"
+	href="/resume/resume.pdf"
 	download="Daniel_Mendoza_Resume.pdf"
 	class="inline-flex items-center gap-2 rounded-sm border border-accent bg-accent px-3 py-1.5 text-accent-foreground transition-colors hover:bg-accent/90 {className}"
 	aria-label={m.resume_download_pdf()}
