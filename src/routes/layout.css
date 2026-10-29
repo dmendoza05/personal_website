@@ -86,3 +86,26 @@ body {
 	animation: none;
 	mix-blend-mode: normal;
 }
+
+::view-transition-group(logo-hero) {
+	z-index: 1;
+	animation-duration: 600ms;
+	animation-timing-function: cubic-bezier(0.33, 1, 0.68, 1);
+}
+
+::view-transition-old(logo-hero),
+::view-transition-new(logo-hero) {
+	height: 100%;
+	object-fit: fill;
+	animation: none;
+	mix-blend-mode: normal;
+}
+
+/* Keep the larger home snapshot so the linework stays sharp in both directions. */
+html:active-view-transition-type(logo-to-header)::view-transition-new(logo-hero) {
+	display: none;
+}
+
+html:active-view-transition-type(logo-to-home)::view-transition-old(logo-hero) {
+	display: none;
+}

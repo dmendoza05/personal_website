@@ -21,7 +21,7 @@
 	>
 		{#if project.thumbnail}
 			<div
-				class="shrink-0 overflow-hidden"
+				class="shrink-0 overflow-hidden relative"
 				data-work-hero={project.slug}
 				style:view-transition-name={sharedHero ? WORK_HERO_NAME : undefined}
 			>
@@ -30,6 +30,14 @@
 					alt=""
 					class="aspect-video w-full object-cover transition-transform duration-300 ease-out group-hover:scale-105 motion-reduce:transition-none motion-reduce:group-hover:scale-100"
 				/>
+
+				{#if project.releaseBadge}
+				<img
+						src={project.releaseBadge}
+						alt={m.works_release_badge()}
+						class="mt-2 h-5 w-auto self-start absolute bottom-2 right-2"
+					/>
+				{/if}
 			</div>
 		{:else}
 			<div

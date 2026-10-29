@@ -1,6 +1,6 @@
 <script lang="ts">
 	import type { Pathname } from '$app/types';
-	import { goto } from '$app/navigation';
+	import { goto, onNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onDestroy, onMount } from 'svelte';
 	import { createTimeline, stagger, type Timeline } from 'animejs';
@@ -8,6 +8,16 @@
 	import Logo from '$lib/components/Logo.svelte';
 	import { HEADER_TRANSITION_MS } from '$lib/components/header/constants';
 	import { site } from '$lib/data/site';
+	import {
+		canLogoHero,
+		getLogoHeroMode,
+		isLogoHeroPath,
+		logoHeroModeFrom,
+		LOGO_HERO_NAME,
+		setLogoHeroMode,
+		startLogoHeroTransition,
+		whenLogoHeroFinished
+	} from '$lib/logo-hero-transition';
 	import { getNavigatingFrom } from '$lib/navigating-from';
 	import { m } from '$lib/paraglide/messages.js';
 
@@ -16,7 +26,7 @@
 
 	const routes: { href: Pathname; label: () => string }[] = [
 		{ href: '/about', label: () => m.nav_about() },
-		{ href: '/works', label: () => m.nav_works() },
+		{ href: '/works', label: () => m.nav_works() }
 		// Hide this for now: { href: '/blog', label: () => m.nav_blog() }
 	];
 
@@ -35,6 +45,9 @@
 
 	const returnPath = getNavigatingFrom().replace(/\/$/, '') || '/';
 	const skipIntro = returnPath === '/about' || returnPath === '/works';
+	const heroArrival = isLogoHeroPath(returnPath) && canLogoHero();
+	const homeLogoInitial = heroArrival ? getLogoHeroMode() : skipIntro ? 'fullname' : 'initials';
+	const homeLogoHidden = !skipIntro && !heroArrival;
 
 	const fadeUp = {
 		opacity: [0, 1],
@@ -82,6 +95,14 @@
 				carouselEl.style.transform = 'none';
 			}
 			if (!skipIntro) logo.toFullname();
+			else if (heroArrival && logo.getState().startsWith('initials')) {
+				void whenLogoHeroFinished().then(() => logo.toFullname());
+			}
+			return;
+		}
+
+		if (heroArrival) {
+			void playReturnFromHeader();
 			return;
 		}
 
@@ -105,6 +126,14 @@
 		timeline?.pause();
 	});
 
+	onNavigate((navigation) => {
+		const to = navigation.to?.url.pathname ?? '';
+		if (!isLogoHeroPath(to) || !canLogoHero() || !logo) return;
+
+		setLogoHeroMode(logoHeroModeFrom(logo.getState()));
+		return startLogoHeroTransition(navigation.complete, 'to-header');
+	});
+
 	function prefersReducedMotion(): boolean {
 		return globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches ?? false;
 	}
@@ -123,6 +152,7 @@
 		exiting = true;
 
 		const path = resolve(href);
+		const hero = canLogoHero() && isLogoHeroPath(href);
 
 		if (prefersReducedMotion() || !logoSvg || !routeItems || !socialItems) {
 			void goto(path);
@@ -130,6 +160,11 @@
 		}
 
 		timeline?.pause();
+
+		if (hero) {
+			logoSvg.style.opacity = '1';
+			if (logo.getState().startsWith('initials')) logo.toFullname();
+		}
 
 		timeline = createTimeline({
 			onComplete: () => {
@@ -139,21 +174,42 @@
 
 		if (carouselEl) timeline.add(carouselEl, fadeDown);
 
-		timeline
-			.add(socialItems, fadeDown)
-			.add(routeItems, fadeDown)
-			.call(() => {
-				logo.toInitials();
-			})
-			.add(
-				logoSvg,
-				{
-					opacity: [1, 0],
-					duration: FADE_MS,
-					ease: 'inCubic'
-				},
-				`+=${HEADER_TRANSITION_MS}`
-			);
+		timeline.add(socialItems, fadeDown).add(routeItems, fadeDown);
+
+		if (!hero) {
+			timeline
+				.call(() => {
+					logo.toInitials();
+				})
+				.add(
+					logoSvg,
+					{
+						opacity: [1, 0],
+						duration: FADE_MS,
+						ease: 'inCubic'
+					},
+					`+=${HEADER_TRANSITION_MS}`
+				);
+		}
+	}
+
+	async function playReturnFromHeader() {
+		if (!logoSvg || !routeItems || !socialItems) return;
+
+		logoSvg.style.opacity = '1';
+		await whenLogoHeroFinished();
+
+		const settleInitials = logo.getState().startsWith('initials');
+
+		timeline = createTimeline();
+		if (settleInitials) {
+			timeline.call(() => logo.toFullname());
+			timeline.add(routeItems, fadeUp, `+=${HEADER_TRANSITION_MS}`);
+		} else {
+			timeline.add(routeItems, fadeUp);
+		}
+		timeline.add(socialItems, fadeUp);
+		if (carouselEl) timeline.add(carouselEl, fadeUp);
 	}
 </script>
 
@@ -170,17 +226,15 @@
 	>
 		<Logo
 			bind:this={logo}
-			initial={skipIntro ? 'fullname' : 'initials'}
+			initial={homeLogoInitial}
 			duration={HEADER_TRANSITION_MS}
 			height={99}
-			class="{skipIntro ? '' : 'opacity-0 motion-reduce:opacity-100'} text-foreground"
+			transitionName={LOGO_HERO_NAME}
+			class="{homeLogoHidden ? 'opacity-0 motion-reduce:opacity-100' : ''} text-foreground"
 		/>
 
 		<nav aria-label="Primary">
-			<ul
-				bind:this={navList}
-				class="flex flex-col items-center gap-5 md:flex-row md:gap-8"
-			>
+			<ul bind:this={navList} class="flex flex-col items-center gap-5 md:flex-row md:gap-8">
 				{#each routes as route (route.href)}
 					<li class={skipIntro ? undefined : 'opacity-0 motion-reduce:opacity-100'}>
 						<a

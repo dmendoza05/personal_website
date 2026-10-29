@@ -8,14 +8,13 @@
 	type LogoMode = 'fullname' | 'initials';
 
 	/** Size by width or height — never both — so aspect ratio stays fixed. */
-	type LogoSizeProps =
-		| { width?: number; height?: never }
-		| { height?: number; width?: never };
+	type LogoSizeProps = { width?: number; height?: never } | { height?: number; width?: never };
 
 	type Props = LogoSizeProps & {
 		initial?: LogoMode;
 		duration?: number;
 		class?: string;
+		transitionName?: string;
 		onFullNameStart?: () => void;
 		onFullNameComplete?: () => void;
 		onInitialsStart?: () => void;
@@ -32,6 +31,7 @@
 		width,
 		height,
 		class: className,
+		transitionName,
 		onFullNameStart,
 		onFullNameComplete,
 		onInitialsStart,
@@ -54,13 +54,7 @@
 	);
 	/** CSS px per viewBox unit — keeps margin collapse correct when the SVG is scaled. */
 	let displayScale = $state(
-		untrack(() =>
-			width != null
-				? width / BASE_WIDTH
-				: height != null
-					? height / BASE_HEIGHT
-					: 1
-		)
+		untrack(() => (width != null ? width / BASE_WIDTH : height != null ? height / BASE_HEIGHT : 1))
 	);
 	let animation: Timeline | undefined;
 	let svg: SVGSVGElement;
@@ -83,11 +77,7 @@
 	});
 
 	const preferredWidth = $derived(
-		width != null
-			? width
-			: height != null
-				? (height * BASE_WIDTH) / BASE_HEIGHT
-				: undefined
+		width != null ? width : height != null ? (height * BASE_WIDTH) / BASE_HEIGHT : undefined
 	);
 
 	$effect(() => {
@@ -196,6 +186,7 @@
 	class={['max-w-full', className]}
 	aria-hidden="true"
 	data-state={logoState}
+	style:view-transition-name={transitionName}
 	style:width={preferredWidth != null ? `min(100%, ${preferredWidth}px)` : undefined}
 	style:height={preferredWidth != null ? 'auto' : undefined}
 	style:aspect-ratio={preferredWidth != null ? `${BASE_WIDTH} / ${BASE_HEIGHT}` : undefined}
