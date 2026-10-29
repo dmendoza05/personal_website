@@ -109,3 +109,41 @@ html:active-view-transition-type(logo-to-header)::view-transition-new(logo-hero)
 html:active-view-transition-type(logo-to-home)::view-transition-old(logo-hero) {
 	display: none;
 }
+
+html:active-view-transition-type(logo-to-header)
+	:is(.about-intro .about-block, .works-intro .works-search, .works-intro .works-card) {
+	animation-play-state: paused;
+}
+
+html:active-view-transition-type(logo-to-header)::view-transition-group(root) {
+	animation-duration: calc(var(--home-exit-delay, 80ms) + var(--home-exit-ms, 400ms) + 200ms);
+}
+
+html:active-view-transition-type(logo-to-header)::view-transition-old(root),
+html:active-view-transition-type(logo-to-header)::view-transition-new(root) {
+	animation-duration: 200ms;
+	animation-delay: calc(var(--home-exit-delay, 80ms) + var(--home-exit-ms, 400ms));
+	mix-blend-mode: normal;
+}
+
+html:active-view-transition-type(logo-to-header)::view-transition-group(home-routes),
+html:active-view-transition-type(logo-to-header)::view-transition-group(home-socials),
+html:active-view-transition-type(logo-to-header)::view-transition-group(home-carousel) {
+	z-index: 1;
+	animation: none;
+}
+
+html:active-view-transition-type(logo-to-header)::view-transition-old(home-routes),
+html:active-view-transition-type(logo-to-header)::view-transition-old(home-socials),
+html:active-view-transition-type(logo-to-header)::view-transition-old(home-carousel) {
+	animation: home-leave var(--home-exit-ms, 400ms) cubic-bezier(0.55, 0.055, 0.675, 0.19)
+		var(--home-exit-delay, 80ms) both;
+	mix-blend-mode: normal;
+}
+
+@keyframes home-leave {
+	to {
+		opacity: 0;
+		transform: translateY(-12px);
+	}
+}
