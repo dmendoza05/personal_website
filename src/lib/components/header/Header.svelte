@@ -1,11 +1,22 @@
 <script lang="ts">
 	import type { Pathname } from '$app/types';
 	import { page } from '$app/state';
-	import { goto } from '$app/navigation';
+	import { goto, onNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onDestroy, onMount, type Snippet } from 'svelte';
 	import { createTimeline, type Timeline } from 'animejs';
 	import Logo from '$lib/components/Logo.svelte';
+	import {
+		canLogoHero,
+		getLogoHeroMode,
+		isHomePath,
+		logoHeroModeFrom,
+		LOGO_HERO_NAME,
+		setLogoHeroMode,
+		startLogoHeroTransition,
+		whenLogoHeroFinished
+	} from '$lib/logo-hero-transition';
+	import { getNavigatingFrom } from '$lib/navigating-from';
 	import HeaderMenu from './HeaderMenu.svelte';
 	import ResumeDownloadButton from './ResumeDownloadButton.svelte';
 	import {
@@ -31,6 +42,8 @@
 		right?: Snippet;
 	} = $props();
 
+	const fromLogoHero = isHomePath(getNavigatingFrom()) && canLogoHero();
+
 	let isSmViewport = $state(false);
 	let logo: Logo;
 	let logoEl: HTMLAnchorElement | undefined = $state();
@@ -53,6 +66,16 @@
 		return () => {
 			mediaQuery.removeEventListener('change', onViewportChange);
 		};
+	});
+
+	onNavigate((navigation) => {
+		if (left || !logo) return;
+
+		const to = navigation.to?.url.pathname ?? '';
+		if (!isHomePath(to) || !canLogoHero()) return;
+
+		setLogoHeroMode(logoHeroModeFrom(logo.getState()));
+		return startLogoHeroTransition(navigation.complete, 'to-home');
 	});
 
 	onDestroy(() => {
@@ -117,6 +140,11 @@
 			return;
 		}
 
+		if (fromLogoHero) {
+			void playHeroArrival();
+			return;
+		}
+
 		logoEl.style.opacity = '0';
 
 		timeline = createTimeline({
@@ -131,6 +159,30 @@
 				logo.toFullname();
 			})
 			.add(routeItems, ROUTE_FADE_UP);
+	}
+
+	async function playHeroArrival() {
+		if (!logoEl || !routeItems) return;
+
+		logoEl.style.opacity = '1';
+		logoEl.style.transform = 'none';
+
+		await whenLogoHeroFinished();
+
+		timeline?.pause();
+		timeline = createTimeline({
+			onComplete: () => {
+				entered = true;
+			}
+		});
+
+		if (logo.getState().startsWith('initials')) {
+			timeline
+				.call(() => logo.toFullname())
+				.add(routeItems, ROUTE_FADE_UP, `+=${HEADER_TRANSITION_MS}`);
+		} else {
+			timeline.add(routeItems, ROUTE_FADE_UP);
+		}
 	}
 
 	function onHomeClick(event: MouseEvent) {
@@ -161,16 +213,19 @@
 		bind:this={logoEl}
 		href={resolve('/')}
 		aria-label="Home"
-		class="flex w-fit max-w-full items-center opacity-0 motion-reduce:opacity-100"
+		class="flex w-fit max-w-full items-center {fromLogoHero
+			? ''
+			: 'opacity-0'} motion-reduce:opacity-100"
 		style:height="{logoHeight}px"
 		style:transition={HEADER_TRANSITION}
 		onclick={onHomeClick}
 	>
 		<Logo
 			bind:this={logo}
-			initial="initials"
+			initial={fromLogoHero ? getLogoHeroMode() : 'initials'}
 			duration={HEADER_TRANSITION_MS}
 			height={logoHeight}
+			transitionName={LOGO_HERO_NAME}
 			class="text-foreground"
 		/>
 	</a>

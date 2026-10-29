@@ -1,21 +1,32 @@
 <script lang="ts">
 	import type { Pathname } from '$app/types';
-	import { goto } from '$app/navigation';
+	import { goto, onNavigate } from '$app/navigation';
 	import { resolve } from '$app/paths';
 	import { onDestroy, onMount } from 'svelte';
-	import { createTimeline, stagger, type Timeline } from 'animejs';
+	import { createTimeline, type Timeline } from 'animejs';
+	import HomeCarouselCard from '$lib/components/HomeCarouselCard.svelte';
 	import Logo from '$lib/components/Logo.svelte';
-	import { HEADER_TRANSITION_MS } from '$lib/components/header/constants';
+	import { HEADER_TRANSITION_MS, ROUTES_STAGGER_MS } from '$lib/components/header/constants';
 	import { site } from '$lib/data/site';
+	import {
+		canLogoHero,
+		getLogoHeroMode,
+		isLogoHeroPath,
+		logoHeroModeFrom,
+		LOGO_HERO_NAME,
+		setLogoHeroMode,
+		startLogoHeroTransition,
+		whenLogoHeroFinished
+	} from '$lib/logo-hero-transition';
 	import { getNavigatingFrom } from '$lib/navigating-from';
 	import { m } from '$lib/paraglide/messages.js';
 
 	const FADE_MS = 600;
-	const ROUTES_STAGGER_MS = 80;
+	const CONTENT_FADE_MS = HEADER_TRANSITION_MS - 100;
 
 	const routes: { href: Pathname; label: () => string }[] = [
 		{ href: '/about', label: () => m.nav_about() },
-		{ href: '/works', label: () => m.nav_works() },
+		{ href: '/works', label: () => m.nav_works() }
 		// Hide this for now: { href: '/blog', label: () => m.nav_blog() }
 	];
 
@@ -34,20 +45,21 @@
 
 	const returnPath = getNavigatingFrom().replace(/\/$/, '') || '/';
 	const skipIntro = returnPath === '/about' || returnPath === '/works';
+	const heroArrival = isLogoHeroPath(returnPath) && canLogoHero();
+	const homeLogoInitial = heroArrival ? getLogoHeroMode() : skipIntro ? 'fullname' : 'initials';
+	const homeLogoHidden = !skipIntro && !heroArrival;
 
-	const fadeUp = {
+	const fadeInTogether = {
 		opacity: [0, 1],
 		translateY: [-12, 0],
-		delay: stagger(ROUTES_STAGGER_MS),
-		duration: HEADER_TRANSITION_MS,
+		duration: CONTENT_FADE_MS,
 		ease: 'outCubic'
 	};
 
-	const fadeDown = {
+	const fadeOutTogether = {
 		opacity: [1, 0],
 		translateY: [0, -12],
-		delay: stagger(ROUTES_STAGGER_MS),
-		duration: HEADER_TRANSITION_MS,
+		duration: CONTENT_FADE_MS,
 		ease: 'inCubic'
 	};
 
@@ -55,6 +67,7 @@
 	let sectionEl: HTMLElement | undefined = $state();
 	let navList: HTMLUListElement | undefined = $state();
 	let socialList: HTMLUListElement | undefined = $state();
+	let carouselEl: HTMLElement | undefined = $state();
 	let timeline: Timeline | undefined;
 	let logoSvg: SVGSVGElement | undefined;
 	let routeItems: NodeListOf<HTMLElement> | undefined;
@@ -75,7 +88,19 @@
 				item.style.opacity = '1';
 				item.style.transform = 'none';
 			}
+			if (carouselEl) {
+				carouselEl.style.opacity = '1';
+				carouselEl.style.transform = 'none';
+			}
 			if (!skipIntro) logo.toFullname();
+			else if (heroArrival && logo.getState().startsWith('initials')) {
+				void whenLogoHeroFinished().then(() => logo.toFullname());
+			}
+			return;
+		}
+
+		if (heroArrival) {
+			void playReturnFromHeader();
 			return;
 		}
 
@@ -89,12 +114,22 @@
 				ease: 'outCubic'
 			})
 			.call(() => logo.toFullname())
-			.add(routeItems, fadeUp, `+=${HEADER_TRANSITION_MS}`)
-			.add(socialItems, fadeUp);
+			.add(routeItems, fadeInTogether, `+=${HEADER_TRANSITION_MS}`)
+			.add(socialItems, fadeInTogether, '<<');
+
+		if (carouselEl) timeline.add(carouselEl, fadeInTogether, '<<');
 	});
 
 	onDestroy(() => {
 		timeline?.pause();
+	});
+
+	onNavigate((navigation) => {
+		const to = navigation.to?.url.pathname ?? '';
+		if (!isLogoHeroPath(to) || !canLogoHero() || !logo) return;
+
+		setLogoHeroMode(logoHeroModeFrom(logo.getState()));
+		return startLogoHeroTransition(navigation.complete, 'to-header');
 	});
 
 	function prefersReducedMotion(): boolean {
@@ -115,6 +150,7 @@
 		exiting = true;
 
 		const path = resolve(href);
+		const hero = canLogoHero() && isLogoHeroPath(href);
 
 		if (prefersReducedMotion() || !logoSvg || !routeItems || !socialItems) {
 			void goto(path);
@@ -123,27 +159,58 @@
 
 		timeline?.pause();
 
+		if (hero) {
+			logoSvg.style.opacity = '1';
+			if (logo.getState().startsWith('initials')) logo.toFullname();
+			document.documentElement.style.setProperty('--home-exit-delay', `${ROUTES_STAGGER_MS}ms`);
+			document.documentElement.style.setProperty('--home-exit-ms', `${CONTENT_FADE_MS}ms`);
+			navList?.style.setProperty('view-transition-name', 'home-routes');
+			socialList?.style.setProperty('view-transition-name', 'home-socials');
+			carouselEl?.style.setProperty('view-transition-name', 'home-carousel');
+			void goto(path);
+			return;
+		}
+
 		timeline = createTimeline({
 			onComplete: () => {
 				void goto(path);
 			}
 		});
 
-		timeline
-			.add(socialItems, fadeDown)
-			.add(routeItems, fadeDown)
-			.call(() => {
-				logo.toInitials();
-			})
-			.add(
-				logoSvg,
-				{
-					opacity: [1, 0],
-					duration: FADE_MS,
-					ease: 'inCubic'
-				},
-				`+=${HEADER_TRANSITION_MS}`
-			);
+		timeline.call(() => {
+			logo.toInitials();
+		});
+		timeline.add(
+			logoSvg,
+			{
+				opacity: [1, 0],
+				duration: FADE_MS,
+				ease: 'inCubic'
+			},
+			`+=${HEADER_TRANSITION_MS}`
+		);
+		timeline.add(routeItems, fadeOutTogether);
+		timeline.add(socialItems, fadeOutTogether, '<<');
+		if (carouselEl) timeline.add(carouselEl, fadeOutTogether, '<<');
+	}
+
+	async function playReturnFromHeader() {
+		if (!logoSvg || !routeItems || !socialItems) return;
+
+		logoSvg.style.opacity = '1';
+		await whenLogoHeroFinished();
+
+		const settleInitials = logo.getState().startsWith('initials');
+
+		timeline = createTimeline();
+		if (settleInitials) {
+			timeline.call(() => logo.toFullname());
+			timeline.add(routeItems, fadeInTogether, `+=${HEADER_TRANSITION_MS}`);
+		} else {
+			timeline.add(routeItems, fadeInTogether);
+		}
+		timeline.add(socialItems, fadeInTogether, '<<');
+		if (carouselEl) timeline.add(carouselEl, fadeInTogether, '<<');
 	}
 </script>
 
@@ -152,7 +219,7 @@
 	<meta name="description" content={site.description} />
 </svelte:head>
 
-<div class="flex h-full min-h-0 flex-1 flex-col">
+<div class="relative flex h-full min-h-0 flex-1 flex-col">
 	<section
 		bind:this={sectionEl}
 		class="flex flex-1 flex-col items-center justify-center gap-12 px-4"
@@ -160,17 +227,15 @@
 	>
 		<Logo
 			bind:this={logo}
-			initial={skipIntro ? 'fullname' : 'initials'}
+			initial={homeLogoInitial}
 			duration={HEADER_TRANSITION_MS}
 			height={99}
-			class="{skipIntro ? '' : 'opacity-0 motion-reduce:opacity-100'} text-foreground"
+			transitionName={LOGO_HERO_NAME}
+			class="{homeLogoHidden ? 'opacity-0 motion-reduce:opacity-100' : ''} text-foreground"
 		/>
 
 		<nav aria-label="Primary">
-			<ul
-				bind:this={navList}
-				class="flex flex-col items-center gap-5 md:flex-row md:gap-8"
-			>
+			<ul bind:this={navList} class="flex flex-col items-center gap-5 md:flex-row md:gap-8">
 				{#each routes as route (route.href)}
 					<li class={skipIntro ? undefined : 'opacity-0 motion-reduce:opacity-100'}>
 						<a
@@ -202,4 +267,11 @@
 			{/each}
 		</ul>
 	</section>
+	<div class="flex items-center justify-center pb-5">
+		<HomeCarouselCard
+			bind:element={carouselEl}
+			class={skipIntro ? '' : 'opacity-0 motion-reduce:opacity-100'}
+			onNavigate={onRouteClick}
+		/>
+	</div>
 </div>

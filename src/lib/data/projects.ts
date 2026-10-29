@@ -49,6 +49,7 @@ export type Project = {
 	keywords: string[];
 	thumbnail?: string;
 	links: ProjectLink[];
+	releaseBadge?: string;
 	featured?: boolean;
 };
 
@@ -92,7 +93,8 @@ export const projects: Project[] = [
 				kind: 'store',
 				href: 'https://chromewebstore.google.com/detail/darkside/kkddlokgbhgmebbfngdapjkaloifdbbb'
 			}
-		]
+		],
+		releaseBadge: 'https://img.shields.io/github/v/release/dmendoza05/darkside'
 	}
 ];
 

@@ -41,6 +41,14 @@
 		if (kind === 'store') return m.works_link_store();
 		return m.works_link_live();
 	}
+
+	function releasePage(badge: string) {
+		const match = /^https:\/\/img\.shields\.io\/github\/v\/release\/([^/?#]+)\/([^/?#]+)/.exec(
+			badge
+		);
+		if (!match) return badge;
+		return `https://github.com/${match[1]}/${match[2]}/releases`;
+	}
 </script>
 
 <svelte:head>
@@ -77,7 +85,19 @@
 			<section
 				class="flex flex-col border-t border-border bg-card/95 p-4 backdrop-blur-sm md:border-t-0 md:border-l sm:p-5"
 			>
-				<h2 id="work-stack" class="text-lg font-semibold text-foreground">
+				{#if project.releaseBadge}
+					<section class="flex justify-end" aria-labelledby="work-release">
+						<a
+							href={releasePage(project.releaseBadge)}
+							target="_blank"
+							rel="noopener noreferrer"
+							class="inline-flex"
+						>
+							<img src={project.releaseBadge} alt={m.works_release_badge()} class="h-5 w-auto" />
+						</a>
+					</section>
+				{/if}
+				<h2 id="work-stack" class="mt-3 text-lg font-semibold text-foreground">
 					{m.works_stack()}
 				</h2>
 				<ul class="mt-3 flex flex-wrap gap-2">
@@ -90,7 +110,7 @@
 				</ul>
 
 				{#if project.links.length > 0}
-					<section class="mt-6" aria-labelledby="work-links">
+					<section class="mt-3" aria-labelledby="work-links">
 						<h2 id="work-links" class="text-lg font-semibold text-foreground">
 							{m.works_links()}
 						</h2>
